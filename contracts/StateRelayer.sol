@@ -1,10 +1,10 @@
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import '@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol';
+import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 
-contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable{
+contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
     struct DEXInfo {
         uint256 primaryTokenPrice;
-        uint256 volumne;
+        uint256 volume;
         uint256 totalLiquidity;
         uint256 APR;
         uint256 firstTokenBalance;
@@ -17,15 +17,15 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable{
         uint40 decimals;
     }
     mapping(string => DEXInfo) DEXInfoMapping;
-    struct VaultGeneralInformatiion {
+    struct VaultGeneralInformation {
         uint256 no_of_vaults;
         uint256 total_loan_value;
         uint256 total_collateral_value;
-        uint256 total_collateralization_ration;
+        uint256 total_collateralization_ratio;
         uint256 active_auctions;
         uint256 lastUpdated;
     }
-    VaultGeneralInformatiion vaultInfo;
+    VaultGeneralInformation vaultInfo;
     struct MasternodeInformation {
         uint256 tvl;
         uint256 zeroYearTVL;
@@ -37,32 +37,39 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable{
     MasternodeInformation masterNodeInformation;
     bool inMultiCall;
     bytes32 public constant BOT_ROLE = keccak256("BOT_ROLE");
-    function _authorizeUpgrade(address newImplementation) internal override onlyRole(DEFAULT_ADMIN_ROLE) {}
+
+    function _authorizeUpgrade(
+        address newImplementation
+    ) internal override onlyRole(DEFAULT_ADMIN_ROLE) {}
 
     constructor() {
         _disableInitializers();
     }
 
-    function initialize(
-        address _admin,
-        address _bot
-    ) external initializer {
+    function initialize(address _admin, address _bot) external initializer {
         _grantRole(DEFAULT_ADMIN_ROLE, _admin);
         _grantRole(BOT_ROLE, _bot);
     }
 
-    function updateDEXInfo(string[] calldata dex, DEXInfo[] calldata dexInfo) external allowUpdate {
+    function updateDEXInfo(
+        string[] calldata dex,
+        DEXInfo[] calldata dexInfo
+    ) external allowUpdate {
         require(dex.length == dexInfo.length);
         for (uint256 i = 0; i < dex.length; i++) {
             DEXInfoMapping[dex[i]] = dexInfo[i];
         }
     }
 
-    function updateVaultGeneralInformation(VaultGeneralInformatiion calldata _vaultInfo) external allowUpdate{
+    function updateVaultGeneralInformation(
+        VaultGeneralInformation calldata _vaultInfo
+    ) external allowUpdate {
         vaultInfo = _vaultInfo;
     }
 
-    function updateMasternodeInformation(MasternodeInformation calldata _masterNodeInformation) external allowUpdate{
+    function updateMasternodeInformation(
+        MasternodeInformation calldata _masterNodeInformation
+    ) external allowUpdate {
         masterNodeInformation = _masterNodeInformation;
     }
 
