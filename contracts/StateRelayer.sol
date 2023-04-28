@@ -54,7 +54,7 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
     BurnedInformation burnedInformation;
 
     bool inMultiCall;
-    bytes32 public immutable BOT_ROLE;
+    bytes32 public constant BOT_ROLE = keccak256("BOT_ROLE");
 
     function _authorizeUpgrade(
         address newImplementation
@@ -62,7 +62,6 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
 
     constructor() {
         _disableInitializers();
-        BOT_ROLE = keccak256("BOT_ROLE");
     }
 
     function initialize(address _admin, address _bot) external initializer {
