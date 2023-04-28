@@ -13,7 +13,7 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
         uint256 tokenBpriceRatio;
         uint256 rewards;
         uint256 commission;
-        uint256 lastUpdated;
+        uint64 lastUpdated;
         // packed information about the decimals of each variable
         uint40 decimals;
     }
@@ -25,7 +25,7 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
         uint256 totalCollateralValue;
         uint256 totalCollateralizationRatio;
         uint256 activeAuctions;
-        uint256 lastUpdated;
+        uint64 lastUpdated;
     }
     VaultGeneralInformation vaultInfo;
 
@@ -34,23 +34,25 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
         uint256 zeroYearLocked;
         uint256 fiveYearLocked;
         uint256 tenYearLocked;
-        uint256 lastUpdated;
+        uint64 lastUpdated;
     }
     MasternodeInformation masterNodeInformation;
 
     struct BurnedInformation {
-        uint256 burnedAddress; // address is a protected keyword
+        // address is a protected keyword
+        // (??) address returns a number instead of a wallet address
+        uint256 burnedAddress;
         uint256 fee;
         uint256 auction;
         uint256 payback;
         uint256 emission;
         uint256 total;
-        uint256 lastUpdated;
+        uint64 lastUpdated;
     }
     BurnedInformation burnedInformation;
 
     bool inMultiCall;
-    bytes32 public constant BOT_ROLE = keccak256("BOT_ROLE");
+    bytes32 public immutable BOT_ROLE;
 
     function _authorizeUpgrade(
         address newImplementation
@@ -58,6 +60,7 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
 
     constructor() {
         _disableInitializers();
+        BOT_ROLE = keccak256("BOT_ROLE");
     }
 
     function initialize(address _admin, address _bot) external initializer {
