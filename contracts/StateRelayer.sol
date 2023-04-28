@@ -15,6 +15,8 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
         uint256 commission;
         uint64 lastUpdated;
         // packed information about the decimals of each variable
+        // example: primaryTokenPrice is 12345.69, store as 1234569 (shifted by 2 places),
+        // in decimals, store the shifted amount in binary (0010), each variable is allocated 5 bits (8 variables x 5 bits = uint40)
         uint40 decimals;
     }
     mapping(string => DEXInfo) DEXInfoMapping;
