@@ -4,37 +4,51 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol"
 contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
     struct DEXInfo {
         uint256 primaryTokenPrice;
-        uint256 volume;
+        uint256 volume24H;
         uint256 totalLiquidity;
-        uint256 APR;
-        uint256 firstTokenBalance;
-        uint256 secondTokenBalance;
-        // don't know whether we need price of pooled tokens over here
+        uint256 apr;
+        uint256 tokenAreserve;
+        uint256 tokenBreserve;
+        uint256 tokenApriceRatio;
+        uint256 tokenBpriceRatio;
         uint256 rewards;
-        uint256 commissions;
+        uint256 commission;
         uint256 lastUpdated;
         // packed information about the decimals of each variable
         uint40 decimals;
     }
     mapping(string => DEXInfo) DEXInfoMapping;
+
     struct VaultGeneralInformation {
-        uint256 no_of_vaults;
-        uint256 total_loan_value;
-        uint256 total_collateral_value;
-        uint256 total_collateralization_ratio;
-        uint256 active_auctions;
+        uint256 totalVaults;
+        uint256 totalLoanValue;
+        uint256 totalCollateralValue;
+        uint256 totalCollateralizationRatio;
+        uint256 activeAuctions;
         uint256 lastUpdated;
     }
     VaultGeneralInformation vaultInfo;
+
     struct MasternodeInformation {
-        uint256 tvl;
-        uint256 zeroYearTVL;
-        uint256 fiveYearTVL;
-        uint256 tenYearTVL;
+        uint256 totalValueLocked;
+        uint256 zeroYearLocked;
+        uint256 fiveYearLocked;
+        uint256 tenYearLocked;
         uint256 lastUpdated;
     }
-
     MasternodeInformation masterNodeInformation;
+
+    struct BurnedInformation {
+        uint256 burnedAddress; // address is a protected keyword
+        uint256 fee;
+        uint256 auction;
+        uint256 payback;
+        uint256 emission;
+        uint256 total;
+        uint256 lastUpdated;
+    }
+    BurnedInformation burnedInformation;
+
     bool inMultiCall;
     bytes32 public constant BOT_ROLE = keccak256("BOT_ROLE");
 
