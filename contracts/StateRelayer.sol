@@ -1,5 +1,5 @@
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import '@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol';
+import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 
 contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable{
     struct DEXInfo {
@@ -37,6 +37,7 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable{
     MasternodeInformation masterNodeInformation;
     bool inMultiCall;
     bytes32 public constant BOT_ROLE = keccak256("BOT_ROLE");
+
     function _authorizeUpgrade(address newImplementation) internal override onlyRole(DEFAULT_ADMIN_ROLE) {}
 
     constructor() {
