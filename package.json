@@ -1,10 +1,10 @@
 {
   "name": "hardhat-project",
   "scripts": {
-    "solhint": "solhint contracts/*.sol",
-    "compile": "solhint && npx hardhat compile",
-    "test": "solhint && npx hardhat test",
-    "clean": "npx hardhat clean"
+    "solhint": "solhint contracts/**/*.sol",
+    "compile": "npm run solhint && hardhat compile",
+    "test": "npm run solhint && hardhat test",
+    "clean": "hardhat clean"
   },
   "eslintConfig": {
     "extends": [
@@ -33,6 +33,7 @@
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.8.2",
-    "@openzeppelin/contracts-upgradeable": "^4.8.2"
+    "@openzeppelin/contracts-upgradeable": "^4.8.2",
+    "solhint": "^3.4.1"
   }
 }
