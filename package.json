@@ -28,7 +28,8 @@
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^2.0.2",
     "hardhat": "^2.13.1",
-    "@birthdayresearch/eslint-config": "^0.5.14"
+    "@birthdayresearch/eslint-config": "^0.5.14",
+    "@birthdayresearch/sticky-typescript": "^0.5.14"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.8.2",
