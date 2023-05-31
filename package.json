@@ -1,8 +1,34 @@
 {
   "name": "hardhat-project",
+  "scripts": {
+    "solhint": "solhint contracts/*.sol",
+    "compile": "solhint && npx hardhat compile",
+    "test": "solhint && npx hardhat test",
+    "clean": "npx hardhat clean"
+  },
+  "eslintConfig": {
+    "extends": [
+      "@birthdayresearch"
+    ],
+    "parserOptions": {
+      "project": "./tsconfig.json"
+    },
+    "overrides": [
+      {
+        "files": [
+          "*.ts"
+        ],
+        "rules": {
+          "import/no-default-export": "off",
+          "no-console": "off"
+        }
+      }
+    ]
+  },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^2.0.2",
-    "hardhat": "^2.13.1"
+    "hardhat": "^2.13.1",
+    "@birthdayresearch/eslint-config": "^0.5.14"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.8.2",

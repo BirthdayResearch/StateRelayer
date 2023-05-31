@@ -1,7 +1,6 @@
 {
   "extends": "solhint:default",
   "rules": {
-    "no-unused-vars": "warn",
-    "quotes": ["error","double"]
+    "no-unused-vars": "warn"
   }
 }
