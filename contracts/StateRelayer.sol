@@ -21,7 +21,7 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable{
         uint256 noOfVaults;
         uint256 totalLoanValue;
         uint256 totalCollateralValue;
-        uint256 totalCollateralizationRation;
+        uint256 totalCollateralizationRatio;
         uint256 activeAuctions;
         uint256 lastUpdated;
     }
@@ -63,7 +63,7 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable{
         vaultInfo = _vaultInfo;
     }
 
-    function updateMasternodeInformation(MasternodeInformation calldata _masterNodeInformation) external allowUpdate{
+    function updateMasterNodeInformation(MasternodeInformation calldata _masterNodeInformation) external allowUpdate{
         masterNodeInformation = _masterNodeInformation;
     }
 

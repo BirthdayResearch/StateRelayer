@@ -7,6 +7,7 @@ export async function deployContract(): Promise<DeployedContractAndSigner> {
   const accounts = await ethers.provider.listAccounts();
   const admin = await ethers.getSigner(accounts[0]);
   const bot = await ethers.getSigner(accounts[1]);
+  const user = await ethers.getSigner(accounts[2]);
   // Deploying StateRelayer contract
   const stateRelayerFactory = await ethers.getContractFactory('StateRelayer');
   const stateRelayer = await stateRelayerFactory.deploy();
@@ -24,11 +25,12 @@ export async function deployContract(): Promise<DeployedContractAndSigner> {
   );
   await stateProxy.deployed();
   const stateRelayerProxy = stateRelayerFactory.attach(stateProxy.address);
-  return { stateRelayerProxy, admin, bot };
+  return { stateRelayerProxy, admin, bot, user };
 }
 
 interface DeployedContractAndSigner {
   stateRelayerProxy: StateRelayer;
   admin: SignerWithAddress;
   bot: SignerWithAddress;
+  user: SignerWithAddress;
 }
