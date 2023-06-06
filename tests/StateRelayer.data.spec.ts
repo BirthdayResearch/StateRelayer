@@ -1,4 +1,4 @@
-import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
+import { loadFixture, time } from '@nomicfoundation/hardhat-network-helpers';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { expect } from 'chai';
 
@@ -19,7 +19,9 @@ describe('State relayer contract data tests', () => {
         tenYearTVL: 103,
         lastUpdated: 101010,
       };
-      await stateRelayerProxy.connect(bot).updateMasterNodeInformation(masterNodeData);
+      await expect(stateRelayerProxy.connect(bot).updateMasterNodeInformation(masterNodeData))
+        .to.emit(stateRelayerProxy, 'UpdateMasterNodeInformation')
+        .withArgs(Object.values(masterNodeData), (await time.latest()) + 1);
       const receivedMasterNodeData = await stateRelayerProxy.masterNodeInformation();
       expect(receivedMasterNodeData.tvl).to.equal(masterNodeData.tvl);
       expect(receivedMasterNodeData.zeroYearTVL).to.equal(masterNodeData.zeroYearTVL);
@@ -38,7 +40,11 @@ describe('State relayer contract data tests', () => {
         activeAuctions: 23,
         lastUpdated: 34244,
       };
-      await stateRelayerProxy.connect(bot).updateVaultGeneralInformation(vaultInformationData);
+      await expect(
+        stateRelayerProxy.connect(bot).updateVaultGeneralInformation(vaultInformationData)
+      )
+        .to.emit(stateRelayerProxy, 'UpdateVaultGeneralInformation')
+        .withArgs(Object.values(vaultInformationData), (await time.latest()) + 1);
       const receivedMasterNodeData = await stateRelayerProxy.vaultInfo();
       expect(receivedMasterNodeData.noOfVaults).to.equal(vaultInformationData.noOfVaults);
       expect(receivedMasterNodeData.totalLoanValue).to.equal(vaultInformationData.totalLoanValue);
@@ -81,7 +87,10 @@ describe('State relayer contract data tests', () => {
       };
       const dexsData: DexInfo[] = [dexDataEth, dexDataBtc];
       const symbols: string[] = ['eth', 'btc'];
-      await stateRelayerProxy.connect(bot).updateDEXInfo(symbols, dexsData);
+      await expect(stateRelayerProxy.connect(bot).updateDEXInfo(symbols, dexsData)).to.emit(
+        stateRelayerProxy,
+        'UpdateDEXInfo'
+      );
       // Getting ETH dex Data
       const receivedEThDexData = await stateRelayerProxy.DEXInfoMapping(symbols[0]);
       // Testing that the received is as expected as dexDataEth
