@@ -1,10 +1,10 @@
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import '@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol';
+import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 
 contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable{
     struct DEXInfo {
         uint256 primaryTokenPrice;
-        uint256 volumne;
+        uint256 volume;
         uint256 totalLiquidity;
         uint256 APR;
         uint256 firstTokenBalance;
@@ -16,16 +16,16 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable{
         // packed information about the decimals of each variable
         uint40 decimals;
     }
-    mapping(string => DEXInfo) DEXInfoMapping;
-    struct VaultGeneralInformatiion {
-        uint256 no_of_vaults;
-        uint256 total_loan_value;
-        uint256 total_collateral_value;
-        uint256 total_collateralization_ration;
-        uint256 active_auctions;
+    mapping(string => DEXInfo) public DEXInfoMapping;
+    struct VaultGeneralInformation {
+        uint256 noOfVaults;
+        uint256 totalLoanValue;
+        uint256 totalCollateralValue;
+        uint256 totalCollateralizationRatio;
+        uint256 activeAuctions;
         uint256 lastUpdated;
     }
-    VaultGeneralInformatiion vaultInfo;
+    VaultGeneralInformation public vaultInfo;
     struct MasternodeInformation {
         uint256 tvl;
         uint256 zeroYearTVL;
@@ -34,9 +34,10 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable{
         uint256 lastUpdated;
     }
 
-    MasternodeInformation masterNodeInformation;
-    bool inMultiCall;
+    MasternodeInformation public masterNodeInformation;
+    bool public inMultiCall;
     bytes32 public constant BOT_ROLE = keccak256("BOT_ROLE");
+
     function _authorizeUpgrade(address newImplementation) internal override onlyRole(DEFAULT_ADMIN_ROLE) {}
 
     constructor() {
@@ -58,11 +59,11 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable{
         }
     }
 
-    function updateVaultGeneralInformation(VaultGeneralInformatiion calldata _vaultInfo) external allowUpdate{
+    function updateVaultGeneralInformation(VaultGeneralInformation calldata _vaultInfo) external allowUpdate{
         vaultInfo = _vaultInfo;
     }
 
-    function updateMasternodeInformation(MasternodeInformation calldata _masterNodeInformation) external allowUpdate{
+    function updateMasterNodeInformation(MasternodeInformation calldata _masterNodeInformation) external allowUpdate{
         masterNodeInformation = _masterNodeInformation;
     }
 
