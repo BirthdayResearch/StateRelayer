@@ -1,10 +1,10 @@
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 
-contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable{
+contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
     struct DEXInfo {
         uint256 primaryTokenPrice;
-        uint256 volume;
+        uint256 volume24H;
         uint256 totalLiquidity;
         uint256 APR;
         uint256 firstTokenBalance;
@@ -38,32 +38,38 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable{
     bool public inMultiCall;
     bytes32 public constant BOT_ROLE = keccak256("BOT_ROLE");
 
-    function _authorizeUpgrade(address newImplementation) internal override onlyRole(DEFAULT_ADMIN_ROLE) {}
+    function _authorizeUpgrade(
+        address newImplementation
+    ) internal override onlyRole(DEFAULT_ADMIN_ROLE) {}
 
     constructor() {
         _disableInitializers();
     }
 
-    function initialize(
-        address _admin,
-        address _bot
-    ) external initializer {
+    function initialize(address _admin, address _bot) external initializer {
         _grantRole(DEFAULT_ADMIN_ROLE, _admin);
         _grantRole(BOT_ROLE, _bot);
     }
 
-    function updateDEXInfo(string[] calldata dex, DEXInfo[] calldata dexInfo) external allowUpdate {
+    function updateDEXInfo(
+        string[] calldata dex,
+        DEXInfo[] calldata dexInfo
+    ) external allowUpdate {
         require(dex.length == dexInfo.length);
         for (uint256 i = 0; i < dex.length; i++) {
             DEXInfoMapping[dex[i]] = dexInfo[i];
         }
     }
 
-    function updateVaultGeneralInformation(VaultGeneralInformation calldata _vaultInfo) external allowUpdate{
+    function updateVaultGeneralInformation(
+        VaultGeneralInformation calldata _vaultInfo
+    ) external allowUpdate {
         vaultInfo = _vaultInfo;
     }
 
-    function updateMasterNodeInformation(MasternodeInformation calldata _masterNodeInformation) external allowUpdate{
+    function updateMasterNodeInformation(
+        MasternodeInformation calldata _masterNodeInformation
+    ) external allowUpdate {
         masterNodeInformation = _masterNodeInformation;
     }
 

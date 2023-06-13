@@ -8,16 +8,16 @@ import { StateRelayer, StateRelayer__factory } from "../generated";
 
 type PairData = {
   [pairSymbol: string]: {
-    primaryTokenPrice: string;
-    volume24H: string;
-    totalLiquidity: string;
-    apr: string;
-    firstTokenBalance: string;
-    secondTokenBalance: string;
-    rewards: string;
-    commissions: string;
-    lastUpdated: string;
-    decimals: string;
+    primaryTokenPrice: ethers.BigNumber;
+    volume24H: ethers.BigNumber;
+    totalLiquidity: ethers.BigNumber;
+    APR: ethers.BigNumber;
+    firstTokenBalance: ethers.BigNumber;
+    secondTokenBalance: ethers.BigNumber;
+    rewards: ethers.BigNumber;
+    commissions: ethers.BigNumber;
+    lastUpdated: ethers.BigNumber;
+    decimals: ethers.BigNumber;
   };
 };
 
@@ -36,6 +36,18 @@ type StateRelayerHandlerProps = {
 };
 
 const DENOMINATION = "USDT";
+const DECIMALS = 10;
+
+const transformToEthersBigNumber = (
+  str: string,
+  decimals: number
+): ethers.BigNumber =>
+  ethers.BigNumber.from(
+    new BigNumber(str)
+      .multipliedBy(new BigNumber("10").pow(decimals))
+      .integerValue(BigNumber.ROUND_FLOOR)
+      .toString()
+  );
 
 export async function handler(
   props: StateRelayerHandlerProps
@@ -88,18 +100,41 @@ export async function handler(
       return {
         ...acc,
         [currPair.displaySymbol]: {
-          primaryTokenPrice: tokenPrice.toString(),
-          volume24H: currPair.volume?.h24.toString() ?? "0",
-          totalLiquidity: currPair.totalLiquidity.usd ?? "0",
-          apr: currPair.apr?.total.toString() ?? "0",
-          firstTokenBalance: currPair.tokenA.reserve,
-          secondTokenBalance: currPair.tokenB.reserve,
-          rewards: currPair.apr?.reward.toString() ?? "0",
-          commissions: currPair.commission,
+          primaryTokenPrice: transformToEthersBigNumber(
+            tokenPrice.toString(),
+            DECIMALS
+          ),
+          volume24H: transformToEthersBigNumber(
+            currPair.volume?.h24.toString() ?? "0",
+            DECIMALS
+          ),
+          totalLiquidity: transformToEthersBigNumber(
+            currPair.totalLiquidity.usd ?? "0",
+            DECIMALS
+          ),
+          APR: transformToEthersBigNumber(
+            currPair.apr?.total.toString() ?? "0",
+            DECIMALS
+          ),
+          firstTokenBalance: transformToEthersBigNumber(
+            currPair.tokenA.reserve,
+            DECIMALS
+          ),
+          secondTokenBalance: transformToEthersBigNumber(
+            currPair.tokenB.reserve,
+            DECIMALS
+          ),
+          rewards: transformToEthersBigNumber(
+            currPair.apr?.reward.toString() ?? "0",
+            DECIMALS
+          ),
+          commissions: transformToEthersBigNumber(
+            currPair.commission,
+            DECIMALS
+          ),
           // todo later
           lastUpdated: "0",
-          // todo later
-          decimals: "10",
+          decimals: DECIMALS,
         },
       } as PairData;
     }, {} as PairData);

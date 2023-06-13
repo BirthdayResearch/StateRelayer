@@ -10,7 +10,7 @@ import { toZeroStrippedHex } from "./Utils";
 
 export class HardhatNetworkContainer extends GenericContainer {
   // Hardcoded image name that is created after running docker build in the smartcontracts package
-  static readonly IMAGE_NAME = "bridge-packages/hardhatnetwork:0.0.0";
+  static readonly IMAGE_NAME = "state-relayer/hardhatnetwork:0.0.0";
 
   // Default RPC port exposed by Hardhat
   static readonly RPC_PORT = 8545;

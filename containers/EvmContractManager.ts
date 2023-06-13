@@ -58,7 +58,7 @@ export class EvmContractManager {
       "hardhat",
       // specify path to config file
       "--config",
-      "./src/hardhat.config.ts",
+      "hardhat.config.ts",
       // specify localhost network so that the contract is deployed to the already
       // running hardhat network instance
       "--network",
