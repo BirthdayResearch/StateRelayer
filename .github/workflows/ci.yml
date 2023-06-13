@@ -21,3 +21,6 @@ jobs:
 
       - name: "Test smart contracts"
         run: "npm run test"
+
+      - name: "Integration test"
+        run: "npm run test-i9n"
