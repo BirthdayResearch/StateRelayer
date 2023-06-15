@@ -42,11 +42,9 @@ describe('State relayer contract data tests', () => {
       const receivedMasterNodeData = await stateRelayerProxy.vaultInfo();
       expect(receivedMasterNodeData.noOfVaults).to.equal(vaultInformationData.noOfVaults);
       expect(receivedMasterNodeData.totalLoanValue).to.equal(vaultInformationData.totalLoanValue);
-      expect(receivedMasterNodeData.totalCollateralValue).to.equal(
-        vaultInformationData.totalCollateralValue
-      );
+      expect(receivedMasterNodeData.totalCollateralValue).to.equal(vaultInformationData.totalCollateralValue);
       expect(receivedMasterNodeData.totalCollateralizationRatio).to.equal(
-        vaultInformationData.totalCollateralizationRatio
+        vaultInformationData.totalCollateralizationRatio,
       );
       expect(receivedMasterNodeData.activeAuctions).to.equal(vaultInformationData.activeAuctions);
       expect(receivedMasterNodeData.lastUpdated).to.equal(vaultInformationData.lastUpdated);
@@ -57,7 +55,7 @@ describe('State relayer contract data tests', () => {
 
       const dexDataEth: DexInfo = {
         primaryTokenPrice: 113,
-        volume: 102021,
+        volume24H: 102021,
         totalLiquidity: 2164,
         APR: 14,
         firstTokenBalance: 31269,
@@ -69,7 +67,7 @@ describe('State relayer contract data tests', () => {
       };
       const dexDataBtc: DexInfo = {
         primaryTokenPrice: 112,
-        volume: 102020,
+        volume24H: 102020,
         totalLiquidity: 2163,
         APR: 12,
         firstTokenBalance: 31265,
@@ -86,7 +84,7 @@ describe('State relayer contract data tests', () => {
       const receivedEThDexData = await stateRelayerProxy.DEXInfoMapping(symbols[0]);
       // Testing that the received is as expected as dexDataEth
       expect(receivedEThDexData.primaryTokenPrice).to.equal(dexDataEth.primaryTokenPrice);
-      expect(receivedEThDexData.volume).to.equal(dexDataEth.volume);
+      expect(receivedEThDexData.volume24H).to.equal(dexDataEth.volume24H);
       expect(receivedEThDexData.totalLiquidity).to.equal(dexDataEth.totalLiquidity);
       expect(receivedEThDexData.APR).to.equal(dexDataEth.APR);
       expect(receivedEThDexData.firstTokenBalance).to.equal(dexDataEth.firstTokenBalance);
@@ -99,7 +97,7 @@ describe('State relayer contract data tests', () => {
       const receivedBtcDexData = await stateRelayerProxy.DEXInfoMapping(symbols[1]);
       // Testing that the received is as expected as dexDataBtc
       expect(receivedBtcDexData.primaryTokenPrice).to.equal(dexDataBtc.primaryTokenPrice);
-      expect(receivedBtcDexData.volume).to.equal(dexDataBtc.volume);
+      expect(receivedBtcDexData.volume24H).to.equal(dexDataBtc.volume24H);
       expect(receivedBtcDexData.totalLiquidity).to.equal(dexDataBtc.totalLiquidity);
       expect(receivedBtcDexData.APR).to.equal(dexDataBtc.APR);
       expect(receivedBtcDexData.firstTokenBalance).to.equal(dexDataBtc.firstTokenBalance);
@@ -123,8 +121,7 @@ describe('State relayer contract data tests', () => {
         tenYearTVL: 103,
         lastUpdated: 101010,
       };
-      await expect(stateRelayerProxy.connect(user).updateMasterNodeInformation(masterNodeData)).to
-        .be.reverted;
+      await expect(stateRelayerProxy.connect(user).updateMasterNodeInformation(masterNodeData)).to.be.reverted;
     });
 
     it('`updateVaultGeneralInformation` - Should successfully revert if the signer is not `bot`', async () => {
@@ -137,9 +134,7 @@ describe('State relayer contract data tests', () => {
         activeAuctions: 23,
         lastUpdated: 34244,
       };
-      await expect(
-        stateRelayerProxy.connect(user).updateVaultGeneralInformation(vaultInformationData)
-      ).to.be.reverted;
+      await expect(stateRelayerProxy.connect(user).updateVaultGeneralInformation(vaultInformationData)).to.be.reverted;
     });
 
     it('`updateDEXInfo` - Should successfully revert if the signer is not `bot`', async () => {
@@ -147,7 +142,7 @@ describe('State relayer contract data tests', () => {
 
       const dexDataEth: DexInfo = {
         primaryTokenPrice: 113,
-        volume: 102021,
+        volume24H: 102021,
         totalLiquidity: 2164,
         APR: 14,
         firstTokenBalance: 31269,
@@ -157,8 +152,7 @@ describe('State relayer contract data tests', () => {
         lastUpdated: 1231,
         decimals: 18,
       };
-      await expect(stateRelayerProxy.connect(user).updateDEXInfo(['eth'], [dexDataEth])).to.be
-        .reverted;
+      await expect(stateRelayerProxy.connect(user).updateDEXInfo(['eth'], [dexDataEth])).to.be.reverted;
     });
   });
 });
@@ -182,7 +176,7 @@ interface VaultGeneralInformation {
 
 interface DexInfo {
   primaryTokenPrice: number;
-  volume: number;
+  volume24H: number;
   totalLiquidity: number;
   APR: number;
   firstTokenBalance: number;
