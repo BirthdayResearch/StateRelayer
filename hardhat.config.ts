@@ -1,11 +1,11 @@
-import "@nomicfoundation/hardhat-toolbox";
+import '@nomicfoundation/hardhat-toolbox';
 
-import { HardhatUserConfig, task, types } from "hardhat/config";
+import { HardhatUserConfig, task, types } from 'hardhat/config';
 
 // Default chainId for local testing purposes. Most local testnets (Ganache, etc) use this chainId
 export const DEFAULT_CHAINID = 1337;
-export const TX_AUTOMINE_ENV_VAR = "TRANSACTION_AUTOMINE";
-export const TX_AUTOMINE_INTERVAL_ENV_VAR = "TRANSACTION_AUTOMINE_INTERVAL";
+export const TX_AUTOMINE_ENV_VAR = 'TRANSACTION_AUTOMINE';
+export const TX_AUTOMINE_INTERVAL_ENV_VAR = 'TRANSACTION_AUTOMINE_INTERVAL';
 
 interface DeployContractArgs {
   name: string;
@@ -13,26 +13,26 @@ interface DeployContractArgs {
   libraries: Record<string, string>;
 }
 
-task("deployContract", "Deploys a contract based on the name of the contract")
+task('deployContract', 'Deploys a contract based on the name of the contract')
   .addParam(
-    "name",
-    "The contract name. If the contract is Foo.sol, the contract name is Foo.",
+    'name',
+    'The contract name. If the contract is Foo.sol, the contract name is Foo.',
     // no default value
     undefined,
-    types.string
+    types.string,
   )
   .addOptionalParam(
-    "deployargs",
-    "Comma-delimited contract deployment arguments. If empty, there are no necessary deployment args.",
+    'deployargs',
+    'Comma-delimited contract deployment arguments. If empty, there are no necessary deployment args.',
     // no default value
     undefined,
-    types.string
+    types.string,
   )
   .addOptionalParam(
-    "libraries",
-    "Link a contract to a deployed library. Expects a JSON of library name to address.",
+    'libraries',
+    'Link a contract to a deployed library. Expects a JSON of library name to address.',
     undefined,
-    types.json
+    types.json,
   )
   .setAction(async (taskArgs: DeployContractArgs, hre) => {
     try {
@@ -41,9 +41,7 @@ task("deployContract", "Deploys a contract based on the name of the contract")
       const contractFactory = await hre.ethers.getContractFactory(name, {
         libraries,
       });
-      const contract = await contractFactory.deploy(
-        ...(deployargs === undefined ? [] : deployargs.split(","))
-      );
+      const contract = await contractFactory.deploy(...(deployargs === undefined ? [] : deployargs.split(',')));
 
       // Logs the contract address as the output of this task
       // Can be picked up by the task executor to create a contract instance with the outputted contract address
@@ -55,16 +53,16 @@ task("deployContract", "Deploys a contract based on the name of the contract")
   });
 
 const config: HardhatUserConfig = {
-  solidity: "0.8.18",
+  solidity: '0.8.18',
   typechain: {
-    outDir: "./generated",
-    target: "ethers-v5",
+    outDir: './generated',
+    target: 'ethers-v5',
   },
   paths: {
-    sources: "./contracts",
-    tests: "./tests",
-    artifacts: "./artifacts",
-    cache: "./cache",
+    sources: './contracts',
+    tests: './tests',
+    artifacts: './artifacts',
+    cache: './cache',
   },
   networks: {
     hardhat: {
@@ -72,8 +70,7 @@ const config: HardhatUserConfig = {
       // To enable/disable auto-mining at runtime, refer to:
       // https://hardhat.org/hardhat-network/docs/explanation/mining-modes#using-rpc-methods
       mining: {
-        auto:
-          (process.env[TX_AUTOMINE_ENV_VAR] ?? "true").toLowerCase() === "true",
+        auto: (process.env[TX_AUTOMINE_ENV_VAR] ?? 'true').toLowerCase() === 'true',
         interval: Number(process.env[TX_AUTOMINE_INTERVAL_ENV_VAR] ?? 0),
       },
       // We need to allow large contract sizes since contract sizes

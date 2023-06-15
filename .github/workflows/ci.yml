@@ -1,4 +1,4 @@
-name: "CI"
+name: 'CI'
 
 on:
   pull_request:
@@ -8,22 +8,22 @@ on:
 
 jobs:
   ci:
-    runs-on: "ubuntu-latest"
+    runs-on: 'ubuntu-latest'
     steps:
-      - name: "Check out the repo"
-        uses: "actions/checkout@v3"
+      - name: 'Check out the repo'
+        uses: 'actions/checkout@v3'
 
-      - name: "Install Node.js"
-        uses: "actions/setup-node@v3"
+      - name: 'Install Node.js'
+        uses: 'actions/setup-node@v3'
 
-      - name: "Build docker image"
-        run: "npm run build:docker"
+      - name: 'Build docker image'
+        run: 'npm run build:docker'
 
-      - name: "Install the dependencies"
-        run: "npm install"
+      - name: 'Install the dependencies'
+        run: 'npm install'
 
-      - name: "Test smart contracts"
-        run: "npm run test"
+      - name: 'Test smart contracts'
+        run: 'npm run test'
 
-      - name: "Integration test"
-        run: "npm run test-i9n"
+      - name: 'Integration test'
+        run: 'npm run test-i9n'
