@@ -15,14 +15,11 @@ export async function deployContract(): Promise<DeployedContractAndSigner> {
   // Deploying StateRelayerProxy contract
   const stateRelayerProxyFactory = await ethers.getContractFactory('StateRelayerProxy');
   // Deployment arguments for the StateRelayerProxy
-  const encodeFunctionData = StateRelayer__factory.createInterface().encodeFunctionData(
-    'initialize',
-    [admin.address, bot.address]
-  );
-  const stateProxy = await stateRelayerProxyFactory.deploy(
-    stateRelayer.address,
-    encodeFunctionData
-  );
+  const encodeFunctionData = StateRelayer__factory.createInterface().encodeFunctionData('initialize', [
+    admin.address,
+    bot.address,
+  ]);
+  const stateProxy = await stateRelayerProxyFactory.deploy(stateRelayer.address, encodeFunctionData);
   await stateProxy.deployed();
   const stateRelayerProxy = stateRelayerFactory.attach(stateProxy.address);
   return { stateRelayerProxy, admin, bot, user };
