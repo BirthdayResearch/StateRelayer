@@ -53,6 +53,11 @@ describe('State Relayer Bot Tests', () => {
     });
     proxy = StateRelayer__factory.connect(stateRelayerProxy.address, bot);
   });
+
+  afterEach(async () => {
+    await hardhatNetwork.stop();
+  });
+
   test('should check that data is parsed correctly', async () => {
     await handler({
       envNetwork: EnvironmentNetwork.LocalPlayground,
