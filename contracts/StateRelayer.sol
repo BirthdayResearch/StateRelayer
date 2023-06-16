@@ -39,7 +39,7 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
     bytes32 public constant BOT_ROLE = keccak256("BOT_ROLE");
 
     // Events
-    event UpdateDEXInfo(string[] dex, DEXInfo[] dexInfo);
+    event UpdateDEXInfo(string[] dex, DEXInfo[] dexInfo, uint256 timeStamp);
     event UpdateVaultGeneralInformation(VaultGeneralInformation vaultInfo, uint256 timeStamp);
     event UpdateMasterNodeInformation(MasternodeInformation nodeInformation, uint256 timeStamp);
 
@@ -70,7 +70,7 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
         for (uint256 i = 0; i < dex.length; i++) {
             DEXInfoMapping[dex[i]] = dexInfo[i];
         }
-        emit UpdateDEXInfo(dex, dexInfo);
+        emit UpdateDEXInfo(dex, dexInfo, block.timestamp);
     }
 
     function updateVaultGeneralInformation(

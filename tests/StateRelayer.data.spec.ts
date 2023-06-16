@@ -1,6 +1,6 @@
 import { loadFixture, time } from '@nomicfoundation/hardhat-network-helpers';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
-import { expect } from 'chai';
+import { assert, expect } from 'chai';
 
 import { StateRelayer } from '../generated';
 import { deployContract } from './utils/deployment';
@@ -23,11 +23,7 @@ describe('State relayer contract data tests', () => {
         .to.emit(stateRelayerProxy, 'UpdateMasterNodeInformation')
         .withArgs(Object.values(masterNodeData), (await time.latest()) + 1);
       const receivedMasterNodeData = await stateRelayerProxy.masterNodeInformation();
-      expect(receivedMasterNodeData.tvl).to.equal(masterNodeData.tvl);
-      expect(receivedMasterNodeData.zeroYearTVL).to.equal(masterNodeData.zeroYearTVL);
-      expect(receivedMasterNodeData.fiveYearTVL).to.equal(masterNodeData.fiveYearTVL);
-      expect(receivedMasterNodeData.tenYearTVL).to.equal(masterNodeData.tenYearTVL);
-      expect(receivedMasterNodeData.lastUpdated).to.equal(masterNodeData.lastUpdated);
+      assert.deepEqual(receivedMasterNodeData.toString(), Object.values(masterNodeData).toString());
     });
 
     it('Should successfully set vault node data', async () => {
@@ -40,20 +36,11 @@ describe('State relayer contract data tests', () => {
         activeAuctions: 23,
         lastUpdated: 34244,
       };
-      await expect(
-        stateRelayerProxy.connect(bot).updateVaultGeneralInformation(vaultInformationData)
-      )
+      await expect(stateRelayerProxy.connect(bot).updateVaultGeneralInformation(vaultInformationData))
         .to.emit(stateRelayerProxy, 'UpdateVaultGeneralInformation')
         .withArgs(Object.values(vaultInformationData), (await time.latest()) + 1);
       const receivedMasterNodeData = await stateRelayerProxy.vaultInfo();
-      expect(receivedMasterNodeData.noOfVaults).to.equal(vaultInformationData.noOfVaults);
-      expect(receivedMasterNodeData.totalLoanValue).to.equal(vaultInformationData.totalLoanValue);
-      expect(receivedMasterNodeData.totalCollateralValue).to.equal(vaultInformationData.totalCollateralValue);
-      expect(receivedMasterNodeData.totalCollateralizationRatio).to.equal(
-        vaultInformationData.totalCollateralizationRatio,
-      );
-      expect(receivedMasterNodeData.activeAuctions).to.equal(vaultInformationData.activeAuctions);
-      expect(receivedMasterNodeData.lastUpdated).to.equal(vaultInformationData.lastUpdated);
+      assert.deepEqual(receivedMasterNodeData.toString(), Object.values(vaultInformationData).toString());
     });
 
     it('Should successfully set dexs data', async () => {
@@ -87,33 +74,16 @@ describe('State relayer contract data tests', () => {
       const symbols: string[] = ['eth', 'btc'];
       await expect(stateRelayerProxy.connect(bot).updateDEXInfo(symbols, dexsData)).to.emit(
         stateRelayerProxy,
-        'UpdateDEXInfo'
-      );
+        'UpdateDEXInfo',
+      ).withArgs;
       // Getting ETH dex Data
       const receivedEThDexData = await stateRelayerProxy.DEXInfoMapping(symbols[0]);
       // Testing that the received is as expected as dexDataEth
-      expect(receivedEThDexData.primaryTokenPrice).to.equal(dexDataEth.primaryTokenPrice);
-      expect(receivedEThDexData.volume24H).to.equal(dexDataEth.volume24H);
-      expect(receivedEThDexData.totalLiquidity).to.equal(dexDataEth.totalLiquidity);
-      expect(receivedEThDexData.APR).to.equal(dexDataEth.APR);
-      expect(receivedEThDexData.firstTokenBalance).to.equal(dexDataEth.firstTokenBalance);
-      expect(receivedEThDexData.secondTokenBalance).to.equal(dexDataEth.secondTokenBalance);
-      expect(receivedEThDexData.rewards).to.equal(dexDataEth.rewards);
-      expect(receivedEThDexData.commissions).to.equal(dexDataEth.commissions);
-      expect(receivedEThDexData.decimals).to.equal(dexDataEth.decimals);
-
+      assert.deepEqual(receivedEThDexData.toString(), Object.values(dexDataEth).toString());
       // Getting BTC dex Data
       const receivedBtcDexData = await stateRelayerProxy.DEXInfoMapping(symbols[1]);
       // Testing that the received is as expected as dexDataBtc
-      expect(receivedBtcDexData.primaryTokenPrice).to.equal(dexDataBtc.primaryTokenPrice);
-      expect(receivedBtcDexData.volume24H).to.equal(dexDataBtc.volume24H);
-      expect(receivedBtcDexData.totalLiquidity).to.equal(dexDataBtc.totalLiquidity);
-      expect(receivedBtcDexData.APR).to.equal(dexDataBtc.APR);
-      expect(receivedBtcDexData.firstTokenBalance).to.equal(dexDataBtc.firstTokenBalance);
-      expect(receivedBtcDexData.secondTokenBalance).to.equal(dexDataBtc.secondTokenBalance);
-      expect(receivedBtcDexData.rewards).to.equal(dexDataBtc.rewards);
-      expect(receivedBtcDexData.commissions).to.equal(dexDataBtc.commissions);
-      expect(receivedBtcDexData.decimals).to.equal(dexDataBtc.decimals);
+      assert.deepEqual(receivedBtcDexData.toString(), Object.values(dexDataBtc).toString());
     });
   });
 
