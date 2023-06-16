@@ -1,6 +1,6 @@
 import { loadFixture, time } from '@nomicfoundation/hardhat-network-helpers';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
-import { assert, expect } from 'chai';
+import { expect } from 'chai';
 
 import { StateRelayer } from '../generated';
 import { deployContract } from './utils/deployment';
@@ -39,8 +39,8 @@ describe('State relayer contract data tests', () => {
       await expect(stateRelayerProxy.connect(bot).updateVaultGeneralInformation(vaultInformationData))
         .to.emit(stateRelayerProxy, 'UpdateVaultGeneralInformation')
         .withArgs(Object.values(vaultInformationData), (await time.latest()) + 1);
-      const receivedMasterNodeData = await stateRelayerProxy.vaultInfo();
-      expect(receivedMasterNodeData.toString()).to.equal(Object.values(vaultInformationData).toString());
+      const receivedVaultInformationData = await stateRelayerProxy.vaultInfo();
+      expect(receivedVaultInformationData.toString()).to.equal(Object.values(vaultInformationData).toString());
     });
 
     it('Should successfully set dexs data', async () => {
