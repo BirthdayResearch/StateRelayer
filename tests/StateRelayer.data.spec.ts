@@ -23,7 +23,7 @@ describe('State relayer contract data tests', () => {
         .to.emit(stateRelayerProxy, 'UpdateMasterNodeInformation')
         .withArgs(Object.values(masterNodeData), (await time.latest()) + 1);
       const receivedMasterNodeData = await stateRelayerProxy.masterNodeInformation();
-      assert.deepEqual(receivedMasterNodeData.toString(), Object.values(masterNodeData).toString());
+      expect(receivedMasterNodeData.toString()).to.equal(Object.values(masterNodeData).toString());
     });
 
     it('Should successfully set vault node data', async () => {
@@ -40,7 +40,7 @@ describe('State relayer contract data tests', () => {
         .to.emit(stateRelayerProxy, 'UpdateVaultGeneralInformation')
         .withArgs(Object.values(vaultInformationData), (await time.latest()) + 1);
       const receivedMasterNodeData = await stateRelayerProxy.vaultInfo();
-      assert.deepEqual(receivedMasterNodeData.toString(), Object.values(vaultInformationData).toString());
+      expect(receivedMasterNodeData.toString()).to.equal(Object.values(vaultInformationData).toString());
     });
 
     it('Should successfully set dexs data', async () => {
@@ -75,15 +75,15 @@ describe('State relayer contract data tests', () => {
       await expect(stateRelayerProxy.connect(bot).updateDEXInfo(symbols, dexsData)).to.emit(
         stateRelayerProxy,
         'UpdateDEXInfo',
-      ).withArgs;
+      );
       // Getting ETH dex Data
       const receivedEThDexData = await stateRelayerProxy.DEXInfoMapping(symbols[0]);
       // Testing that the received is as expected as dexDataEth
-      assert.deepEqual(receivedEThDexData.toString(), Object.values(dexDataEth).toString());
+      expect(receivedEThDexData.toString()).to.equal(Object.values(dexDataEth).toString());
       // Getting BTC dex Data
       const receivedBtcDexData = await stateRelayerProxy.DEXInfoMapping(symbols[1]);
       // Testing that the received is as expected as dexDataBtc
-      assert.deepEqual(receivedBtcDexData.toString(), Object.values(dexDataBtc).toString());
+      expect(receivedBtcDexData.toString()).to.equal(Object.values(dexDataBtc).toString());
     });
   });
 
