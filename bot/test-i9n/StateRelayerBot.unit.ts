@@ -4,7 +4,13 @@ import { ethers } from 'ethers';
 import { HardhatNetwork, HardhatNetworkContainer, StartedHardhatNetworkContainer } from '../../containers';
 import { StateRelayer, StateRelayer__factory, StateRelayerProxy__factory } from '../../generated';
 import { handler } from '../StateRelayerBot';
-import { mockedDexPricesData, mockedPoolPairData, mockedStatsData } from '../utils/oceanMockedData';
+import {
+  mockedDexPricesData,
+  mockedMasterNodeData,
+  mockedPoolPairData,
+  mockedStatsData,
+  mockedVaultData,
+} from '../utils/oceanMockedData';
 
 jest.mock('@defichain/whale-api-client', () => ({
   WhaleApiClient: jest.fn().mockImplementation(() => ({
@@ -14,6 +20,12 @@ jest.mock('@defichain/whale-api-client', () => ({
     poolpairs: {
       list: () => mockedPoolPairData,
       listDexPrices: () => mockedDexPricesData,
+    },
+    masternodes: {
+      list: () => mockedMasterNodeData,
+    },
+    vault: {
+      get: () => mockedVaultData,
     },
   })),
 }));
@@ -65,6 +77,8 @@ describe('State Relayer Bot Tests', () => {
       contractAddress: proxy.address,
       signer: bot,
     });
-    console.log(await proxy.DEXInfoMapping('dETH-DFI'));
+    console.log(await (await proxy.DEXInfoMapping('dETH-DFI')).toString());
+    console.log(await proxy.vaultInfo());
+    console.log(await proxy.masterNodeInformation());
   });
 });

@@ -391,6 +391,20 @@ export const mockedDexPricesData = {
   },
 };
 
+export const mockedVaultData = {
+  vaults: '11424',
+  totalLoanValue: '84857375.19502015',
+  totalCollateralValue: '181011671.8179531',
+  totalCollateralizationRatio: '255',
+  activeAuctions: '11424',
+};
+
+export const mockedMasterNodeData = {
+  totalValueLockedinMasternodes: '152862005.47177258',
+  zeroYearLocked: '109372690.57990181',
+  fiveYearLocked: '9054324.931097768',
+  tenYearLocked: '34469627.40944635',
+};
 // generated fixtures from mocked data above
 export const expectedPairData = {
   'dETH-DFI': {

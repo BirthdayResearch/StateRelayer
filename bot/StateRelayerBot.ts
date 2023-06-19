@@ -1,39 +1,10 @@
 /* eslint-disable no-console */
 import { getWhaleClient } from '@waveshq/walletkit-bot';
-import { EnvironmentNetwork } from '@waveshq/walletkit-core';
 import { BigNumber } from 'bignumber.js';
 import { ethers } from 'ethers';
 
 import { StateRelayer, StateRelayer__factory } from '../generated';
-
-type PairData = {
-  [pairSymbol: string]: {
-    primaryTokenPrice: ethers.BigNumber;
-    volume24H: ethers.BigNumber;
-    totalLiquidity: ethers.BigNumber;
-    APR: ethers.BigNumber;
-    firstTokenBalance: ethers.BigNumber;
-    secondTokenBalance: ethers.BigNumber;
-    rewards: ethers.BigNumber;
-    commissions: ethers.BigNumber;
-    lastUpdated: ethers.BigNumber;
-    decimals: ethers.BigNumber;
-  };
-};
-
-type DataStore = {
-  // /dex
-  totalValueLockInPoolPair: string;
-  total24HVolume: string;
-  pair: PairData;
-};
-
-type StateRelayerHandlerProps = {
-  urlNetwork: string;
-  envNetwork: EnvironmentNetwork;
-  contractAddress: string;
-  signer: ethers.Signer;
-};
+import { DataStore, MasterNodesData, PairData, StateRelayerHandlerProps, VaultData } from './types';
 
 const DENOMINATION = 'USDT';
 const DECIMALS = 10;
@@ -43,10 +14,12 @@ const transformToEthersBigNumber = (str: string, decimals: number): ethers.BigNu
     new BigNumber(str).multipliedBy(new BigNumber('10').pow(decimals)).integerValue(BigNumber.ROUND_FLOOR).toString(),
   );
 
-export async function handler(props: StateRelayerHandlerProps): Promise<DataStore | undefined> {
+export async function handler(props: StateRelayerHandlerProps): Promise<DFCData | undefined> {
   const { urlNetwork, envNetwork, signer, contractAddress } = props;
   const stateRelayerContract = new ethers.Contract(contractAddress, StateRelayer__factory.abi, signer) as StateRelayer;
   const dataStore = {} as DataStore;
+  const dataVault = {} as VaultData;
+  const dataMasterNode = {} as MasterNodesData;
   try {
     // TODO: Check if Function should run (blockHeight > 30 from previous)
     // Get Data from OCEAN API
@@ -97,16 +70,49 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DataStor
     }, {} as PairData);
     dataStore.pair = pair;
     // TODO: Get Data from /dex/[pool-pair]
-    // TODO: Get Data from /vaults
-    // TODO: Get Data from /masternodes
+    // Data from vaults
+    const totalLoanValue = statsData.loan.value.loan;
+    const totalCollateralValue = statsData.loan.value.collateral;
+    dataVault.vaults = statsData.loan.count.openVaults.toString();
+    dataVault.totalLoanValue = transformToEthersBigNumber(totalLoanValue.toString(), DECIMALS);
+    dataVault.totalCollateralValue = transformToEthersBigNumber(totalCollateralValue.toString(), DECIMALS);
+    dataVault.totalCollateralizationRatio = ((totalCollateralValue / totalLoanValue) * 100).toFixed(0).toString();
+    dataVault.activeAuctions = statsData.loan.count.openAuctions.toString();
+    dataVault.lastUpdated = '0';
+    // Data from Master Nodes
+    dataMasterNode.totalValueLockedInMasterNodes = transformToEthersBigNumber(
+      statsData.tvl.masternodes.toString(),
+      DECIMALS,
+    );
+    dataMasterNode.zeroYearLocked = transformToEthersBigNumber(
+      statsData.masternodes.locked[0].tvl.toString(),
+      DECIMALS,
+    );
+    dataMasterNode.fiveYearLocked = transformToEthersBigNumber(
+      statsData.masternodes.locked[2].tvl.toString(),
+      DECIMALS,
+    );
+    dataMasterNode.tenYearLocked = transformToEthersBigNumber(statsData.masternodes.locked[1].tvl.toString(), DECIMALS);
+    dataMasterNode.lastUpdated = '0';
+
     // TODO: Get Data from all burns in ecosystem
-    // Interfacing with SC
-    // TODO: Connect with SC
-    // TODO: Call SC Function to update Collated Data
+    // Call SC Function to update Data
+    // Update Dex information
     await stateRelayerContract.updateDEXInfo(Object.keys(dataStore.pair), Object.values(dataStore.pair) as any);
-    return dataStore;
+    // Update Master Node information
+    await stateRelayerContract.updateMasterNodeInformation(Object.values(dataMasterNode) as any);
+    // Update Vault general information
+    await stateRelayerContract.updateVaultGeneralInformation(Object.values(dataVault) as any);
+
+    return { dataStore, dataVault, dataMasterNode };
   } catch (e) {
     console.error((e as Error).message);
     return undefined;
   }
+}
+
+interface DFCData {
+  dataStore: DataStore;
+  dataVault: VaultData;
+  dataMasterNode: MasterNodesData;
 }
