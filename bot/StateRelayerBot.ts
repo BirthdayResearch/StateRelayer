@@ -64,7 +64,7 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
           commissions: transformToEthersBigNumber(currPair.commission, DECIMALS),
           // todo later
           lastUpdated: '0',
-          decimals: DECIMALS,
+          decimal: DECIMALS,
         },
       } as PairData;
     }, {} as PairData);
@@ -78,7 +78,8 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
     dataVault.totalCollateralValue = transformToEthersBigNumber(totalCollateralValue.toString(), DECIMALS);
     dataVault.totalCollateralizationRatio = ((totalCollateralValue / totalLoanValue) * 100).toFixed(0).toString();
     dataVault.activeAuctions = statsData.loan.count.openAuctions.toString();
-    dataVault.lastUpdated = '0';
+    dataVault.lastUpdated = Date.now();
+    dataVault.decimal = DECIMALS;
     // Data from Master Nodes
     dataMasterNode.totalValueLockedInMasterNodes = transformToEthersBigNumber(
       statsData.tvl.masternodes.toString(),
@@ -93,7 +94,8 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
       DECIMALS,
     );
     dataMasterNode.tenYearLocked = transformToEthersBigNumber(statsData.masternodes.locked[1].tvl.toString(), DECIMALS);
-    dataMasterNode.lastUpdated = '0';
+    dataMasterNode.lastUpdated = Date.now();
+    dataMasterNode.decimal = DECIMALS;
 
     // TODO: Get Data from all burns in ecosystem
     // Call SC Function to update Data

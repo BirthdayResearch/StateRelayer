@@ -5,6 +5,7 @@ import { HardhatNetwork, HardhatNetworkContainer, StartedHardhatNetworkContainer
 import { StateRelayer, StateRelayer__factory, StateRelayerProxy__factory } from '../../generated';
 import { handler } from '../StateRelayerBot';
 import {
+  expectedPairData,
   mockedDexPricesData,
   mockedMasterNodeData,
   mockedPoolPairData,
@@ -77,8 +78,49 @@ describe('State Relayer Bot Tests', () => {
       contractAddress: proxy.address,
       signer: bot,
     });
-    console.log(await (await proxy.DEXInfoMapping('dETH-DFI')).toString());
-    console.log(await proxy.vaultInfo());
-    console.log(await proxy.masterNodeInformation());
+
+    // Checking the dex info
+    const dETH = await proxy.DEXInfoMapping('dETH-DFI');
+    expect(dETH.primaryTokenPrice.div(10 ** dETH.decimal).toString()).toEqual(
+      Number(Object.values(expectedPairData['dETH-DFI'])[0]).toFixed(0),
+    );
+    expect(dETH.volume24H.div(10 ** dETH.decimal).toString()).toEqual(
+      Number(Object.values(expectedPairData['dETH-DFI'])[1]).toFixed(0),
+    );
+    expect(dETH.totalLiquidity.div(10 ** dETH.decimal).toString()).toEqual(
+      Number(Object.values(expectedPairData['dETH-DFI'])[2]).toFixed(0),
+    );
+    expect((dETH.APR.toNumber() / 10 ** dETH.decimal).toFixed(5).toString()).toEqual(
+      Number(Object.values(expectedPairData['dETH-DFI'])[3]).toFixed(5),
+    );
+
+    // Checking VaultInfo
+    const receivedVaultData = await proxy.vaultInfo();
+    expect(receivedVaultData.noOfVaults.toString()).toEqual(mockedVaultData.noOfVaults);
+    expect(receivedVaultData.totalLoanValue.div(10 ** receivedVaultData.decimal).toString()).toEqual(
+      Number(mockedVaultData.totalLoanValue).toFixed(0),
+    );
+    expect(receivedVaultData.totalCollateralValue.div(10 ** receivedVaultData.decimal).toString()).toEqual(
+      Math.floor(Number(mockedVaultData.totalCollateralValue)).toString(),
+    );
+    expect(receivedVaultData.totalCollateralizationRatio.toString()).toEqual(
+      mockedVaultData.totalCollateralizationRatio,
+    );
+    expect(receivedVaultData.activeAuctions.toString()).toEqual(mockedVaultData.activeAuctions);
+
+    // Checking MasterNode information
+    const receivedMasterNodeData = await proxy.masterNodeInformation();
+    expect(receivedMasterNodeData.tvl.div(10 ** receivedMasterNodeData.decimal).toString()).toEqual(
+      Number(mockedMasterNodeData.totalValueLockedInMasterNodes).toFixed(0),
+    );
+    expect(receivedMasterNodeData.zeroYearTVL.div(10 ** receivedMasterNodeData.decimal).toString()).toEqual(
+      Math.floor(Number(mockedMasterNodeData.zeroYearLocked)).toString(),
+    );
+    expect(receivedMasterNodeData.fiveYearTVL.div(10 ** receivedMasterNodeData.decimal).toString()).toEqual(
+      Math.floor(Number(mockedMasterNodeData.fiveYearLocked)).toString(),
+    );
+    expect(receivedMasterNodeData.tenYearTVL.div(10 ** receivedMasterNodeData.decimal).toString()).toEqual(
+      Number(mockedMasterNodeData.tenYearLocked).toFixed(0),
+    );
   });
 });

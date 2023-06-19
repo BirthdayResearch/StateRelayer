@@ -14,7 +14,7 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
         uint256 commissions;
         uint256 lastUpdated;
         // packed information about the decimals of each variable
-        uint40 decimals;
+        uint40 decimal;
     }
     mapping(string => DEXInfo) public DEXInfoMapping;
     struct VaultGeneralInformation {
@@ -24,6 +24,7 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
         uint256 totalCollateralizationRatio;
         uint256 activeAuctions;
         uint256 lastUpdated;
+        uint40 decimal;
     }
     VaultGeneralInformation public vaultInfo;
     struct MasternodeInformation {
@@ -32,6 +33,7 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
         uint256 fiveYearTVL;
         uint256 tenYearTVL;
         uint256 lastUpdated;
+        uint40 decimal;
     }
 
     MasternodeInformation public masterNodeInformation;

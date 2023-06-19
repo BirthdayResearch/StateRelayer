@@ -18,6 +18,7 @@ describe('State relayer contract data tests', () => {
         fiveYearTVL: 102,
         tenYearTVL: 103,
         lastUpdated: 101010,
+        decimal: 10,
       };
       await expect(stateRelayerProxy.connect(bot).updateMasterNodeInformation(masterNodeData))
         .to.emit(stateRelayerProxy, 'UpdateMasterNodeInformation')
@@ -35,6 +36,7 @@ describe('State relayer contract data tests', () => {
         totalCollateralizationRatio: 234,
         activeAuctions: 23,
         lastUpdated: 34244,
+        decimal: 10,
       };
       await expect(stateRelayerProxy.connect(bot).updateVaultGeneralInformation(vaultInformationData))
         .to.emit(stateRelayerProxy, 'UpdateVaultGeneralInformation')
@@ -56,7 +58,7 @@ describe('State relayer contract data tests', () => {
         rewards: 124,
         commissions: 3,
         lastUpdated: 1231,
-        decimals: 18,
+        decimal: 18,
       };
       const dexDataBtc: DexInfo = {
         primaryTokenPrice: 112,
@@ -68,7 +70,7 @@ describe('State relayer contract data tests', () => {
         rewards: 123,
         commissions: 2,
         lastUpdated: 1233,
-        decimals: 18,
+        decimal: 18,
       };
       const dexsData: DexInfo[] = [dexDataEth, dexDataBtc];
       const symbols: string[] = ['eth', 'btc'];
@@ -99,6 +101,7 @@ describe('State relayer contract data tests', () => {
         fiveYearTVL: 102,
         tenYearTVL: 103,
         lastUpdated: 101010,
+        decimal: 10,
       };
       await expect(stateRelayerProxy.connect(user).updateMasterNodeInformation(masterNodeData)).to.be.reverted;
     });
@@ -112,6 +115,7 @@ describe('State relayer contract data tests', () => {
         totalCollateralizationRatio: 234,
         activeAuctions: 23,
         lastUpdated: 34244,
+        decimal: 10,
       };
       await expect(stateRelayerProxy.connect(user).updateVaultGeneralInformation(vaultInformationData)).to.be.reverted;
     });
@@ -129,7 +133,7 @@ describe('State relayer contract data tests', () => {
         rewards: 124,
         commissions: 3,
         lastUpdated: 1231,
-        decimals: 18,
+        decimal: 18,
       };
       await expect(stateRelayerProxy.connect(user).updateDEXInfo(['eth'], [dexDataEth])).to.be.reverted;
     });
@@ -142,6 +146,7 @@ interface MasterNode {
   fiveYearTVL: number;
   tenYearTVL: number;
   lastUpdated: number;
+  decimal: number;
 }
 
 interface VaultGeneralInformation {
@@ -151,6 +156,7 @@ interface VaultGeneralInformation {
   totalCollateralizationRatio: number;
   activeAuctions: number;
   lastUpdated: number;
+  decimal: number;
 }
 
 interface DexInfo {
@@ -163,5 +169,5 @@ interface DexInfo {
   rewards: number;
   commissions: number;
   lastUpdated: number;
-  decimals: number;
+  decimal: number;
 }
