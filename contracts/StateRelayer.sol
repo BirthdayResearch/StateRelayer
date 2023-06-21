@@ -17,6 +17,7 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
         uint40 decimals;
     }
     mapping(string => DEXInfo) public DEXInfoMapping;
+
     struct VaultGeneralInformation {
         uint256 noOfVaults;
         uint256 totalLoanValue;
@@ -26,6 +27,7 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
         uint256 lastUpdated;
     }
     VaultGeneralInformation public vaultInfo;
+
     struct MasternodeInformation {
         uint256 tvl;
         uint256 zeroYearTVL;
@@ -33,8 +35,18 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
         uint256 tenYearTVL;
         uint256 lastUpdated;
     }
-
     MasternodeInformation public masterNodeInformation;
+    
+    struct BurnedInfo{
+        uint256 fee;
+        uint256 auction;
+        uint256 payback;
+        uint256 emission;
+        uint256 total;
+        uint8 decimal;
+    }
+    BurnedInfo public burnedInfo;
+
     bool public inMultiCall;
     bytes32 public constant BOT_ROLE = keccak256("BOT_ROLE");
 
@@ -42,6 +54,7 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
     event UpdateDEXInfo(string[] dex, DEXInfo[] dexInfo, uint256 timeStamp);
     event UpdateVaultGeneralInformation(VaultGeneralInformation vaultInfo, uint256 timeStamp);
     event UpdateMasterNodeInformation(MasternodeInformation nodeInformation, uint256 timeStamp);
+    event UpdatedBurnedInformation(BurnedInfo burnedInfo, uint256 timeStamp);
 
     function _authorizeUpgrade(address newImplementation) internal override onlyRole(DEFAULT_ADMIN_ROLE) {}
 
@@ -85,6 +98,11 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
     ) external allowUpdate {
         masterNodeInformation = _masterNodeInformation;
         emit UpdateMasterNodeInformation(_masterNodeInformation, block.timestamp);
+    }
+
+    function updateBurnInfo( BurnedInfo calldata _burnedInfo) external allowUpdate {
+        burnedInfo = _burnedInfo;
+        emit UpdatedBurnedInformation(_burnedInfo, block.timestamp);
     }
 
     function multiCall(bytes[] calldata funcCalls) external onlyRole(BOT_ROLE) {

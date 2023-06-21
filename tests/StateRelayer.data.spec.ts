@@ -85,6 +85,21 @@ describe('State relayer contract data tests', () => {
       // Testing that the received is as expected as dexDataBtc
       expect(receivedBtcDexData.toString()).to.equal(Object.values(dexDataBtc).toString());
     });
+
+    it('Should successfully set burned data for all ecosystem', async()=>{
+      ({ stateRelayerProxy, bot } = await loadFixture(deployContract));
+      const burnInfo: BurnedInfo = {
+        fee: 315015,
+        auction: 1512527,
+        payback: 61705058,
+        emission: 98783549,
+        total: 317634155,
+        decimal: 10
+      }
+      await stateRelayerProxy.connect(bot).updateBurnInfo(burnInfo)
+      const receivedBurnedData =  await stateRelayerProxy.burnedInfo()
+      expect(receivedBurnedData.toString()).to.equal(Object.values(burnInfo).toString())
+    })
   });
 
   describe('UnSuccessful', () => {
@@ -133,6 +148,20 @@ describe('State relayer contract data tests', () => {
       };
       await expect(stateRelayerProxy.connect(user).updateDEXInfo(['eth'], [dexDataEth])).to.be.reverted;
     });
+
+    it('`updateBurnInfo` - Should successfully revert if the signer is not `bot`', async()=>{
+        ({ stateRelayerProxy, user } = await loadFixture(deployContract));
+        const burnInfo: BurnedInfo = {
+          fee: 315015,
+          auction: 1512527,
+          payback: 61705058,
+          emission: 98783549,
+          total: 317634155,
+          decimal: 10
+        }
+        await expect(stateRelayerProxy.connect(user).updateBurnInfo(burnInfo)).to.reverted;
+
+    })
   });
 });
 
@@ -164,4 +193,13 @@ interface DexInfo {
   commissions: number;
   lastUpdated: number;
   decimals: number;
+}
+
+interface BurnedInfo{
+  fee: number;
+  auction: number;
+  payback: number;
+  emission: number;
+  total: number;
+  decimal: number;
 }

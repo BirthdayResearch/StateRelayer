@@ -391,6 +391,14 @@ export const mockedDexPricesData = {
   },
 };
 
+export const mockedBurnedInfo = {
+    fee: '315015.5',
+    auction: '1512527.37726055',
+    payback: '61705058.1749106',
+    emission: '98783549.5707572',
+    total: '317634155.7199576',
+}
+
 // generated fixtures from mocked data above
 export const expectedPairData = {
   'dETH-DFI': {
