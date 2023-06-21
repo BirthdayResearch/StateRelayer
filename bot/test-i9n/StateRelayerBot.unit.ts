@@ -22,12 +22,6 @@ jest.mock('@defichain/whale-api-client', () => ({
       list: () => mockedPoolPairData,
       listDexPrices: () => mockedDexPricesData,
     },
-    masternodes: {
-      list: () => mockedMasterNodeData,
-    },
-    vault: {
-      get: () => mockedVaultData,
-    },
   })),
 }));
 
