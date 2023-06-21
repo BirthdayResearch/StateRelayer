@@ -4,7 +4,7 @@ import { ethers } from 'ethers';
 import { HardhatNetwork, HardhatNetworkContainer, StartedHardhatNetworkContainer } from '../../containers';
 import { StateRelayer, StateRelayer__factory, StateRelayerProxy__factory } from '../../generated';
 import { handler } from '../StateRelayerBot';
-import { mockedDexPricesData, mockedPoolPairData, mockedStatsData } from '../utils/oceanMockedData';
+import { expectedBurnedInfo, mockedDexPricesData, mockedPoolPairData, mockedStatsData } from '../utils/oceanMockedData';
 
 jest.mock('@defichain/whale-api-client', () => ({
   WhaleApiClient: jest.fn().mockImplementation(() => ({
@@ -66,5 +66,12 @@ describe('State Relayer Bot Tests', () => {
       signer: bot,
     });
     console.log(await proxy.DEXInfoMapping('dETH-DFI'));
+    const receivedBurnedInfo = await proxy.burnedInfo();
+    const {decimal} = receivedBurnedInfo;
+    expect(receivedBurnedInfo.fee.div(10**decimal).toString()).toEqual(Math.floor(Number(expectedBurnedInfo.fee)).toString())
+    expect(receivedBurnedInfo.auction.div(10**decimal).toString()).toEqual(Number(expectedBurnedInfo.auction).toFixed(0))
+    expect(receivedBurnedInfo.payback.div(10**decimal).toString()).toEqual(Number(expectedBurnedInfo.payback).toFixed(0))
+    expect(receivedBurnedInfo.emission.div(10**decimal).toString()).toEqual(Math.floor(Number(expectedBurnedInfo.emission)).toString())
+    expect(receivedBurnedInfo.total.div(10**decimal).toString()).toEqual(Math.floor(Number(expectedBurnedInfo.total)).toString())
   });
 });

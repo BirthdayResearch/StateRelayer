@@ -1,48 +1,10 @@
 /* eslint-disable no-console */
 import { getWhaleClient } from '@waveshq/walletkit-bot';
-import { EnvironmentNetwork } from '@waveshq/walletkit-core';
 import { BigNumber } from 'bignumber.js';
 import { ethers } from 'ethers';
 
 import { StateRelayer, StateRelayer__factory } from '../generated';
-
-type PairData = {
-  [pairSymbol: string]: {
-    primaryTokenPrice: ethers.BigNumber;
-    volume24H: ethers.BigNumber;
-    totalLiquidity: ethers.BigNumber;
-    APR: ethers.BigNumber;
-    firstTokenBalance: ethers.BigNumber;
-    secondTokenBalance: ethers.BigNumber;
-    rewards: ethers.BigNumber;
-    commissions: ethers.BigNumber;
-    lastUpdated: ethers.BigNumber;
-    decimals: ethers.BigNumber;
-  };
-};
-
-type DataStore = {
-  // /dex
-  totalValueLockInPoolPair: string;
-  total24HVolume: string;
-  pair: PairData;
-};
-
-type StateRelayerHandlerProps = {
-  urlNetwork: string;
-  envNetwork: EnvironmentNetwork;
-  contractAddress: string;
-  signer: ethers.Signer;
-};
-
-type BurnedInformation = {
-  fee: ethers.BigNumber;
-  auction: ethers.BigNumber;
-  payback: ethers.BigNumber;
-  emission: ethers.BigNumber;
-  total: ethers.BigNumber;
-  decimal: ethers.BigNumber;
-};
+import { BurnedInformation, DataStore, PairData, StateRelayerHandlerProps } from './types';
 
 const DENOMINATION = 'USDT';
 const DECIMALS = 10;
@@ -62,22 +24,22 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
     // Get Data from OCEAN API
     const client = getWhaleClient(urlNetwork, envNetwork);
     const statsData = await client.stats.get();
-    const rawPoolpairData = await client.poolpairs.list(200);
+    const rawPoolPairData = await client.poolpairs.list(200);
     const dexPriceData = await client.poolpairs.listDexPrices(DENOMINATION);
 
-    // sanitise response data
-    const poolpairData = rawPoolpairData.filter((pair: any) => !pair.displaySymbol.includes('/'));
+    // sanitize response data
+    const poolPairData = rawPoolPairData.filter((pair: any) => !pair.displaySymbol.includes('/'));
 
     /* ------------ Data from /dex ----------- */
     // totalValueLockInPoolPair
     dataStore.totalValueLockInPoolPair = statsData.tvl.dex.toString();
 
     // total24HVolume
-    const total24HVolume = poolpairData.reduce((acc, currPair) => acc + (currPair.volume?.h24 ?? 0), 0);
+    const total24HVolume = poolPairData.reduce((acc, currPair) => acc + (currPair.volume?.h24 ?? 0), 0);
     dataStore.total24HVolume = total24HVolume.toString();
 
     // pair
-    const pair = poolpairData.reduce<PairData>((acc, currPair) => {
+    const pair = poolPairData.reduce<PairData>((acc, currPair) => {
       let tokenPrice = new BigNumber(0);
       // price ratio is
       const priceRatio = currPair.priceRatio.ba;
