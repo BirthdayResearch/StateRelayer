@@ -94,6 +94,7 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
             (bool success, bytes memory returnData) = address(this).call(funcCalls[i]);
             if (!success) {
                 if (returnData.length > 0) {
+                    // solhint-disable-next-line max-line-length
                     // reference from openzeppelin: https://github.com/OpenZeppelin/openzeppelin-contracts/blob/e50c24f5839db17f46991478384bfda14acfb830/contracts/utils/Address.sol#L233
                     assembly {
                         let returndata_size := mload(returnData)
