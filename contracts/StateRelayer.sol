@@ -1,6 +1,9 @@
 import '@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol';
 
+error ALREADY_IN_BATCH_CALL_BY_BOT();
+error ERROR_IN_LOW_LEVEL_CALLS();
+
 contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
     struct DEXInfo {
         uint256 primaryTokenPrice;
@@ -85,11 +88,19 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
     function batchCallByBot(bytes[] calldata funcCalls) external onlyRole(BOT_ROLE) {
         // just a sanity check, actually, if we don't grant any roles to the proxy address
         // we will not have a recursive batchCallByBot call.
-        require(!inBatchCallByBot, 'Already in batchCallByBot');
+        if (inBatchCallByBot) revert ALREADY_IN_BATCH_CALL_BY_BOT();
         inBatchCallByBot = true;
         for (uint256 i = 0; i < funcCalls.length; ++i) {
-            (bool success, ) = address(this).call(funcCalls[i]);
-            require(success, 'There are some errors in low-level calls');
+            (bool success, bytes memory returnData) = address(this).call(funcCalls[i]);
+            if (!success) {
+                if (returnData.length > 0) {
+                    // reference from openzeppelin: https://github.com/OpenZeppelin/openzeppelin-contracts/blob/e50c24f5839db17f46991478384bfda14acfb830/contracts/utils/Address.sol#L233
+                    assembly {
+                        let returndata_size := mload(returnData)
+                        revert(add(32, returnData), returndata_size)
+                    }
+                } else revert ERROR_IN_LOW_LEVEL_CALLS();
+            }
         }
         inBatchCallByBot = false;
     }
