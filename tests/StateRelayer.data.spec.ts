@@ -1,9 +1,12 @@
 import { loadFixture, time } from '@nomicfoundation/hardhat-network-helpers';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { expect } from 'chai';
+import { ethers } from 'hardhat';
 
 import { StateRelayer } from '../generated';
 import { deployContract } from './utils/deployment';
+
+type BigNumber = ethers.bigNumber
 
 describe('State relayer contract data tests', () => {
   let stateRelayerProxy: StateRelayer;
@@ -13,12 +16,12 @@ describe('State relayer contract data tests', () => {
     it('Should successfully set master node data', async () => {
       ({ stateRelayerProxy, bot } = await loadFixture(deployContract));
       const masterNodeData: MasterNode = {
-        tvl: 108,
-        zeroYearTVL: 101,
-        fiveYearTVL: 102,
-        tenYearTVL: 103,
+        totalValueLockedInMasterNodes: 108,
+        zeroYearLocked: 101,
+        fiveYearLocked: 102,
+        tenYearLocked: 103,
         lastUpdated: 101010,
-        decimal: 10,
+        decimals: 10,
       };
       await expect(stateRelayerProxy.connect(bot).updateMasterNodeInformation(masterNodeData))
         .to.emit(stateRelayerProxy, 'UpdateMasterNodeInformation')
@@ -36,7 +39,7 @@ describe('State relayer contract data tests', () => {
         totalCollateralizationRatio: 234,
         activeAuctions: 23,
         lastUpdated: 34244,
-        decimal: 10,
+        decimals: 10,
       };
       await expect(stateRelayerProxy.connect(bot).updateVaultGeneralInformation(vaultInformationData))
         .to.emit(stateRelayerProxy, 'UpdateVaultGeneralInformation')
@@ -47,7 +50,8 @@ describe('State relayer contract data tests', () => {
 
     it('Should successfully set dexs data', async () => {
       ({ stateRelayerProxy, bot } = await loadFixture(deployContract));
-
+      const totalValueLockInPoolPair = 76354685;
+      const total24HVolume = 65738274;
       const dexDataEth: DexInfo = {
         primaryTokenPrice: 113,
         volume24H: 102021,
@@ -58,7 +62,7 @@ describe('State relayer contract data tests', () => {
         rewards: 124,
         commissions: 3,
         lastUpdated: 1231,
-        decimal: 18,
+        decimals: 18,
       };
       const dexDataBtc: DexInfo = {
         primaryTokenPrice: 112,
@@ -70,11 +74,11 @@ describe('State relayer contract data tests', () => {
         rewards: 123,
         commissions: 2,
         lastUpdated: 1233,
-        decimal: 18,
+        decimals: 18,
       };
       const dexsData: DexInfo[] = [dexDataEth, dexDataBtc];
       const symbols: string[] = ['eth', 'btc'];
-      await expect(stateRelayerProxy.connect(bot).updateDEXInfo(symbols, dexsData)).to.emit(
+      await expect(stateRelayerProxy.connect(bot).updateDEXInfo(symbols, dexsData,totalValueLockInPoolPair, total24HVolume)).to.emit(
         stateRelayerProxy,
         'UpdateDEXInfo',
       );
@@ -96,12 +100,12 @@ describe('State relayer contract data tests', () => {
     it('`updateMasterNodeInformation` - Should successfully revert if the signer is not `bot`', async () => {
       ({ stateRelayerProxy, user } = await loadFixture(deployContract));
       const masterNodeData: MasterNode = {
-        tvl: 108,
-        zeroYearTVL: 101,
-        fiveYearTVL: 102,
-        tenYearTVL: 103,
+        totalValueLockedInMasterNodes: 108,
+        zeroYearLocked: 101,
+        fiveYearLocked: 102,
+        tenYearLocked: 103,
         lastUpdated: 101010,
-        decimal: 10,
+        decimals: 10,
       };
       await expect(stateRelayerProxy.connect(user).updateMasterNodeInformation(masterNodeData)).to.be.reverted;
     });
@@ -115,7 +119,7 @@ describe('State relayer contract data tests', () => {
         totalCollateralizationRatio: 234,
         activeAuctions: 23,
         lastUpdated: 34244,
-        decimal: 10,
+        decimals: 10,
       };
       await expect(stateRelayerProxy.connect(user).updateVaultGeneralInformation(vaultInformationData)).to.be.reverted;
     });
@@ -133,41 +137,41 @@ describe('State relayer contract data tests', () => {
         rewards: 124,
         commissions: 3,
         lastUpdated: 1231,
-        decimal: 18,
+        decimals: 18,
       };
-      await expect(stateRelayerProxy.connect(user).updateDEXInfo(['eth'], [dexDataEth])).to.be.reverted;
+      await expect(stateRelayerProxy.connect(user).updateDEXInfo(['eth'], [dexDataEth], 1, 2)).to.be.reverted;
     });
   });
 });
 
 interface MasterNode {
-  tvl: number;
-  zeroYearTVL: number;
-  fiveYearTVL: number;
-  tenYearTVL: number;
-  lastUpdated: number;
-  decimal: number;
+  totalValueLockedInMasterNodes: BigNumber;
+  zeroYearLocked: BigNumber;
+  fiveYearLocked: BigNumber;
+  tenYearLocked: BigNumber;
+  lastUpdated: BigNumber;
+  decimals: BigNumber;
 }
 
 interface VaultGeneralInformation {
-  noOfVaults: number;
-  totalLoanValue: number;
-  totalCollateralValue: number;
-  totalCollateralizationRatio: number;
-  activeAuctions: number;
-  lastUpdated: number;
-  decimal: number;
+  noOfVaults: BigNumber;
+  totalLoanValue: BigNumber;
+  totalCollateralValue: BigNumber;
+  totalCollateralizationRatio: BigNumber;
+  activeAuctions: BigNumber;
+  lastUpdated: BigNumber;
+  decimals: BigNumber;
 }
 
 interface DexInfo {
-  primaryTokenPrice: number;
-  volume24H: number;
-  totalLiquidity: number;
-  APR: number;
-  firstTokenBalance: number;
-  secondTokenBalance: number;
-  rewards: number;
-  commissions: number;
-  lastUpdated: number;
-  decimal: number;
+  primaryTokenPrice: BigNumber;
+  volume24H: BigNumber;
+  totalLiquidity: BigNumber;
+  APR: BigNumber;
+  firstTokenBalance: BigNumber;
+  secondTokenBalance: BigNumber;
+  rewards: BigNumber;
+  commissions: BigNumber;
+  lastUpdated: BigNumber;
+  decimals: BigNumber;
 }

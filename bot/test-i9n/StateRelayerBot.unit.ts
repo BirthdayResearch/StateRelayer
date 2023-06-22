@@ -5,12 +5,13 @@ import { HardhatNetwork, HardhatNetworkContainer, StartedHardhatNetworkContainer
 import { StateRelayer, StateRelayer__factory, StateRelayerProxy__factory } from '../../generated';
 import { handler } from '../StateRelayerBot';
 import {
+  expectedDexInfo,
+  expectedMasterNodeData,
   expectedPairData,
+  expectedVaultData,
   mockedDexPricesData,
-  mockedMasterNodeData,
   mockedPoolPairData,
   mockedStatsData,
-  mockedVaultData,
 } from '../utils/oceanMockedData';
 
 jest.mock('@defichain/whale-api-client', () => ({
@@ -65,7 +66,7 @@ describe('State Relayer Bot Tests', () => {
     await hardhatNetwork.stop();
   });
 
-  test('should check that data is parsed correctly', async () => {
+  test('Successfully set the dexInfo data', async () => {
     await handler({
       envNetwork: EnvironmentNetwork.LocalPlayground,
       urlNetwork: '',
@@ -73,48 +74,68 @@ describe('State Relayer Bot Tests', () => {
       signer: bot,
     });
 
-    // Checking the dex info
+    // Checking the /dex/dex-pair info
     const dETH = await proxy.DEXInfoMapping('dETH-DFI');
-    expect(dETH.primaryTokenPrice.div(10 ** dETH.decimal).toString()).toEqual(
-      Number(Object.values(expectedPairData['dETH-DFI'])[0]).toFixed(0),
-    );
-    expect(dETH.volume24H.div(10 ** dETH.decimal).toString()).toEqual(
-      Number(Object.values(expectedPairData['dETH-DFI'])[1]).toFixed(0),
-    );
-    expect(dETH.totalLiquidity.div(10 ** dETH.decimal).toString()).toEqual(
-      Number(Object.values(expectedPairData['dETH-DFI'])[2]).toFixed(0),
-    );
-    expect((dETH.APR.toNumber() / 10 ** dETH.decimal).toFixed(5).toString()).toEqual(
-      Number(Object.values(expectedPairData['dETH-DFI'])[3]).toFixed(5),
+    expect(dETH.primaryTokenPrice.toString()).toEqual(
+      (Object.values(expectedPairData['dETH-DFI'])[0]))
+    expect(dETH.volume24H.toString()).toEqual(
+      (Object.values(expectedPairData['dETH-DFI'])[1]))
+    expect(dETH.totalLiquidity.toString()).toEqual(
+      (Object.values(expectedPairData['dETH-DFI'])[2]))
+    expect((dETH.APR.toNumber()).toString()).toEqual(
+      (Object.values(expectedPairData['dETH-DFI'])[3])
     );
 
-    // Checking VaultInfo
-    const receivedVaultData = await proxy.vaultInfo();
-    expect(receivedVaultData.noOfVaults.toString()).toEqual(mockedVaultData.noOfVaults);
-    expect(receivedVaultData.totalLoanValue.div(10 ** receivedVaultData.decimal).toString()).toEqual(
-      Number(mockedVaultData.totalLoanValue).toFixed(0),
-    );
-    expect(receivedVaultData.totalCollateralValue.div(10 ** receivedVaultData.decimal).toString()).toEqual(
-      Math.floor(Number(mockedVaultData.totalCollateralValue)).toString(),
-    );
-    expect(receivedVaultData.totalCollateralizationRatio.toString()).toEqual(
-      mockedVaultData.totalCollateralizationRatio,
-    );
-    expect(receivedVaultData.activeAuctions.toString()).toEqual(mockedVaultData.activeAuctions);
+    // Checking /dex info
+    const dex = await proxy.getDexInfo();
+    expect(dex[0].toString()).toEqual(expectedDexInfo.totalValueLockInPoolPair)
+    expect(dex[1].toString()).toEqual(expectedDexInfo.total24HVolume)
+
+  });
+
+  test('Successfully set the masterNode data', async()=>{
+    await handler({
+      envNetwork: EnvironmentNetwork.LocalPlayground,
+      urlNetwork: '',
+      contractAddress: proxy.address,
+      signer: bot,
+    });
 
     // Checking MasterNode information
     const receivedMasterNodeData = await proxy.masterNodeInformation();
-    expect(receivedMasterNodeData.tvl.div(10 ** receivedMasterNodeData.decimal).toString()).toEqual(
-      Number(mockedMasterNodeData.totalValueLockedInMasterNodes).toFixed(0),
+    expect(receivedMasterNodeData.totalValueLockedInMasterNodes.toString()).toEqual(
+      expectedMasterNodeData.totalValueLockedInMasterNodes,
     );
-    expect(receivedMasterNodeData.zeroYearTVL.div(10 ** receivedMasterNodeData.decimal).toString()).toEqual(
-      Math.floor(Number(mockedMasterNodeData.zeroYearLocked)).toString(),
+    expect(receivedMasterNodeData.zeroYearLocked.toString()).toEqual(
+      expectedMasterNodeData.zeroYearLocked,
     );
-    expect(receivedMasterNodeData.fiveYearTVL.div(10 ** receivedMasterNodeData.decimal).toString()).toEqual(
-      Math.floor(Number(mockedMasterNodeData.fiveYearLocked)).toString(),
+    expect(receivedMasterNodeData.fiveYearLocked.toString()).toEqual(
+      expectedMasterNodeData.fiveYearLocked,
     );
-    expect(receivedMasterNodeData.tenYearTVL.div(10 ** receivedMasterNodeData.decimal).toString()).toEqual(
-      Number(mockedMasterNodeData.tenYearLocked).toFixed(0),
+    expect(receivedMasterNodeData.tenYearLocked.toString()).toEqual(
+      expectedMasterNodeData.tenYearLocked)
+  })
+
+  test('Successfully set the vault data', async()=>{
+    await handler({
+      envNetwork: EnvironmentNetwork.LocalPlayground,
+      urlNetwork: '',
+      contractAddress: proxy.address,
+      signer: bot,
+    });
+
+   // Checking VaultInfo
+    const receivedVaultData = await proxy.vaultInfo();
+    expect(receivedVaultData.noOfVaults.toString()).toEqual(expectedVaultData.noOfVaults);
+    expect(receivedVaultData.totalLoanValue.toString()).toEqual(
+      expectedVaultData.totalLoanValue,
     );
-  });
+    expect(receivedVaultData.totalCollateralValue.toString()).toEqual(
+      expectedVaultData.totalCollateralValue,
+    );
+    expect(receivedVaultData.totalCollateralizationRatio.toString()).toEqual(
+      expectedVaultData.totalCollateralizationRatio,
+    );
+    expect(receivedVaultData.activeAuctions.toString()).toEqual(expectedVaultData.activeAuctions);
+  })
 });

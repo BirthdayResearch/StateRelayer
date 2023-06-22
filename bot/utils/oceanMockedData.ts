@@ -392,51 +392,54 @@ export const mockedDexPricesData = {
 };
 
 // generated fixtures from mocked data above
-export const mockedVaultData = {
+export const expectedVaultData = {
   noOfVaults: '11424',
-  totalLoanValue: '84857375.19502015',
-  totalCollateralValue: '181011671.8179531',
+  totalLoanValue: '848573751950201500',
+  totalCollateralValue: '1810116718179531000',
   totalCollateralizationRatio: '213',
   activeAuctions: '1',
 };
 
-// generated fixtures from mocked data above
-export const mockedMasterNodeData = {
-  totalValueLockedInMasterNodes: '152862005.47177258',
-  zeroYearLocked: '109372690.57990181',
-  fiveYearLocked: '9054324.931097768',
-  tenYearLocked: '34469627.40944635',
+export const expectedMasterNodeData = {
+  totalValueLockedInMasterNodes: '1528620054717725800',
+  zeroYearLocked: '1093726905799018100',
+  fiveYearLocked: '90543249310977680',
+  tenYearLocked: '344696274094463500',
 };
-// generated fixtures from mocked data above
+
+export const expectedDexInfo = {
+  totalValueLockInPoolPair:'2722816853262795000',
+  total24HVolume: '600100000000000',
+}
 export const expectedPairData = {
   'dETH-DFI': {
-    primaryTokenPrice: '2072.0393468322487732',
-    volume24H: '12000',
-    totalLiquidity: '25636863.24062524435653579327168029',
-    apr: '0.11184687438197073',
+    primaryTokenPrice: '20720393468322',
+    volume24H: '120000000000000',
+    totalLiquidity: '256368632406252443',
+    apr: '1118468743',
   },
   'dBTC-DFI': {
-    primaryTokenPrice: '29794.4817887563546869',
-    volume24H: '12001',
-    totalLiquidity: '115509685.491358337662696092943679775',
-    apr: '0.12524175118415037',
+    primaryTokenPrice: '29794.4817887563',
+    volume24H: '120010000000000',
+    totalLiquidity: '115509685.4913583376',
+    apr: '1252417511',
   },
   'dUSDT-DFI': {
-    primaryTokenPrice: '0.9835236794568237',
-    volume24H: '12002',
-    totalLiquidity: '5681591.45859434',
-    apr: '0.1218801632818402',
+    primaryTokenPrice: '9835236794',
+    volume24H: '120020000000000',
+    totalLiquidity: '56815914585943400',
+    apr: '1218801632',
   },
   'dDOGE-DFI': {
-    primaryTokenPrice: '0.0915855624703084',
-    volume24H: '12003',
-    totalLiquidity: '416980.066178766746375664018708065',
-    apr: '0.013596317989663933',
+    primaryTokenPrice: '0915855624',
+    volume24H: '120030000000000',
+    totalLiquidity: '416980.0661787667',
+    apr: '0135963179',
   },
   'dLTC-DFI': {
-    primaryTokenPrice: '99.7252292452062933',
-    volume24H: '12004',
-    totalLiquidity: '2414037.856720123393447225830671435',
-    apr: '0.00819656242847228',
+    primaryTokenPrice: '997252292452',
+    volume24H: '120040000000000',
+    totalLiquidity: '2414037.8567201233',
+    apr: '0081965624',
   },
 };

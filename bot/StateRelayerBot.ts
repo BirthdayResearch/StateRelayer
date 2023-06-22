@@ -33,13 +33,11 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
 
     /* ------------ Data from /dex ----------- */
     // totalValueLockInPoolPair
-    dataStore.totalValueLockInPoolPair = statsData.tvl.dex.toString();
-
+    const totalValueLockInPoolPair = transformToEthersBigNumber(statsData.tvl.dex.toString(), DECIMALS);
     // total24HVolume
-    const total24HVolume = poolpairData.reduce((acc, currPair) => acc + (currPair.volume?.h24 ?? 0), 0);
-    dataStore.total24HVolume = total24HVolume.toString();
+    const total24HVolume = transformToEthersBigNumber(poolpairData.reduce((acc, currPair) => acc + (currPair.volume?.h24 ?? 0), 0).toString(), DECIMALS);
 
-    // pair
+    // /dex/pair
     const pair = poolpairData.reduce<PairData>((acc, currPair) => {
       let tokenPrice = new BigNumber(0);
       // price ratio is
@@ -64,22 +62,21 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
           commissions: transformToEthersBigNumber(currPair.commission, DECIMALS),
           // todo later
           lastUpdated: '0',
-          decimal: DECIMALS,
+          decimals: DECIMALS,
         },
       } as PairData;
     }, {} as PairData);
     dataStore.pair = pair;
-    // TODO: Get Data from /dex/[pool-pair]
     // Data from vaults
     const totalLoanValue = statsData.loan.value.loan;
     const totalCollateralValue = statsData.loan.value.collateral;
-    dataVault.vaults = statsData.loan.count.openVaults.toString();
+    dataVault.noOfVaults = statsData.loan.count.openVaults.toString();
     dataVault.totalLoanValue = transformToEthersBigNumber(totalLoanValue.toString(), DECIMALS);
     dataVault.totalCollateralValue = transformToEthersBigNumber(totalCollateralValue.toString(), DECIMALS);
-    dataVault.totalCollateralizationRatio = ((totalCollateralValue / totalLoanValue) * 100).toFixed(0).toString();
+    dataVault.totalCollateralizationRatio = ((totalCollateralValue/totalLoanValue)*(100)).toFixed(0).toString();
     dataVault.activeAuctions = statsData.loan.count.openAuctions.toString();
     dataVault.lastUpdated = Date.now();
-    dataVault.decimal = DECIMALS;
+    dataVault.decimals = DECIMALS;
     // Data from Master Nodes
     dataMasterNode.totalValueLockedInMasterNodes = transformToEthersBigNumber(
       statsData.tvl.masternodes.toString(),
@@ -95,16 +92,16 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
     );
     dataMasterNode.tenYearLocked = transformToEthersBigNumber(statsData.masternodes.locked[1].tvl.toString(), DECIMALS);
     dataMasterNode.lastUpdated = Date.now();
-    dataMasterNode.decimal = DECIMALS;
+    dataMasterNode.decimals = DECIMALS;
 
     // TODO: Get Data from all burns in ecosystem
     // Call SC Function to update Data
     // Update Dex information
-    await stateRelayerContract.updateDEXInfo(Object.keys(dataStore.pair), Object.values(dataStore.pair) as any);
+    await stateRelayerContract.updateDEXInfo(Object.keys(dataStore.pair), Object.values(dataStore.pair) as any, totalValueLockInPoolPair, total24HVolume);
     // Update Master Node information
-    await stateRelayerContract.updateMasterNodeInformation(Object.values(dataMasterNode) as any);
-    // Update Vault general information
-    await stateRelayerContract.updateVaultGeneralInformation(Object.values(dataVault) as any);
+    await stateRelayerContract.updateMasterNodeInformation(dataMasterNode as MasterNodesData);
+    // // Update Vault general information
+    await stateRelayerContract.updateVaultGeneralInformation(dataVault as VaultData);
 
     return { dataStore, dataVault, dataMasterNode };
   } catch (e) {
