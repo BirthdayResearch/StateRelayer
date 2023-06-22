@@ -12,7 +12,7 @@ import {
   mockedDexPricesData,
   mockedPoolPairData,
   mockedStatsData,
-} from '../utils/oceanMockedData';
+} from './mockData/oceanMockedData';
 
 jest.mock('@defichain/whale-api-client', () => ({
   WhaleApiClient: jest.fn().mockImplementation(() => ({
@@ -91,16 +91,6 @@ describe('State Relayer Bot Tests', () => {
     expect(dex[0].toString()).toEqual(expectedDexInfo.totalValueLockInPoolPair)
     expect(dex[1].toString()).toEqual(expectedDexInfo.total24HVolume)
 
-  });
-
-  test('Successfully set the masterNode data', async()=>{
-    await handler({
-      envNetwork: EnvironmentNetwork.LocalPlayground,
-      urlNetwork: '',
-      contractAddress: proxy.address,
-      signer: bot,
-    });
-
     // Checking MasterNode information
     const receivedMasterNodeData = await proxy.masterNodeInformation();
     expect(receivedMasterNodeData.totalValueLockedInMasterNodes.toString()).toEqual(
@@ -114,17 +104,8 @@ describe('State Relayer Bot Tests', () => {
     );
     expect(receivedMasterNodeData.tenYearLocked.toString()).toEqual(
       expectedMasterNodeData.tenYearLocked)
-  })
 
-  test('Successfully set the vault data', async()=>{
-    await handler({
-      envNetwork: EnvironmentNetwork.LocalPlayground,
-      urlNetwork: '',
-      contractAddress: proxy.address,
-      signer: bot,
-    });
-
-   // Checking VaultInfo
+    // Checking VaultInfo
     const receivedVaultData = await proxy.vaultInfo();
     expect(receivedVaultData.noOfVaults.toString()).toEqual(expectedVaultData.noOfVaults);
     expect(receivedVaultData.totalLoanValue.toString()).toEqual(
@@ -137,5 +118,6 @@ describe('State Relayer Bot Tests', () => {
       expectedVaultData.totalCollateralizationRatio,
     );
     expect(receivedVaultData.activeAuctions.toString()).toEqual(expectedVaultData.activeAuctions);
+
   })
 });
