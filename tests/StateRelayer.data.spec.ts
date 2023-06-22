@@ -220,6 +220,28 @@ describe('State relayer contract data tests', () => {
       expect(receivedBtcDexData.toString()).to.equal(Object.values(dexDataBtc).toString());
     });
 
+    it('Should fail when the caller is not authorized ', async () => {
+      ({ stateRelayerProxy, admin } = await loadFixture(deployContract));
+
+      const masterNodeData: MasterNode = {
+        tvl: 108,
+        zeroYearTVL: 101,
+        fiveYearTVL: 102,
+        tenYearTVL: 103,
+        lastUpdated: 101010,
+      };
+      const stateRelayerInterface = StateRelayer__factory.createInterface();
+      const callDataForUpdatingMasterNodeData = stateRelayerInterface.encodeFunctionData(
+        'updateMasterNodeInformation',
+        [masterNodeData],
+      );
+      const botRole = await stateRelayerProxy.BOT_ROLE();
+
+      await expect(
+        stateRelayerProxy.connect(admin).batchCallByBot([callDataForUpdatingMasterNodeData]),
+      ).to.revertedWith(`AccessControl: account ${admin.address.toLowerCase()} is missing role ${botRole}`);
+    });
+
     it('Should fail when the batch call tries to use authorized function', async () => {
       ({ stateRelayerProxy, bot } = await loadFixture(deployContract));
 
