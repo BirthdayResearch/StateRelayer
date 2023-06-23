@@ -18,7 +18,6 @@ export type PairData = {
     secondTokenBalance: bigNumber;
     rewards: bigNumber;
     commissions: bigNumber;
-    lastUpdated: bigNumber;
     decimals: bigNumber;
   };
 };
@@ -29,7 +28,6 @@ export type VaultData = {
     totalCollateralValue: bigNumber;
     totalCollateralizationRatio: bigNumber;
     activeAuctions: bigNumber;
-    lastUpdated: bigNumber;
     decimals: bigNumber;
 };
 
@@ -38,7 +36,6 @@ export type MasterNodesData = {
     zeroYearLocked: bigNumber;
     fiveYearLocked: bigNumber;
     tenYearLocked: bigNumber;
-    lastUpdated: bigNumber;
     decimals: bigNumber;
 };
 

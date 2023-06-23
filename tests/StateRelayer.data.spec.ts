@@ -20,14 +20,13 @@ describe('State relayer contract data tests', () => {
         zeroYearLocked: 101,
         fiveYearLocked: 102,
         tenYearLocked: 103,
-        lastUpdated: 101010,
         decimals: 10,
       };
       await expect(stateRelayerProxy.connect(bot).updateMasterNodeInformation(masterNodeData))
         .to.emit(stateRelayerProxy, 'UpdateMasterNodeInformation')
         .withArgs(Object.values(masterNodeData), (await time.latest()) + 1);
-      const receivedMasterNodeData = await stateRelayerProxy.masterNodeInformation();
-      expect(receivedMasterNodeData.toString()).to.equal(Object.values(masterNodeData).toString());
+      const receivedMasterNodeData = await stateRelayerProxy.getMasterNodeInfo();
+      expect(receivedMasterNodeData[1].toString()).to.equal(Object.values(masterNodeData).toString());
     });
 
     it('Should successfully set vault node data', async () => {
@@ -38,14 +37,13 @@ describe('State relayer contract data tests', () => {
         totalCollateralValue: 23432,
         totalCollateralizationRatio: 234,
         activeAuctions: 23,
-        lastUpdated: 34244,
         decimals: 10,
       };
       await expect(stateRelayerProxy.connect(bot).updateVaultGeneralInformation(vaultInformationData))
         .to.emit(stateRelayerProxy, 'UpdateVaultGeneralInformation')
         .withArgs(Object.values(vaultInformationData), (await time.latest()) + 1);
-      const receivedVaultInformationData = await stateRelayerProxy.vaultInfo();
-      expect(receivedVaultInformationData.toString()).to.equal(Object.values(vaultInformationData).toString());
+      const receivedVaultInformationData = await stateRelayerProxy.getVaultInfo();
+      expect(receivedVaultInformationData[1].toString()).to.equal(Object.values(vaultInformationData).toString());
     });
 
     it('Should successfully set dexs data', async () => {
@@ -61,7 +59,6 @@ describe('State relayer contract data tests', () => {
         secondTokenBalance: 2314,
         rewards: 124,
         commissions: 3,
-        lastUpdated: 1231,
         decimals: 18,
       };
       const dexDataBtc: DexInfo = {
@@ -73,7 +70,6 @@ describe('State relayer contract data tests', () => {
         secondTokenBalance: 2312,
         rewards: 123,
         commissions: 2,
-        lastUpdated: 1233,
         decimals: 18,
       };
       const dexsData: DexInfo[] = [dexDataEth, dexDataBtc];
@@ -83,13 +79,13 @@ describe('State relayer contract data tests', () => {
         'UpdateDEXInfo',
       );
       // Getting ETH dex Data
-      const receivedEThDexData = await stateRelayerProxy.DEXInfoMapping(symbols[0]);
+      const receivedEThDexData = await stateRelayerProxy.getDexPairInfo(symbols[0]);
       // Testing that the received is as expected as dexDataEth
-      expect(receivedEThDexData.toString()).to.equal(Object.values(dexDataEth).toString());
+      expect(receivedEThDexData[1].toString()).to.equal(Object.values(dexDataEth).toString());
       // Getting BTC dex Data
-      const receivedBtcDexData = await stateRelayerProxy.DEXInfoMapping(symbols[1]);
+      const receivedBtcDexData = await stateRelayerProxy.getDexPairInfo(symbols[1]);
       // Testing that the received is as expected as dexDataBtc
-      expect(receivedBtcDexData.toString()).to.equal(Object.values(dexDataBtc).toString());
+      expect(receivedBtcDexData[1].toString()).to.equal(Object.values(dexDataBtc).toString());
     });
   });
 
@@ -104,7 +100,6 @@ describe('State relayer contract data tests', () => {
         zeroYearLocked: 101,
         fiveYearLocked: 102,
         tenYearLocked: 103,
-        lastUpdated: 101010,
         decimals: 10,
       };
       await expect(stateRelayerProxy.connect(user).updateMasterNodeInformation(masterNodeData)).to.be.reverted;
@@ -118,7 +113,6 @@ describe('State relayer contract data tests', () => {
         totalCollateralValue: 23432,
         totalCollateralizationRatio: 234,
         activeAuctions: 23,
-        lastUpdated: 34244,
         decimals: 10,
       };
       await expect(stateRelayerProxy.connect(user).updateVaultGeneralInformation(vaultInformationData)).to.be.reverted;
@@ -136,7 +130,6 @@ describe('State relayer contract data tests', () => {
         secondTokenBalance: 2314,
         rewards: 124,
         commissions: 3,
-        lastUpdated: 1231,
         decimals: 18,
       };
       await expect(stateRelayerProxy.connect(user).updateDEXInfo(['eth'], [dexDataEth], 1, 2)).to.be.reverted;
@@ -149,7 +142,6 @@ interface MasterNode {
   zeroYearLocked: BigNumber;
   fiveYearLocked: BigNumber;
   tenYearLocked: BigNumber;
-  lastUpdated: BigNumber;
   decimals: BigNumber;
 }
 
@@ -159,7 +151,6 @@ interface VaultGeneralInformation {
   totalCollateralValue: BigNumber;
   totalCollateralizationRatio: BigNumber;
   activeAuctions: BigNumber;
-  lastUpdated: BigNumber;
   decimals: BigNumber;
 }
 
@@ -172,6 +163,5 @@ interface DexInfo {
   secondTokenBalance: BigNumber;
   rewards: BigNumber;
   commissions: BigNumber;
-  lastUpdated: BigNumber;
   decimals: BigNumber;
 }

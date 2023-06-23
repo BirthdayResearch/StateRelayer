@@ -4,7 +4,6 @@ import { BigNumber } from 'bignumber.js';
 import { ethers } from 'ethers';
 
 import { StateRelayer, StateRelayer__factory } from '../generated';
-import { getTimeStamp } from './utils/helper';
 import { DataStore, MasterNodesData, PairData, StateRelayerHandlerProps, VaultData } from './utils/types';
 
 const DENOMINATION = 'USDT';
@@ -37,9 +36,6 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
     const totalValueLockInPoolPair = transformToEthersBigNumber(statsData.tvl.dex.toString(), DECIMALS);
     // total24HVolume
     const total24HVolume = transformToEthersBigNumber(poolpairData.reduce((acc, currPair) => acc + (currPair.volume?.h24 ?? 0), 0).toString(), DECIMALS);
-    // Getting current time stamp
-    // Currently fetching floopy net time stamp, need to upgrade to DMC once live
-    const estimatedTime = await getTimeStamp();
     // /dex/pair
     const pair = poolpairData.reduce<PairData>((acc, currPair) => {
       let tokenPrice = new BigNumber(0);
@@ -63,8 +59,6 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
           secondTokenBalance: transformToEthersBigNumber(currPair.tokenB.reserve, DECIMALS),
           rewards: transformToEthersBigNumber(currPair.apr?.reward.toString() ?? '0', DECIMALS),
           commissions: transformToEthersBigNumber(currPair.commission, DECIMALS),
-          // todo later
-          lastUpdated: estimatedTime,
           decimals: DECIMALS,
         },
       } as PairData;
@@ -78,7 +72,6 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
     dataVault.totalCollateralValue = transformToEthersBigNumber(totalCollateralValue.toString(), DECIMALS);
     dataVault.totalCollateralizationRatio = ((totalCollateralValue/totalLoanValue)*(100)).toFixed(0).toString();
     dataVault.activeAuctions = statsData.loan.count.openAuctions.toString();
-    dataVault.lastUpdated = await getTimeStamp();
     dataVault.decimals = DECIMALS;
     // Data from Master Nodes
     dataMasterNode.totalValueLockedInMasterNodes = transformToEthersBigNumber(
@@ -94,7 +87,6 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
       DECIMALS,
     );
     dataMasterNode.tenYearLocked = transformToEthersBigNumber(statsData.masternodes.locked[1].tvl.toString(), DECIMALS);
-    dataMasterNode.lastUpdated = await getTimeStamp();
     dataMasterNode.decimals = DECIMALS;
 
     // TODO: Get Data from all burns in ecosystem

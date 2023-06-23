@@ -75,14 +75,14 @@ describe('State Relayer Bot Tests', () => {
     });
 
     // Checking the /dex/dex-pair info
-    const dETH = await proxy.DEXInfoMapping('dETH-DFI');
-    expect(dETH.primaryTokenPrice.toString()).toEqual(
+    const dETH = await proxy.getDexPairInfo('dETH-DFI');
+    expect(dETH[1].primaryTokenPrice.toString()).toEqual(
       (Object.values(expectedPairData['dETH-DFI'])[0]))
-    expect(dETH.volume24H.toString()).toEqual(
+    expect(dETH[1].volume24H.toString()).toEqual(
       (Object.values(expectedPairData['dETH-DFI'])[1]))
-    expect(dETH.totalLiquidity.toString()).toEqual(
+    expect(dETH[1].totalLiquidity.toString()).toEqual(
       (Object.values(expectedPairData['dETH-DFI'])[2]))
-    expect((dETH.APR.toNumber()).toString()).toEqual(
+    expect((dETH[1].APR.toNumber()).toString()).toEqual(
       (Object.values(expectedPairData['dETH-DFI'])[3])
     );
 
@@ -92,32 +92,32 @@ describe('State Relayer Bot Tests', () => {
     expect(dex[1].toString()).toEqual(expectedDexInfo.total24HVolume)
 
     // Checking MasterNode information
-    const receivedMasterNodeData = await proxy.masterNodeInformation();
-    expect(receivedMasterNodeData.totalValueLockedInMasterNodes.toString()).toEqual(
+    const receivedMasterNodeData = await proxy.getMasterNodeInfo();
+    expect(receivedMasterNodeData[1].totalValueLockedInMasterNodes.toString()).toEqual(
       expectedMasterNodeData.totalValueLockedInMasterNodes,
     );
-    expect(receivedMasterNodeData.zeroYearLocked.toString()).toEqual(
+    expect(receivedMasterNodeData[1].zeroYearLocked.toString()).toEqual(
       expectedMasterNodeData.zeroYearLocked,
     );
-    expect(receivedMasterNodeData.fiveYearLocked.toString()).toEqual(
+    expect(receivedMasterNodeData[1].fiveYearLocked.toString()).toEqual(
       expectedMasterNodeData.fiveYearLocked,
     );
-    expect(receivedMasterNodeData.tenYearLocked.toString()).toEqual(
+    expect(receivedMasterNodeData[1].tenYearLocked.toString()).toEqual(
       expectedMasterNodeData.tenYearLocked)
 
     // Checking VaultInfo
-    const receivedVaultData = await proxy.vaultInfo();
-    expect(receivedVaultData.noOfVaults.toString()).toEqual(expectedVaultData.noOfVaults);
-    expect(receivedVaultData.totalLoanValue.toString()).toEqual(
+    const receivedVaultData = await proxy.getVaultInfo();
+    expect(receivedVaultData[1].noOfVaults.toString()).toEqual(expectedVaultData.noOfVaults);
+    expect(receivedVaultData[1].totalLoanValue.toString()).toEqual(
       expectedVaultData.totalLoanValue,
     );
-    expect(receivedVaultData.totalCollateralValue.toString()).toEqual(
+    expect(receivedVaultData[1].totalCollateralValue.toString()).toEqual(
       expectedVaultData.totalCollateralValue,
     );
-    expect(receivedVaultData.totalCollateralizationRatio.toString()).toEqual(
+    expect(receivedVaultData[1].totalCollateralizationRatio.toString()).toEqual(
       expectedVaultData.totalCollateralizationRatio,
     );
-    expect(receivedVaultData.activeAuctions.toString()).toEqual(expectedVaultData.activeAuctions);
+    expect(receivedVaultData[1].activeAuctions.toString()).toEqual(expectedVaultData.activeAuctions);
 
   })
 });
