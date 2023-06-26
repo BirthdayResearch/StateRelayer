@@ -7,9 +7,9 @@ error ERROR_IN_LOW_LEVEL_CALLS();
 contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
     uint256 private totalValueLockInPoolPair;
     uint256 private total24HVolume;
-    uint256 private lastUpdatedVaultInfo;
-    uint256 private lastUpdatedMasterNodeInfo;
-    uint256 private lastUpdatedDexInfo;
+    uint256 private lastUpdatedVaultInfoTimestamp;
+    uint256 private lastUpdatedMasterNodeInfoTimestamp;
+    uint256 private lastUpdatedDexInfoTimestamp;
     struct DEXInfo {
         uint256 primaryTokenPrice;
         uint256 volume24H;
@@ -46,7 +46,8 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
     bytes32 public constant BOT_ROLE = keccak256("BOT_ROLE");
 
     // Events
-    event UpdateDEXInfo(string[] dex, DEXInfo[] dexInfo, uint256 timeStamp);
+    event UpdateDEXInfo(string[] dex, DEXInfo[] dexInfo, uint256 timeStamp, 
+        uint256 totalValueLockInPoolPair, uint256 total24HVolume);
     event UpdateVaultGeneralInformation(VaultGeneralInformation vaultInfo, uint256 timeStamp);
     event UpdateMasterNodeInformation(MasternodeInformation nodeInformation, uint256 timeStamp);
 
@@ -78,21 +79,21 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
         totalValueLockInPoolPair = _totalValueLocked;
         total24HVolume = _total24HVolume;
         uint256 _lastUpdatedDexInfo = block.timestamp;
-        lastUpdatedDexInfo = _lastUpdatedDexInfo;
-        emit UpdateDEXInfo(dex, dexInfo, _lastUpdatedDexInfo);
+        lastUpdatedDexInfoTimestamp = _lastUpdatedDexInfo;
+        emit UpdateDEXInfo(dex, dexInfo, _lastUpdatedDexInfo, _totalValueLocked, _total24HVolume);
     }
 
     function updateVaultGeneralInformation(VaultGeneralInformation calldata _vaultInfo) external allowUpdate {
         vaultInfo = _vaultInfo;
         uint256 _lastUpdatedVaultInfo = block.timestamp;
-        lastUpdatedVaultInfo = _lastUpdatedVaultInfo;
+        lastUpdatedVaultInfoTimestamp = _lastUpdatedVaultInfo;
         emit UpdateVaultGeneralInformation(_vaultInfo, _lastUpdatedVaultInfo);
     }
 
     function updateMasterNodeInformation(MasternodeInformation calldata _masterNodeInformation) external allowUpdate {
         masterNodeInformation = _masterNodeInformation;
         uint256 _lastUpdatedMasterNodeInfo = block.timestamp;
-        lastUpdatedMasterNodeInfo = _lastUpdatedMasterNodeInfo;
+        lastUpdatedMasterNodeInfoTimestamp = _lastUpdatedMasterNodeInfo;
         emit UpdateMasterNodeInformation(_masterNodeInformation, _lastUpdatedMasterNodeInfo);
     }
 
@@ -123,18 +124,18 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
     }
 
     function getDexInfo() external view returns(uint256, uint256, uint256){
-        return (totalValueLockInPoolPair, total24HVolume, lastUpdatedDexInfo); 
+        return (lastUpdatedDexInfoTimestamp, total24HVolume, totalValueLockInPoolPair ); 
     }
 
     function getDexPairInfo(string memory pair) external view returns(uint256, DEXInfo memory){
-        return ( lastUpdatedDexInfo, DEXInfoMapping[pair]);
+        return ( lastUpdatedDexInfoTimestamp, DEXInfoMapping[pair]);
     }
 
     function getVaultInfo() external view returns(uint256, VaultGeneralInformation memory){
-        return (lastUpdatedVaultInfo, vaultInfo);
+        return (lastUpdatedVaultInfoTimestamp, vaultInfo);
     }
 
     function getMasterNodeInfo() external view returns(uint256, MasternodeInformation memory){
-        return (lastUpdatedMasterNodeInfo, masterNodeInformation);
+        return (lastUpdatedMasterNodeInfoTimestamp, masterNodeInformation);
     }
 }

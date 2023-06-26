@@ -5,7 +5,7 @@ import { ethers } from 'ethers';
 export type bigNumber = ethers.BigNumberish;
 
 export type DataStore = {
-    pair: PairData;
+  pair: PairData;
 };
 
 export type PairData = {
@@ -22,26 +22,9 @@ export type PairData = {
   };
 };
 
-export type VaultData = {
-    noOfVaults: bigNumber;
-    totalLoanValue: bigNumber;
-    totalCollateralValue: bigNumber;
-    totalCollateralizationRatio: bigNumber;
-    activeAuctions: bigNumber;
-    decimals: bigNumber;
-};
-
-export type MasterNodesData = {
-    totalValueLockedInMasterNodes: bigNumber;
-    zeroYearLocked: bigNumber;
-    fiveYearLocked: bigNumber;
-    tenYearLocked: bigNumber;
-    decimals: bigNumber;
-};
-
 export type StateRelayerHandlerProps = {
-    urlNetwork: string;
-    envNetwork: EnvironmentNetwork;
-    contractAddress: string;
-    signer: ethers.Signer;
+  urlNetwork: string;
+  envNetwork: EnvironmentNetwork;
+  contractAddress: string;
+  signer: ethers.Signer;
 };
