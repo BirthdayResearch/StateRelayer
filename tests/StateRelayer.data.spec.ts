@@ -3,16 +3,17 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { expect } from 'chai';
 import { ethers } from 'hardhat';
 
-import { StateRelayer } from '../generated';
+import { StateRelayer, StateRelayer__factory } from '../generated';
 import { deployContract } from './utils/deployment';
 
-type BigNumber = ethers.bigNumber
-
+type BigNumber = ethers.bigNumber;
 describe('State relayer contract data tests', () => {
   let stateRelayerProxy: StateRelayer;
   let bot: SignerWithAddress;
   let user: SignerWithAddress;
-  describe('Successful', () => {
+  let admin: SignerWithAddress;
+
+  describe('Test updating individually ', () => {
     it('Should successfully set master node data', async () => {
       ({ stateRelayerProxy, bot } = await loadFixture(deployContract));
       const masterNodeData: MasterNode = {
@@ -74,10 +75,9 @@ describe('State relayer contract data tests', () => {
       };
       const dexsData: DexInfo[] = [dexDataEth, dexDataBtc];
       const symbols: string[] = ['eth', 'btc'];
-      await expect(stateRelayerProxy.connect(bot).updateDEXInfo(symbols, dexsData,totalValueLockInPoolPair, total24HVolume)).to.emit(
-        stateRelayerProxy,
-        'UpdateDEXInfo',
-      );
+      await expect(
+        stateRelayerProxy.connect(bot).updateDEXInfo(symbols, dexsData, totalValueLockInPoolPair, total24HVolume),
+      ).to.emit(stateRelayerProxy, 'UpdateDEXInfo');
       // Getting ETH dex Data
       const receivedEThDexData = await stateRelayerProxy.getDexPairInfo(symbols[0]);
       // Testing that the received is as expected as dexDataEth
@@ -89,7 +89,7 @@ describe('State relayer contract data tests', () => {
     });
   });
 
-  describe('UnSuccessful', () => {
+  describe('Unsuccessfully updating individually', () => {
     // These tests should fail as the signer does not have the `BOT_ROLE` assigned.
     // Only addresses with role assigned as `BOT_ROLE` can perform the updates.
 
@@ -133,6 +133,150 @@ describe('State relayer contract data tests', () => {
         decimals: 18,
       };
       await expect(stateRelayerProxy.connect(user).updateDEXInfo(['eth'], [dexDataEth], 1, 2)).to.be.reverted;
+    });
+  });
+
+  describe('Test batch call', () => {
+    it('Should be able to update in batch ', async () => {
+      ({ stateRelayerProxy, bot } = await loadFixture(deployContract));
+
+      const masterNodeData: MasterNode = {
+        totalValueLockedInMasterNodes: 108,
+        zeroYearLocked: 101,
+        fiveYearLocked: 102,
+        tenYearLocked: 103,
+        decimals: 18,
+      };
+      const stateRelayerInterface = StateRelayer__factory.createInterface();
+      const callDataForUpdatingMasterNodeData = stateRelayerInterface.encodeFunctionData(
+        'updateMasterNodeInformation',
+        [masterNodeData],
+      );
+      const vaultInformationData: VaultGeneralInformation = {
+        noOfVaults: 2,
+        totalLoanValue: 1000,
+        totalCollateralValue: 23432,
+        totalCollateralizationRatio: 234,
+        activeAuctions: 23,
+        decimals: 18,
+      };
+      const callDataForUpdatingVaultInformation = stateRelayerInterface.encodeFunctionData(
+        'updateVaultGeneralInformation',
+        [vaultInformationData],
+      );
+
+      const dexDataEth: DexInfo = {
+        primaryTokenPrice: 113,
+        volume24H: 102021,
+        totalLiquidity: 2164,
+        APR: 14,
+        firstTokenBalance: 31269,
+        secondTokenBalance: 2314,
+        rewards: 124,
+        commissions: 3,
+        decimals: 18,
+      };
+      const dexDataBtc: DexInfo = {
+        primaryTokenPrice: 112,
+        volume24H: 102020,
+        totalLiquidity: 2163,
+        APR: 12,
+        firstTokenBalance: 31265,
+        secondTokenBalance: 2312,
+        rewards: 123,
+        commissions: 2,
+        decimals: 18,
+      };
+      const dexsData: DexInfo[] = [dexDataEth, dexDataBtc];
+      const symbols: string[] = ['eth', 'btc'];
+      const callDataForUpdatingDexInfos = stateRelayerInterface.encodeFunctionData('updateDEXInfo', [
+        symbols,
+        dexsData,
+        1,
+        2,
+      ]);
+      await stateRelayerProxy
+        .connect(bot)
+        .batchCallByBot([
+          callDataForUpdatingMasterNodeData,
+          callDataForUpdatingVaultInformation,
+          callDataForUpdatingDexInfos,
+        ]);
+      const receivedMasterNodeData = await stateRelayerProxy.getMasterNodeInfo();
+      expect(receivedMasterNodeData[1].toString()).to.equal(Object.values(masterNodeData).toString());
+      const receivedVaultInformationData = await stateRelayerProxy.getVaultInfo();
+      expect(receivedVaultInformationData[1].toString()).to.equal(Object.values(vaultInformationData).toString());
+      // Getting ETH dex Data
+      // const receivedEThDexData = await stateRelayerProxy.DEXInfoMapping(symbols[0]);
+      // // Testing that the received is as expected as dexDataEth
+      // expect(receivedEThDexData.toString()).to.equal(Object.values(dexDataEth).toString());
+      // // Getting BTC dex Data
+      // const receivedBtcDexData = await stateRelayerProxy.DEXInfoMapping(symbols[1]);
+      // // Testing that the received is as expected as dexDataBtc
+      // expect(receivedBtcDexData.toString()).to.equal(Object.values(dexDataBtc).toString());
+    });
+
+    it('Should fail when the caller is not authorized ', async () => {
+      ({ stateRelayerProxy, admin } = await loadFixture(deployContract));
+
+      const masterNodeData: MasterNode = {
+        totalValueLockedInMasterNodes: 108,
+        zeroYearLocked: 101,
+        fiveYearLocked: 102,
+        tenYearLocked: 103,
+        decimals: 10,
+      };
+      const stateRelayerInterface = StateRelayer__factory.createInterface();
+      const callDataForUpdatingMasterNodeData = stateRelayerInterface.encodeFunctionData(
+        'updateMasterNodeInformation',
+        [masterNodeData],
+      );
+      const botRole = await stateRelayerProxy.BOT_ROLE();
+
+      await expect(
+        stateRelayerProxy.connect(admin).batchCallByBot([callDataForUpdatingMasterNodeData]),
+      ).to.revertedWith(`AccessControl: account ${admin.address.toLowerCase()} is missing role ${botRole}`);
+    });
+
+    it('Should fail when the batch call tries to use authorized function', async () => {
+      ({ stateRelayerProxy, bot } = await loadFixture(deployContract));
+
+      const stateRelayerInterface = StateRelayer__factory.createInterface();
+      const encodedGrantRole = stateRelayerInterface.encodeFunctionData('grantRole', [
+        `0x${'0'.repeat(64)}`,
+        bot.address,
+      ]);
+      await expect(stateRelayerProxy.connect(bot).batchCallByBot([encodedGrantRole])).to.revertedWith(
+        `AccessControl: account ${stateRelayerProxy.address.toLowerCase()} is missing role 0x${'0'.repeat(64)}`,
+      );
+    });
+
+    it('Shuold fail when not granting state relayer the bot_role and then perform recursive batch call', async () => {
+      ({ stateRelayerProxy, bot } = await loadFixture(deployContract));
+
+      const stateRelayerInterface = StateRelayer__factory.createInterface();
+      const encodedGrantRole = stateRelayerInterface.encodeFunctionData('batchCallByBot', [
+        [stateRelayerInterface.encodeFunctionData('BOT_ROLE')],
+      ]);
+      const botRole = await stateRelayerProxy.BOT_ROLE();
+      await expect(stateRelayerProxy.connect(bot).batchCallByBot([encodedGrantRole])).to.revertedWith(
+        `AccessControl: account ${stateRelayerProxy.address.toLowerCase()} is missing role ${botRole}`,
+      );
+    });
+
+    // This is to check whether the sanity works, in reality, NEVER GRANT THE SMART CONTRACT STATE RELAYER PROXY any role
+    it('Should fail when granting state relayer the bot_role and then doing recursive batch calls', async () => {
+      ({ stateRelayerProxy, bot, admin } = await loadFixture(deployContract));
+      const botRole = await stateRelayerProxy.BOT_ROLE();
+      await stateRelayerProxy.connect(admin).grantRole(botRole, stateRelayerProxy.address);
+      const stateRelayerInterface = StateRelayer__factory.createInterface();
+      const encodedGrantRole = stateRelayerInterface.encodeFunctionData('batchCallByBot', [
+        [stateRelayerInterface.encodeFunctionData('BOT_ROLE')],
+      ]);
+      await expect(stateRelayerProxy.connect(bot).batchCallByBot([encodedGrantRole])).to.revertedWithCustomError(
+        stateRelayerProxy,
+        'ALREADY_IN_BATCH_CALL_BY_BOT',
+      );
     });
   });
 });
