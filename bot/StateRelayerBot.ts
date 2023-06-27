@@ -94,14 +94,14 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
     // Update Dex information
     await stateRelayerContract.updateDEXInfo(
       Object.keys(dataStore.pair),
-      Object.values(dataStore.pair) as any,
+      Object.values(dataStore.pair),
       totalValueLockInPoolPair,
       total24HVolume,
     );
     // Update Master Node information
-    await stateRelayerContract.updateMasterNodeInformation(dataMasterNode as MasterNodeData);
+    await stateRelayerContract.updateMasterNodeInformation(dataMasterNode);
     // // Update Vault general information
-    await stateRelayerContract.updateVaultGeneralInformation(dataVault as VaultData);
+    await stateRelayerContract.updateVaultGeneralInformation(dataVault);
 
     return { dataStore, dataVault, dataMasterNode };
   } catch (e) {

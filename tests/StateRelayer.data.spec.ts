@@ -13,7 +13,7 @@ describe('State relayer contract data tests', () => {
   let user: SignerWithAddress;
   let admin: SignerWithAddress;
 
-  describe('Test updating individually ', () => {
+  describe('Successfully updating individually ', () => {
     it('Should successfully set master node data', async () => {
       ({ stateRelayerProxy, bot } = await loadFixture(deployContract));
       const masterNodeData: MasterNode = {
@@ -207,13 +207,13 @@ describe('State relayer contract data tests', () => {
       const receivedVaultInformationData = await stateRelayerProxy.getVaultInfo();
       expect(receivedVaultInformationData[1].toString()).to.equal(Object.values(vaultInformationData).toString());
       // Getting ETH dex Data
-      // const receivedEThDexData = await stateRelayerProxy.DEXInfoMapping(symbols[0]);
-      // // Testing that the received is as expected as dexDataEth
-      // expect(receivedEThDexData.toString()).to.equal(Object.values(dexDataEth).toString());
-      // // Getting BTC dex Data
-      // const receivedBtcDexData = await stateRelayerProxy.DEXInfoMapping(symbols[1]);
-      // // Testing that the received is as expected as dexDataBtc
-      // expect(receivedBtcDexData.toString()).to.equal(Object.values(dexDataBtc).toString());
+      const receivedEThDexData = await stateRelayerProxy.getDexPairInfo(symbols[0]);
+      // Testing that the received is as expected as dexDataEth
+      expect(receivedEThDexData[1].toString()).to.equal(Object.values(dexDataEth).toString());
+      // Getting BTC dex Data
+      const receivedBtcDexData = await stateRelayerProxy.getDexPairInfo(symbols[1]);
+      // Testing that the received is as expected as dexDataBtc
+      expect(receivedBtcDexData[1].toString()).to.equal(Object.values(dexDataBtc).toString());
     });
 
     it('Should fail when the caller is not authorized ', async () => {
