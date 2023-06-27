@@ -1,6 +1,8 @@
 import { EnvironmentNetwork } from '@waveshq/walletkit-core';
 import { ethers } from 'ethers';
 
+import { StateRelayer } from '../../generated';
+
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export type bigNumber = ethers.BigNumberish;
 
@@ -9,18 +11,10 @@ export type DataStore = {
 };
 
 export type PairData = {
-  [pairSymbol: string]: {
-    primaryTokenPrice: bigNumber;
-    volume24H: bigNumber;
-    totalLiquidity: bigNumber;
-    APR: bigNumber;
-    firstTokenBalance: bigNumber;
-    secondTokenBalance: bigNumber;
-    rewards: bigNumber;
-    commissions: bigNumber;
-    decimals: bigNumber;
-  };
+  [pairSymbol: string]: StateRelayer.DEXInfoStructOutput;
 };
+export type VaultData = StateRelayer.VaultGeneralInformationStructOutput;
+export type MasterNodeData = StateRelayer.MasterNodeInformationStructOutput;
 
 export type StateRelayerHandlerProps = {
   urlNetwork: string;

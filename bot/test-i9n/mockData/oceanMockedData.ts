@@ -402,15 +402,15 @@ export const expectedVaultData = {
 
 export const expectedMasterNodeData = {
   totalValueLockedInMasterNodes: '1528620054717725800',
-  zeroYearLocked: '1093726905799018100',
-  fiveYearLocked: '90543249310977680',
-  tenYearLocked: '344696274094463500',
+  zeroYearLocked: '10636',
+  fiveYearLocked: '917',
+  tenYearLocked: '3491',
 };
 
 export const expectedDexInfo = {
-  totalValueLockInPoolPair:'2722816853262795000',
+  totalValueLockInPoolPair: '2722816853262795000',
   total24HVolume: '600100000000000',
-}
+};
 export const expectedPairData = {
   'dETH-DFI': {
     primaryTokenPrice: '20720393468322',

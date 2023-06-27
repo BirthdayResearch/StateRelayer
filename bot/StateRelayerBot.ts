@@ -4,12 +4,10 @@ import { BigNumber } from 'bignumber.js';
 import { ethers } from 'ethers';
 
 import { StateRelayer, StateRelayer__factory } from '../generated';
-import { DataStore, PairData, StateRelayerHandlerProps } from './utils/types';
+import { DataStore, MasterNodeData, PairData, StateRelayerHandlerProps, VaultData } from './utils/types';
 
 const DENOMINATION = 'USDT';
 const DECIMALS = 10;
-type VaultData = StateRelayer.VaultGeneralInformationStructOutput;
-type MasterNodeData = StateRelayer.MasternodeInformationStructOutput;
 
 const transformToEthersBigNumber = (str: string, decimals: number): ethers.BigNumber =>
   ethers.BigNumber.from(
@@ -86,15 +84,9 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
       statsData.tvl.masternodes.toString(),
       DECIMALS,
     );
-    dataMasterNode.zeroYearLocked = transformToEthersBigNumber(
-      statsData.masternodes.locked[0].tvl.toString(),
-      DECIMALS,
-    );
-    dataMasterNode.fiveYearLocked = transformToEthersBigNumber(
-      statsData.masternodes.locked[2].tvl.toString(),
-      DECIMALS,
-    );
-    dataMasterNode.tenYearLocked = transformToEthersBigNumber(statsData.masternodes.locked[1].tvl.toString(), DECIMALS);
+    dataMasterNode.zeroYearLocked = transformToEthersBigNumber(statsData.masternodes.locked[0].count.toString(), 0);
+    dataMasterNode.fiveYearLocked = transformToEthersBigNumber(statsData.masternodes.locked[2].count.toString(), 0);
+    dataMasterNode.tenYearLocked = transformToEthersBigNumber(statsData.masternodes.locked[1].count.toString(), 0);
     dataMasterNode.decimals = DECIMALS;
 
     // TODO: Get Data from all burns in ecosystem

@@ -33,7 +33,7 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
         uint40 decimals;
     }
     VaultGeneralInformation private vaultInfo;
-    struct MasternodeInformation {
+    struct MasterNodeInformation {
         uint256 totalValueLockedInMasterNodes;
         uint256 zeroYearLocked;
         uint256 fiveYearLocked;
@@ -41,7 +41,7 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
         uint40 decimals;
     }
 
-    MasternodeInformation private masterNodeInformation;
+    MasterNodeInformation private masterNodeInformation;
     bool public inBatchCallByBot;
     bytes32 public constant BOT_ROLE = keccak256("BOT_ROLE");
 
@@ -49,7 +49,7 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
     event UpdateDEXInfo(string[] dex, DEXInfo[] dexInfo, uint256 timeStamp, 
         uint256 totalValueLockInPoolPair, uint256 total24HVolume);
     event UpdateVaultGeneralInformation(VaultGeneralInformation vaultInfo, uint256 timeStamp);
-    event UpdateMasterNodeInformation(MasternodeInformation nodeInformation, uint256 timeStamp);
+    event UpdateMasterNodeInformation(MasterNodeInformation nodeInformation, uint256 timeStamp);
 
     function _authorizeUpgrade(address newImplementation) internal override onlyRole(DEFAULT_ADMIN_ROLE) {}
 
@@ -90,7 +90,7 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
         emit UpdateVaultGeneralInformation(_vaultInfo, _lastUpdatedVaultInfo);
     }
 
-    function updateMasterNodeInformation(MasternodeInformation calldata _masterNodeInformation) external allowUpdate {
+    function updateMasterNodeInformation(MasterNodeInformation calldata _masterNodeInformation) external allowUpdate {
         masterNodeInformation = _masterNodeInformation;
         uint256 _lastUpdatedMasterNodeInfo = block.timestamp;
         lastUpdatedMasterNodeInfoTimestamp = _lastUpdatedMasterNodeInfo;
@@ -135,7 +135,7 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
         return (lastUpdatedVaultInfoTimestamp, vaultInfo);
     }
 
-    function getMasterNodeInfo() external view returns(uint256, MasternodeInformation memory){
+    function getMasterNodeInfo() external view returns(uint256, MasterNodeInformation memory){
         return (lastUpdatedMasterNodeInfoTimestamp, masterNodeInformation);
     }
 }
