@@ -74,8 +74,8 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
     dataVault.totalLoanValue = transformToEthersBigNumber(totalLoanValue.toString(), DECIMALS);
     dataVault.totalCollateralValue = transformToEthersBigNumber(totalCollateralValue.toString(), DECIMALS);
     dataVault.totalCollateralizationRatio = transformToEthersBigNumber(
-      ((totalCollateralValue / totalLoanValue) * 100).toFixed(0).toString(),
-      0,
+      ((totalCollateralValue / totalLoanValue) * 100).toFixed(3).toString(),
+      DECIMALS,
     );
     dataVault.activeAuctions = transformToEthersBigNumber(statsData.loan.count.openAuctions.toString(), 0);
     dataVault.decimals = DECIMALS;

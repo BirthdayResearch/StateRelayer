@@ -396,7 +396,7 @@ export const expectedVaultData = {
   noOfVaults: '11424',
   totalLoanValue: '848573751950201500',
   totalCollateralValue: '1810116718179531000',
-  totalCollateralizationRatio: '213',
+  totalCollateralizationRatio: '2133130000000',
   activeAuctions: '1',
 };
 

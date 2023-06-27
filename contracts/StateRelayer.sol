@@ -25,19 +25,19 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
     }
     mapping(string => DEXInfo) private DEXInfoMapping;
     struct VaultGeneralInformation {
-        uint256 noOfVaults;
+        uint256 noOfVaults; // integer values, no decimals
         uint256 totalLoanValue;
         uint256 totalCollateralValue;
         uint256 totalCollateralizationRatio;
-        uint256 activeAuctions;
+        uint256 activeAuctions; // integer values, no decimals
         uint40 decimals;
     }
     VaultGeneralInformation private vaultInfo;
     struct MasterNodeInformation {
         uint256 totalValueLockedInMasterNodes;
-        uint256 zeroYearLocked;
-        uint256 fiveYearLocked;
-        uint256 tenYearLocked;
+        uint256 zeroYearLocked; // integer values, no decimals
+        uint256 fiveYearLocked; // integer values, no decimals
+        uint256 tenYearLocked; // integer values, no decimals
         uint40 decimals;
     }
 
