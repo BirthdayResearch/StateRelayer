@@ -392,35 +392,46 @@ export const mockedDexPricesData = {
 };
 
 // generated fixtures from mocked data above
+export const expectedVaultData = {
+  noOfVaults: '11424',
+  totalLoanValue: '848573751950201500',
+  totalCollateralValue: '1810116718179531000',
+  totalCollateralizationRatio: '2133130000000',
+  activeAuctions: '1',
+};
+
+export const expectedMasterNodeData = {
+  totalValueLockedInMasterNodes: '1528620054717725800',
+  zeroYearLocked: '10636',
+  fiveYearLocked: '917',
+  tenYearLocked: '3491',
+};
+
+export const expectedDexInfo = {
+  totalValueLockInPoolPair: '2722816853262795000',
+  total24HVolume: '600100000000000',
+};
 export const expectedPairData = {
   'dETH-DFI': {
-    primaryTokenPrice: '2072.0393468322487732',
-    volume24H: '12000',
-    totalLiquidity: '25636863.24062524435653579327168029',
-    apr: '0.11184687438197073',
+    primaryTokenPrice: '20720393468322',
+    volume24H: '120000000000000',
+    totalLiquidity: '256368632406252443',
+    apr: '1118468743',
+    firstTokenBalance: '60845440937100',
+    secondTokenBalance: '246099134373830200',
+    rewards: '1056525711',
+    commission: '20000000',
+    decimals: '10',
   },
   'dBTC-DFI': {
-    primaryTokenPrice: '29794.4817887563546869',
-    volume24H: '12001',
-    totalLiquidity: '115509685.491358337662696092943679775',
-    apr: '0.12524175118415037',
-  },
-  'dUSDT-DFI': {
-    primaryTokenPrice: '0.9835236794568237',
-    volume24H: '12002',
-    totalLiquidity: '5681591.45859434',
-    apr: '0.1218801632818402',
-  },
-  'dDOGE-DFI': {
-    primaryTokenPrice: '0.0915855624703084',
-    volume24H: '12003',
-    totalLiquidity: '416980.066178766746375664018708065',
-    apr: '0.013596317989663933',
-  },
-  'dLTC-DFI': {
-    primaryTokenPrice: '99.7252292452062933',
-    volume24H: '12004',
-    totalLiquidity: '2414037.856720123393447225830671435',
-    apr: '0.00819656242847228',
+    primaryTokenPrice: '297944817887563',
+    volume24H: '120010000000000',
+    totalLiquidity: '1155096854913583376',
+    apr: '1252417511',
+    firstTokenBalance: '19065303332500',
+    secondTokenBalance: '1108826510654014500',
+    rewards: '1207452297',
+    commission: '20000000',
+    decimals: '10',
   },
 };
