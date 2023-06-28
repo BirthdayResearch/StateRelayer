@@ -59,7 +59,7 @@ require('dotenv').config({
 const config: HardhatUserConfig = {
   solidity: '0.8.18',
   networks: {
-    floopyTestnet: {
+    testnet: {
       url: 'http://35.187.53.161:20551',
       accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
       chainId: 1133,
@@ -74,20 +74,6 @@ const config: HardhatUserConfig = {
     tests: './tests',
     artifacts: './artifacts',
     cache: './cache',
-  },
-  networks: {
-    hardhat: {
-      chainId: DEFAULT_CHAINID,
-      // To enable/disable auto-mining at runtime, refer to:
-      // https://hardhat.org/hardhat-network/docs/explanation/mining-modes#using-rpc-methods
-      mining: {
-        auto: (process.env[TX_AUTOMINE_ENV_VAR] ?? 'true').toLowerCase() === 'true',
-        interval: Number(process.env[TX_AUTOMINE_INTERVAL_ENV_VAR] ?? 0),
-      },
-      // We need to allow large contract sizes since contract sizes
-      // could be larger than the stipulated max size in EIP-170
-      allowUnlimitedContractSize: true,
-    },
   },
 };
 
