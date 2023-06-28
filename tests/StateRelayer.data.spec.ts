@@ -96,7 +96,7 @@ describe('State relayer contract data tests', () => {
         payback: 61705058,
         emission: 98783549,
         total: 317634155,
-        decimal: 10,
+        decimals: 10,
       };
       await stateRelayerProxy.connect(bot).updateBurnInfo(burnInfo);
       const receivedBurnedData = await stateRelayerProxy.getBurnedInfo();
@@ -154,7 +154,7 @@ describe('State relayer contract data tests', () => {
   describe('Test batch call', () => {
     it('Should be able to update in batch ', async () => {
       ({ stateRelayerProxy, bot } = await loadFixture(deployContract));
-
+      // Master node data
       const masterNodeData: MasterNode = {
         totalValueLockedInMasterNodes: 108,
         zeroYearLocked: 101,
@@ -167,6 +167,7 @@ describe('State relayer contract data tests', () => {
         'updateMasterNodeInformation',
         [masterNodeData],
       );
+      // Vault information data
       const vaultInformationData: VaultGeneralInformation = {
         noOfVaults: 2,
         totalLoanValue: 1000,
@@ -180,6 +181,7 @@ describe('State relayer contract data tests', () => {
         [vaultInformationData],
       );
 
+      // Dex info data
       const dexDataEth: DexInfo = {
         primaryTokenPrice: 113,
         volume24H: 102021,
@@ -210,12 +212,25 @@ describe('State relayer contract data tests', () => {
         1,
         2,
       ]);
+
+      // Burned info data
+      const burnedData: BurnedInfo = {
+        fee: 123,
+        auction: 25434,
+        payback: 34676234,
+        emission: 23546454,
+        total: 243563434,
+        decimals: 18,
+      };
+
+      const callDataBurnedInfo = stateRelayerInterface.encodeFunctionData('updateBurnInfo', [burnedData]);
       await stateRelayerProxy
         .connect(bot)
         .batchCallByBot([
           callDataForUpdatingMasterNodeData,
           callDataForUpdatingVaultInformation,
           callDataForUpdatingDexInfos,
+          callDataBurnedInfo,
         ]);
       const receivedMasterNodeData = await stateRelayerProxy.getMasterNodeInfo();
       expect(receivedMasterNodeData[1].toString()).to.equal(Object.values(masterNodeData).toString());
@@ -229,6 +244,9 @@ describe('State relayer contract data tests', () => {
       const receivedBtcDexData = await stateRelayerProxy.getDexPairInfo(symbols[1]);
       // Testing that the received is as expected as dexDataBtc
       expect(receivedBtcDexData[1].toString()).to.equal(Object.values(dexDataBtc).toString());
+      // Testing that the received is as expected as burnedData
+      const receivedBurnedData = await stateRelayerProxy.getBurnedInfo();
+      expect(receivedBurnedData[1].toString()).to.equal(Object.values(burnedData).toString());
     });
 
     it('Should fail when the caller is not authorized ', async () => {
@@ -302,7 +320,7 @@ describe('State relayer contract data tests', () => {
         payback: 61705058,
         emission: 98783549,
         total: 317634155,
-        decimal: 10,
+        decimals: 10,
       };
       await expect(stateRelayerProxy.connect(user).updateBurnInfo(burnInfo)).to.reverted;
     });
@@ -344,5 +362,5 @@ interface BurnedInfo {
   payback: number;
   emission: number;
   total: number;
-  decimal: number;
+  decimals: number;
 }

@@ -47,6 +47,7 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
       poolPairData.reduce((acc, currPair) => acc + (currPair.volume?.h24 ?? 0), 0).toString(),
       DECIMALS,
     );
+
     // /dex/pair
     const pair = poolPairData.reduce<PairData>((acc, currPair) => {
       let tokenPrice = new BigNumber(0);
@@ -75,6 +76,7 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
       } as PairData;
     }, {} as PairData);
     dataStore.pair = pair;
+
     // Data from vaults
     const totalLoanValue = statsData.loan.value.loan;
     const totalCollateralValue = statsData.loan.value.collateral;
@@ -87,6 +89,7 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
     );
     dataVault.activeAuctions = transformToEthersBigNumber(statsData.loan.count.openAuctions.toString(), 0);
     dataVault.decimals = DECIMALS;
+
     // Data from Master Nodes
     dataMasterNode.totalValueLockedInMasterNodes = transformToEthersBigNumber(
       statsData.tvl.masternodes.toString(),
@@ -97,16 +100,13 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
     dataMasterNode.tenYearLocked = transformToEthersBigNumber(statsData.masternodes.locked[1].count.toString(), 0);
     dataMasterNode.decimals = DECIMALS;
 
-    // TODO: Get Data from all burns in ecosystem
+    // Get Data from all burns in ecosystem
     burnedData.fee = transformToEthersBigNumber(statsData.burned.fee.toString(), DECIMALS);
     burnedData.auction = transformToEthersBigNumber(statsData.burned.auction.toString(), DECIMALS);
     burnedData.payback = transformToEthersBigNumber(statsData.burned.payback.toString(), DECIMALS);
     burnedData.emission = transformToEthersBigNumber(statsData.burned.emission.toString(), DECIMALS);
     burnedData.total = transformToEthersBigNumber(statsData.burned.total.toString(), DECIMALS);
-    burnedData.decimal = DECIMALS;
-    // Interfacing with SC
-    // TODO: Connect with SC
-    // TODO: Call SC Function to update Collated Data
+    burnedData.decimals = DECIMALS;
     // Call SC Function to update Data
     // Update Dex information
     await stateRelayerContract.updateDEXInfo(

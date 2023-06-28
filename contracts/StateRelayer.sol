@@ -42,7 +42,7 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
         uint256 payback;
         uint256 emission;
         uint256 total;
-        uint40 decimal;
+        uint40 decimals;
     }
     BurnedInformation public burnedInformation;
 
