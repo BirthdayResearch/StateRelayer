@@ -1,40 +1,55 @@
 {
   "name": "hardhat-project",
   "scripts": {
-    "solhint": "solhint contracts/**/*.sol",
+    "build:docker": "docker build -t state-relayer/hardhatnetwork:0.0.0 .",
+    "clean": "hardhat clean",
     "compile": "npm run solhint && hardhat compile",
+    "postinstall": "npm run compile",
+    "solhint": "solhint contracts/**/*.sol",
     "test": "npm run solhint && hardhat test",
-    "clean": "hardhat clean"
+    "test-i9n": "jest"
   },
+  "prettier": "@birthdayresearch/sticky-prettier",
   "eslintConfig": {
-    "extends": [
-      "@birthdayresearch"
-    ],
     "parserOptions": {
       "project": "./tsconfig.json"
     },
+    "extends": [
+      "@birthdayresearch"
+    ],
     "overrides": [
       {
         "files": [
           "*.ts"
         ],
         "rules": {
-          "import/no-default-export": "off",
-          "no-console": "off"
+          "no-console": "off",
+          "import/no-default-export": "off"
         }
       }
     ]
   },
-  "devDependencies": {
-    "@birthdayresearch/eslint-config": "^0.5.14",
-    "@birthdayresearch/sticky-typescript": "^0.5.14",
-    "@nomicfoundation/hardhat-toolbox": "^2.0.2",
-    "dotenv": "^16.1.4",
-    "hardhat": "^2.13.1"
+  "jest": {
+    "preset": "@birthdayresearch/sticky-jest"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.8.2",
     "@openzeppelin/contracts-upgradeable": "^4.8.2",
     "solhint": "^3.4.1"
+  },
+  "devDependencies": {
+    "@birthdayresearch/eslint-config": "^0.5.14",
+    "@birthdayresearch/sticky-jest": "^0.8.5",
+    "@birthdayresearch/sticky-prettier": "^0.8.5",
+    "@birthdayresearch/sticky-testcontainers": "^0.8.5",
+    "@birthdayresearch/sticky-typescript": "^0.5.14",
+    "@nomicfoundation/hardhat-toolbox": "^2.0.2",
+    "@types/jest": "^29.5.2",
+    "@waveshq/standard-defichain-jellyfishsdk": "^0.52.1",
+    "@waveshq/walletkit-bot": "^0.47.0",
+    "hardhat": "^2.13.1",
+    "jest": "^29.5.0",
+    "ts-jest": "^29.1.0",
+    "dotenv": "^16.1.4"
   }
 }
