@@ -15,6 +15,7 @@ export type PairData = {
 };
 export type VaultData = StateRelayer.VaultGeneralInformationStructOutput;
 export type MasterNodeData = StateRelayer.MasterNodeInformationStructOutput;
+export type BurnedInformation = StateRelayer.BurnedInfoStructOutput;
 
 export type StateRelayerHandlerProps = {
   urlNetwork: string;

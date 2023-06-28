@@ -392,6 +392,14 @@ export const mockedDexPricesData = {
 };
 
 // generated fixtures from mocked data above
+export const expectedBurnedInfo = {
+  fee: '3150155000000000',
+  auction: '15125273772605500',
+  payback: '617050581749106000',
+  emission: '987835495707572000',
+  total: '3176341557199576000',
+};
+
 export const expectedVaultData = {
   noOfVaults: '11424',
   totalLoanValue: '848573751950201500',

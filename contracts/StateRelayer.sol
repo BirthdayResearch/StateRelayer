@@ -10,6 +10,7 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
     uint256 private lastUpdatedVaultInfoTimestamp;
     uint256 private lastUpdatedMasterNodeInfoTimestamp;
     uint256 private lastUpdatedDexInfoTimestamp;
+    uint256 private lastUpdatedBurnedInfoTimestamp;
     struct DEXInfo {
         uint256 primaryTokenPrice;
         uint256 volume24H;
@@ -24,6 +25,7 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
         uint40 decimals;
     }
     mapping(string => DEXInfo) private DEXInfoMapping;
+
     struct VaultGeneralInformation {
         uint256 noOfVaults; // integer values, no decimals
         uint256 totalLoanValue;
@@ -32,7 +34,18 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
         uint256 activeAuctions; // integer values, no decimals
         uint40 decimals;
     }
-    VaultGeneralInformation private vaultInfo;
+    VaultGeneralInformation public vaultInfo;
+    
+    struct BurnedInformation{
+        uint256 fee;
+        uint256 auction;
+        uint256 payback;
+        uint256 emission;
+        uint256 total;
+        uint40 decimals;
+    }
+    BurnedInformation public burnedInformation;
+
     struct MasterNodeInformation {
         uint256 totalValueLockedInMasterNodes;
         uint256 zeroYearLocked; // integer values, no decimals
@@ -50,6 +63,7 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
         uint256 totalValueLockInPoolPair, uint256 total24HVolume);
     event UpdateVaultGeneralInformation(VaultGeneralInformation vaultInfo, uint256 timeStamp);
     event UpdateMasterNodeInformation(MasterNodeInformation nodeInformation, uint256 timeStamp);
+    event UpdatedBurnedInformation(BurnedInformation burnedInformation, uint256 timeStamp);
 
     function _authorizeUpgrade(address newImplementation) internal override onlyRole(DEFAULT_ADMIN_ROLE) {}
 
@@ -85,16 +99,23 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
 
     function updateVaultGeneralInformation(VaultGeneralInformation calldata _vaultInfo) external allowUpdate {
         vaultInfo = _vaultInfo;
-        uint256 _lastUpdatedVaultInfo = block.timestamp;
-        lastUpdatedVaultInfoTimestamp = _lastUpdatedVaultInfo;
-        emit UpdateVaultGeneralInformation(_vaultInfo, _lastUpdatedVaultInfo);
+        uint256 _lastUpdatedVaultInfoTimestamp = block.timestamp;
+        lastUpdatedVaultInfoTimestamp = _lastUpdatedVaultInfoTimestamp;
+        emit UpdateVaultGeneralInformation(_vaultInfo, _lastUpdatedVaultInfoTimestamp);
     }
 
     function updateMasterNodeInformation(MasterNodeInformation calldata _masterNodeInformation) external allowUpdate {
         masterNodeInformation = _masterNodeInformation;
-        uint256 _lastUpdatedMasterNodeInfo = block.timestamp;
-        lastUpdatedMasterNodeInfoTimestamp = _lastUpdatedMasterNodeInfo;
-        emit UpdateMasterNodeInformation(_masterNodeInformation, _lastUpdatedMasterNodeInfo);
+        uint256 _lastUpdatedMasterNodeInfoTimestamp = block.timestamp;
+        lastUpdatedMasterNodeInfoTimestamp = _lastUpdatedMasterNodeInfoTimestamp;
+        emit UpdateMasterNodeInformation(_masterNodeInformation, _lastUpdatedMasterNodeInfoTimestamp);
+    }
+
+    function updateBurnInfo( BurnedInformation calldata _burnedInfo) external allowUpdate {
+        burnedInformation = _burnedInfo;
+        uint256 _lastUpdatedMasterBurnedInfoTimestamp = block.timestamp;
+        lastUpdatedBurnedInfoTimestamp = _lastUpdatedMasterBurnedInfoTimestamp;
+        emit UpdatedBurnedInformation(_burnedInfo, _lastUpdatedMasterBurnedInfoTimestamp);
     }
 
     /**
@@ -137,5 +158,9 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
 
     function getMasterNodeInfo() external view returns(uint256, MasterNodeInformation memory){
         return (lastUpdatedMasterNodeInfoTimestamp, masterNodeInformation);
+    }
+
+    function getBurnedInfo() external view returns(uint256, BurnedInformation memory){
+        return (lastUpdatedBurnedInfoTimestamp, burnedInformation);
     }
 }

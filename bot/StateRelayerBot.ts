@@ -4,7 +4,14 @@ import { BigNumber } from 'bignumber.js';
 import { ethers } from 'ethers';
 
 import { StateRelayer, StateRelayer__factory } from '../generated';
-import { DataStore, MasterNodeData, PairData, StateRelayerHandlerProps, VaultData } from './utils/types';
+import {
+  BurnedInformation,
+  DataStore,
+  MasterNodeData,
+  PairData,
+  StateRelayerHandlerProps,
+  VaultData,
+} from './utils/types';
 
 const DENOMINATION = 'USDT';
 const DECIMALS = 10;
@@ -18,6 +25,7 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
   const { urlNetwork, envNetwork, signer, contractAddress } = props;
   const stateRelayerContract = new ethers.Contract(contractAddress, StateRelayer__factory.abi, signer) as StateRelayer;
   const dataStore = {} as DataStore;
+  const burnedData = {} as BurnedInformation;
   const dataVault = {} as VaultData;
   const dataMasterNode = {} as MasterNodeData;
   try {
@@ -25,22 +33,23 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
     // Get Data from OCEAN API
     const client = getWhaleClient(urlNetwork, envNetwork);
     const statsData = await client.stats.get();
-    const rawPoolpairData = await client.poolpairs.list(200);
+    const rawPoolPairData = await client.poolpairs.list(200);
     const dexPriceData = await client.poolpairs.listDexPrices(DENOMINATION);
 
-    // sanitise response data
-    const poolpairData = rawPoolpairData.filter((pair: any) => !pair.displaySymbol.includes('/'));
+    // sanitize response data
+    const poolPairData = rawPoolPairData.filter((pair: any) => !pair.displaySymbol.includes('/'));
 
     /* ------------ Data from /dex ----------- */
     // totalValueLockInPoolPair
     const totalValueLockInPoolPair = transformToEthersBigNumber(statsData.tvl.dex.toString(), DECIMALS);
     // total24HVolume
     const total24HVolume = transformToEthersBigNumber(
-      poolpairData.reduce((acc, currPair) => acc + (currPair.volume?.h24 ?? 0), 0).toString(),
+      poolPairData.reduce((acc, currPair) => acc + (currPair.volume?.h24 ?? 0), 0).toString(),
       DECIMALS,
     );
+
     // /dex/pair
-    const pair = poolpairData.reduce<PairData>((acc, currPair) => {
+    const pair = poolPairData.reduce<PairData>((acc, currPair) => {
       let tokenPrice = new BigNumber(0);
       // price ratio is
       const priceRatio = currPair.priceRatio.ba;
@@ -67,6 +76,7 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
       } as PairData;
     }, {} as PairData);
     dataStore.pair = pair;
+
     // Data from vaults
     const totalLoanValue = statsData.loan.value.loan;
     const totalCollateralValue = statsData.loan.value.collateral;
@@ -79,6 +89,7 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
     );
     dataVault.activeAuctions = transformToEthersBigNumber(statsData.loan.count.openAuctions.toString(), 0);
     dataVault.decimals = DECIMALS;
+
     // Data from Master Nodes
     dataMasterNode.totalValueLockedInMasterNodes = transformToEthersBigNumber(
       statsData.tvl.masternodes.toString(),
@@ -89,7 +100,13 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
     dataMasterNode.tenYearLocked = transformToEthersBigNumber(statsData.masternodes.locked[1].count.toString(), 0);
     dataMasterNode.decimals = DECIMALS;
 
-    // TODO: Get Data from all burns in ecosystem
+    // Get Data from all burns in ecosystem
+    burnedData.fee = transformToEthersBigNumber(statsData.burned.fee.toString(), DECIMALS);
+    burnedData.auction = transformToEthersBigNumber(statsData.burned.auction.toString(), DECIMALS);
+    burnedData.payback = transformToEthersBigNumber(statsData.burned.payback.toString(), DECIMALS);
+    burnedData.emission = transformToEthersBigNumber(statsData.burned.emission.toString(), DECIMALS);
+    burnedData.total = transformToEthersBigNumber(statsData.burned.total.toString(), DECIMALS);
+    burnedData.decimals = DECIMALS;
     // Call SC Function to update Data
     // Update Dex information
     await stateRelayerContract.updateDEXInfo(
@@ -102,8 +119,9 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
     await stateRelayerContract.updateMasterNodeInformation(dataMasterNode);
     // // Update Vault general information
     await stateRelayerContract.updateVaultGeneralInformation(dataVault);
+    await stateRelayerContract.updateBurnInfo(burnedData);
 
-    return { dataStore, dataVault, dataMasterNode };
+    return { dataStore, dataVault, dataMasterNode, burnedData };
   } catch (e) {
     console.error((e as Error).message);
     return undefined;
@@ -114,4 +132,5 @@ interface DFCData {
   dataStore: DataStore;
   dataVault: VaultData;
   dataMasterNode: MasterNodeData;
+  burnedData: BurnedInformation;
 }

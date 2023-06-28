@@ -5,6 +5,7 @@ import { HardhatNetwork, HardhatNetworkContainer, StartedHardhatNetworkContainer
 import { StateRelayer, StateRelayer__factory, StateRelayerProxy__factory } from '../../generated';
 import { handler } from '../StateRelayerBot';
 import {
+  expectedBurnedInfo,
   expectedDexInfo,
   expectedMasterNodeData,
   expectedPairData,
@@ -73,6 +74,12 @@ describe('State Relayer Bot Tests', () => {
       contractAddress: proxy.address,
       signer: bot,
     });
+    const receivedBurnedInfo = await proxy.getBurnedInfo();
+    expect(receivedBurnedInfo[1].fee.toString()).toEqual(expectedBurnedInfo.fee);
+    expect(receivedBurnedInfo[1].auction.toString()).toEqual(expectedBurnedInfo.auction);
+    expect(receivedBurnedInfo[1].payback.toString()).toEqual(expectedBurnedInfo.payback);
+    expect(receivedBurnedInfo[1].emission.toString()).toEqual(expectedBurnedInfo.emission);
+    expect(receivedBurnedInfo[1].total.toString()).toEqual(expectedBurnedInfo.total);
 
     // Checking the /dex/dex-pair info
     const dETH = await proxy.getDexPairInfo('dETH-DFI');

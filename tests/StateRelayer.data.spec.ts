@@ -87,6 +87,21 @@ describe('State relayer contract data tests', () => {
       // Testing that the received is as expected as dexDataBtc
       expect(receivedBtcDexData[1].toString()).to.equal(Object.values(dexDataBtc).toString());
     });
+
+    it('Should successfully set burned data for all ecosystem', async () => {
+      ({ stateRelayerProxy, bot } = await loadFixture(deployContract));
+      const burnInfo: BurnedInfo = {
+        fee: 315015,
+        auction: 1512527,
+        payback: 61705058,
+        emission: 98783549,
+        total: 317634155,
+        decimals: 10,
+      };
+      await stateRelayerProxy.connect(bot).updateBurnInfo(burnInfo);
+      const receivedBurnedData = await stateRelayerProxy.getBurnedInfo();
+      expect(receivedBurnedData[1].toString()).to.equal(Object.values(burnInfo).toString());
+    });
   });
 
   describe('Unsuccessfully updating individually', () => {
@@ -134,12 +149,25 @@ describe('State relayer contract data tests', () => {
       };
       await expect(stateRelayerProxy.connect(user).updateDEXInfo(['eth'], [dexDataEth], 1, 2)).to.be.reverted;
     });
+
+    it('`updateBurnInfo` - Should successfully revert if the signer is not `bot`', async () => {
+      ({ stateRelayerProxy, user } = await loadFixture(deployContract));
+      const burnInfo: BurnedInfo = {
+        fee: 315015,
+        auction: 1512527,
+        payback: 61705058,
+        emission: 98783549,
+        total: 317634155,
+        decimals: 10,
+      };
+      await expect(stateRelayerProxy.connect(user).updateBurnInfo(burnInfo)).to.reverted;
+    });
   });
 
   describe('Test batch call', () => {
     it('Should be able to update in batch ', async () => {
       ({ stateRelayerProxy, bot } = await loadFixture(deployContract));
-
+      // Master node data
       const masterNodeData: MasterNode = {
         totalValueLockedInMasterNodes: 108,
         zeroYearLocked: 101,
@@ -152,6 +180,7 @@ describe('State relayer contract data tests', () => {
         'updateMasterNodeInformation',
         [masterNodeData],
       );
+      // Vault information data
       const vaultInformationData: VaultGeneralInformation = {
         noOfVaults: 2,
         totalLoanValue: 1000,
@@ -165,6 +194,7 @@ describe('State relayer contract data tests', () => {
         [vaultInformationData],
       );
 
+      // Dex info data
       const dexDataEth: DexInfo = {
         primaryTokenPrice: 113,
         volume24H: 102021,
@@ -195,12 +225,25 @@ describe('State relayer contract data tests', () => {
         1,
         2,
       ]);
+
+      // Burned info data
+      const burnedData: BurnedInfo = {
+        fee: 123,
+        auction: 25434,
+        payback: 34676234,
+        emission: 23546454,
+        total: 243563434,
+        decimals: 18,
+      };
+
+      const callDataBurnedInfo = stateRelayerInterface.encodeFunctionData('updateBurnInfo', [burnedData]);
       await stateRelayerProxy
         .connect(bot)
         .batchCallByBot([
           callDataForUpdatingMasterNodeData,
           callDataForUpdatingVaultInformation,
           callDataForUpdatingDexInfos,
+          callDataBurnedInfo,
         ]);
       const receivedMasterNodeData = await stateRelayerProxy.getMasterNodeInfo();
       expect(receivedMasterNodeData[1].toString()).to.equal(Object.values(masterNodeData).toString());
@@ -214,6 +257,9 @@ describe('State relayer contract data tests', () => {
       const receivedBtcDexData = await stateRelayerProxy.getDexPairInfo(symbols[1]);
       // Testing that the received is as expected as dexDataBtc
       expect(receivedBtcDexData[1].toString()).to.equal(Object.values(dexDataBtc).toString());
+      // Testing that the received is as expected as burnedData
+      const receivedBurnedData = await stateRelayerProxy.getBurnedInfo();
+      expect(receivedBurnedData[1].toString()).to.equal(Object.values(burnedData).toString());
     });
 
     it('Should fail when the caller is not authorized ', async () => {
@@ -251,7 +297,7 @@ describe('State relayer contract data tests', () => {
       );
     });
 
-    it('Shuold fail when not granting state relayer the bot_role and then perform recursive batch call', async () => {
+    it('Should fail when not granting state relayer the bot_role and then perform recursive batch call', async () => {
       ({ stateRelayerProxy, bot } = await loadFixture(deployContract));
 
       const stateRelayerInterface = StateRelayer__factory.createInterface();
@@ -308,4 +354,13 @@ interface DexInfo {
   rewards: BigNumber;
   commissions: BigNumber;
   decimals: BigNumber;
+}
+
+interface BurnedInfo {
+  fee: number;
+  auction: number;
+  payback: number;
+  emission: number;
+  total: number;
+  decimals: number;
 }
