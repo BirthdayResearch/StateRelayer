@@ -149,6 +149,19 @@ describe('State relayer contract data tests', () => {
       };
       await expect(stateRelayerProxy.connect(user).updateDEXInfo(['eth'], [dexDataEth], 1, 2)).to.be.reverted;
     });
+
+    it('`updateBurnInfo` - Should successfully revert if the signer is not `bot`', async () => {
+      ({ stateRelayerProxy, user } = await loadFixture(deployContract));
+      const burnInfo: BurnedInfo = {
+        fee: 315015,
+        auction: 1512527,
+        payback: 61705058,
+        emission: 98783549,
+        total: 317634155,
+        decimals: 10,
+      };
+      await expect(stateRelayerProxy.connect(user).updateBurnInfo(burnInfo)).to.reverted;
+    });
   });
 
   describe('Test batch call', () => {
@@ -284,7 +297,7 @@ describe('State relayer contract data tests', () => {
       );
     });
 
-    it('Shuold fail when not granting state relayer the bot_role and then perform recursive batch call', async () => {
+    it('Should fail when not granting state relayer the bot_role and then perform recursive batch call', async () => {
       ({ stateRelayerProxy, bot } = await loadFixture(deployContract));
 
       const stateRelayerInterface = StateRelayer__factory.createInterface();
@@ -310,19 +323,6 @@ describe('State relayer contract data tests', () => {
         stateRelayerProxy,
         'ALREADY_IN_BATCH_CALL_BY_BOT',
       );
-    });
-
-    it('`updateBurnInfo` - Should successfully revert if the signer is not `bot`', async () => {
-      ({ stateRelayerProxy, user } = await loadFixture(deployContract));
-      const burnInfo: BurnedInfo = {
-        fee: 315015,
-        auction: 1512527,
-        payback: 61705058,
-        emission: 98783549,
-        total: 317634155,
-        decimals: 10,
-      };
-      await expect(stateRelayerProxy.connect(user).updateBurnInfo(burnInfo)).to.reverted;
     });
   });
 });
