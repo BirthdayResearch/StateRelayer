@@ -4,7 +4,14 @@ import { BigNumber } from 'bignumber.js';
 import { ethers } from 'ethers';
 
 import { StateRelayer, StateRelayer__factory } from '../generated';
-import { BurnedInformation, DataStore, PairData, StateRelayerHandlerProps } from './types';
+import {
+  BurnedInformation,
+  DataStore,
+  MasterNodeData,
+  PairData,
+  StateRelayerHandlerProps,
+  VaultData,
+} from './utils/types';
 
 const DENOMINATION = 'USDT';
 const DECIMALS = 10;
@@ -19,6 +26,8 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
   const stateRelayerContract = new ethers.Contract(contractAddress, StateRelayer__factory.abi, signer) as StateRelayer;
   const dataStore = {} as DataStore;
   const burnedData = {} as BurnedInformation;
+  const dataVault = {} as VaultData;
+  const dataMasterNode = {} as MasterNodeData;
   try {
     // TODO: Check if Function should run (blockHeight > 30 from previous)
     // Get Data from OCEAN API
@@ -32,13 +41,13 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
 
     /* ------------ Data from /dex ----------- */
     // totalValueLockInPoolPair
-    dataStore.totalValueLockInPoolPair = statsData.tvl.dex.toString();
-
+    const totalValueLockInPoolPair = transformToEthersBigNumber(statsData.tvl.dex.toString(), DECIMALS);
     // total24HVolume
-    const total24HVolume = poolPairData.reduce((acc, currPair) => acc + (currPair.volume?.h24 ?? 0), 0);
-    dataStore.total24HVolume = total24HVolume.toString();
-
-    // pair
+    const total24HVolume = transformToEthersBigNumber(
+      poolPairData.reduce((acc, currPair) => acc + (currPair.volume?.h24 ?? 0), 0).toString(),
+      DECIMALS,
+    );
+    // /dex/pair
     const pair = poolPairData.reduce<PairData>((acc, currPair) => {
       let tokenPrice = new BigNumber(0);
       // price ratio is
@@ -61,29 +70,58 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
           secondTokenBalance: transformToEthersBigNumber(currPair.tokenB.reserve, DECIMALS),
           rewards: transformToEthersBigNumber(currPair.apr?.reward.toString() ?? '0', DECIMALS),
           commissions: transformToEthersBigNumber(currPair.commission, DECIMALS),
-          // todo later
-          lastUpdated: '0',
           decimals: DECIMALS,
         },
       } as PairData;
     }, {} as PairData);
     dataStore.pair = pair;
-    // TODO: Get Data from /dex/[pool-pair]
-    // TODO: Get Data from /vaults
-    // TODO: Get Data from /masternodes
+    // Data from vaults
+    const totalLoanValue = statsData.loan.value.loan;
+    const totalCollateralValue = statsData.loan.value.collateral;
+    dataVault.noOfVaults = transformToEthersBigNumber(statsData.loan.count.openVaults.toString(), 0);
+    dataVault.totalLoanValue = transformToEthersBigNumber(totalLoanValue.toString(), DECIMALS);
+    dataVault.totalCollateralValue = transformToEthersBigNumber(totalCollateralValue.toString(), DECIMALS);
+    dataVault.totalCollateralizationRatio = transformToEthersBigNumber(
+      ((totalCollateralValue / totalLoanValue) * 100).toFixed(3).toString(),
+      DECIMALS,
+    );
+    dataVault.activeAuctions = transformToEthersBigNumber(statsData.loan.count.openAuctions.toString(), 0);
+    dataVault.decimals = DECIMALS;
+    // Data from Master Nodes
+    dataMasterNode.totalValueLockedInMasterNodes = transformToEthersBigNumber(
+      statsData.tvl.masternodes.toString(),
+      DECIMALS,
+    );
+    dataMasterNode.zeroYearLocked = transformToEthersBigNumber(statsData.masternodes.locked[0].count.toString(), 0);
+    dataMasterNode.fiveYearLocked = transformToEthersBigNumber(statsData.masternodes.locked[2].count.toString(), 0);
+    dataMasterNode.tenYearLocked = transformToEthersBigNumber(statsData.masternodes.locked[1].count.toString(), 0);
+    dataMasterNode.decimals = DECIMALS;
+
     // TODO: Get Data from all burns in ecosystem
     burnedData.fee = transformToEthersBigNumber(statsData.burned.fee.toString(), DECIMALS);
     burnedData.auction = transformToEthersBigNumber(statsData.burned.auction.toString(), DECIMALS);
     burnedData.payback = transformToEthersBigNumber(statsData.burned.payback.toString(), DECIMALS);
     burnedData.emission = transformToEthersBigNumber(statsData.burned.emission.toString(), DECIMALS);
     burnedData.total = transformToEthersBigNumber(statsData.burned.total.toString(), DECIMALS);
-    burnedData.decimal = ethers.BigNumber.from(DECIMALS);
+    burnedData.decimal = DECIMALS;
     // Interfacing with SC
     // TODO: Connect with SC
     // TODO: Call SC Function to update Collated Data
-    await stateRelayerContract.updateDEXInfo(Object.keys(dataStore.pair), Object.values(dataStore.pair) as any);
-    await stateRelayerContract.updateBurnInfo(Object.values(burnedData) as any);
-    return { dataStore, burnedData };
+    // Call SC Function to update Data
+    // Update Dex information
+    await stateRelayerContract.updateDEXInfo(
+      Object.keys(dataStore.pair),
+      Object.values(dataStore.pair),
+      totalValueLockInPoolPair,
+      total24HVolume,
+    );
+    // Update Master Node information
+    await stateRelayerContract.updateMasterNodeInformation(dataMasterNode);
+    // // Update Vault general information
+    await stateRelayerContract.updateVaultGeneralInformation(dataVault);
+    await stateRelayerContract.updateBurnInfo(burnedData);
+
+    return { dataStore, dataVault, dataMasterNode, burnedData };
   } catch (e) {
     console.error((e as Error).message);
     return undefined;
@@ -92,5 +130,7 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
 
 interface DFCData {
   dataStore: DataStore;
+  dataVault: VaultData;
+  dataMasterNode: MasterNodeData;
   burnedData: BurnedInformation;
 }

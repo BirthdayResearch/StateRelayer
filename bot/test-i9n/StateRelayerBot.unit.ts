@@ -4,7 +4,16 @@ import { ethers } from 'ethers';
 import { HardhatNetwork, HardhatNetworkContainer, StartedHardhatNetworkContainer } from '../../containers';
 import { StateRelayer, StateRelayer__factory, StateRelayerProxy__factory } from '../../generated';
 import { handler } from '../StateRelayerBot';
-import { expectedBurnedInfo, mockedDexPricesData, mockedPoolPairData, mockedStatsData } from '../utils/oceanMockedData';
+import {
+  expectedBurnedInfo,
+  expectedDexInfo,
+  expectedMasterNodeData,
+  expectedPairData,
+  expectedVaultData,
+  mockedDexPricesData,
+  mockedPoolPairData,
+  mockedStatsData,
+} from './mockData/oceanMockedData';
 
 jest.mock('@defichain/whale-api-client', () => ({
   WhaleApiClient: jest.fn().mockImplementation(() => ({
@@ -58,20 +67,54 @@ describe('State Relayer Bot Tests', () => {
     await hardhatNetwork.stop();
   });
 
-  test('should check that data is parsed correctly', async () => {
+  test('Successfully set the dexInfo data', async () => {
     await handler({
       envNetwork: EnvironmentNetwork.LocalPlayground,
       urlNetwork: '',
       contractAddress: proxy.address,
       signer: bot,
     });
-    console.log(await proxy.DEXInfoMapping('dETH-DFI'));
-    const receivedBurnedInfo = await proxy.burnedInfo();
-    const {decimal} = receivedBurnedInfo;
-    expect(receivedBurnedInfo.fee.div(10**decimal).toString()).toEqual(Math.floor(Number(expectedBurnedInfo.fee)).toString())
-    expect(receivedBurnedInfo.auction.div(10**decimal).toString()).toEqual(Number(expectedBurnedInfo.auction).toFixed(0))
-    expect(receivedBurnedInfo.payback.div(10**decimal).toString()).toEqual(Number(expectedBurnedInfo.payback).toFixed(0))
-    expect(receivedBurnedInfo.emission.div(10**decimal).toString()).toEqual(Math.floor(Number(expectedBurnedInfo.emission)).toString())
-    expect(receivedBurnedInfo.total.div(10**decimal).toString()).toEqual(Math.floor(Number(expectedBurnedInfo.total)).toString())
+    const receivedBurnedInfo = await proxy.getBurnedInfo();
+    expect(receivedBurnedInfo[1].fee.toString()).toEqual(expectedBurnedInfo.fee);
+    expect(receivedBurnedInfo[1].auction.toString()).toEqual(expectedBurnedInfo.auction);
+    expect(receivedBurnedInfo[1].payback.toString()).toEqual(expectedBurnedInfo.payback);
+    expect(receivedBurnedInfo[1].emission.toString()).toEqual(expectedBurnedInfo.emission);
+    expect(receivedBurnedInfo[1].total.toString()).toEqual(expectedBurnedInfo.total);
+
+    // Checking the /dex/dex-pair info
+    const dETH = await proxy.getDexPairInfo('dETH-DFI');
+    expect(dETH[1].primaryTokenPrice.toString()).toEqual(Object.values(expectedPairData['dETH-DFI'])[0]);
+    expect(dETH[1].volume24H.toString()).toEqual(Object.values(expectedPairData['dETH-DFI'])[1]);
+    expect(dETH[1].totalLiquidity.toString()).toEqual(Object.values(expectedPairData['dETH-DFI'])[2]);
+    expect(dETH[1].APR.toString()).toEqual(Object.values(expectedPairData['dETH-DFI'])[3]);
+    expect(dETH[1].firstTokenBalance.toString()).toEqual(Object.values(expectedPairData['dETH-DFI'])[4]);
+    expect(dETH[1].secondTokenBalance.toString()).toEqual(Object.values(expectedPairData['dETH-DFI'])[5]);
+    expect(dETH[1].rewards.toString()).toEqual(Object.values(expectedPairData['dETH-DFI'])[6]);
+    expect(dETH[1].commissions.toString()).toEqual(Object.values(expectedPairData['dETH-DFI'])[7]);
+    expect(dETH[1].decimals.toString()).toEqual(Object.values(expectedPairData['dETH-DFI'])[8]);
+
+    // Checking /dex info
+    const dex = await proxy.getDexInfo();
+    expect(dex[2].toString()).toEqual(expectedDexInfo.totalValueLockInPoolPair);
+    expect(dex[1].toString()).toEqual(expectedDexInfo.total24HVolume);
+
+    // Checking MasterNode information
+    const receivedMasterNodeData = await proxy.getMasterNodeInfo();
+    expect(receivedMasterNodeData[1].totalValueLockedInMasterNodes.toString()).toEqual(
+      expectedMasterNodeData.totalValueLockedInMasterNodes,
+    );
+    expect(receivedMasterNodeData[1].zeroYearLocked.toString()).toEqual(expectedMasterNodeData.zeroYearLocked);
+    expect(receivedMasterNodeData[1].fiveYearLocked.toString()).toEqual(expectedMasterNodeData.fiveYearLocked);
+    expect(receivedMasterNodeData[1].tenYearLocked.toString()).toEqual(expectedMasterNodeData.tenYearLocked);
+
+    // Checking VaultInfo
+    const receivedVaultData = await proxy.getVaultInfo();
+    expect(receivedVaultData[1].noOfVaults.toString()).toEqual(expectedVaultData.noOfVaults);
+    expect(receivedVaultData[1].totalLoanValue.toString()).toEqual(expectedVaultData.totalLoanValue);
+    expect(receivedVaultData[1].totalCollateralValue.toString()).toEqual(expectedVaultData.totalCollateralValue);
+    expect(receivedVaultData[1].totalCollateralizationRatio.toString()).toEqual(
+      expectedVaultData.totalCollateralizationRatio,
+    );
+    expect(receivedVaultData[1].activeAuctions.toString()).toEqual(expectedVaultData.activeAuctions);
   });
 });
