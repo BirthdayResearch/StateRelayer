@@ -393,53 +393,53 @@ export const mockedDexPricesData = {
 
 // generated fixtures from mocked data above
 export const expectedBurnedInfo = {
-  fee: '3150155000000000',
-  auction: '15125273772605500',
-  payback: '617050581749106000',
-  emission: '987835495707572000',
-  total: '3176341557199576000',
+  fee: '315015500000000000000000',
+  auction: '1512527377260550000000000',
+  payback: '61705058174910600000000000',
+  emission: '98783549570757200000000000',
+  total: '317634155719957600000000000',
 };
 
 export const expectedVaultData = {
   noOfVaults: '11424',
-  totalLoanValue: '848573751950201500',
-  totalCollateralValue: '1810116718179531000',
-  totalCollateralizationRatio: '2133130000000',
+  totalLoanValue: '84857375195020150000000000',
+  totalCollateralValue: '181011671817953100000000000',
+  totalCollateralizationRatio: '213313000000000000000',
   activeAuctions: '1',
 };
 
 export const expectedMasterNodeData = {
-  totalValueLockedInMasterNodes: '1528620054717725800',
+  totalValueLockedInMasterNodes: '152862005471772580000000000',
   zeroYearLocked: '10636',
   fiveYearLocked: '917',
   tenYearLocked: '3491',
 };
 
 export const expectedDexInfo = {
-  totalValueLockInPoolPair: '2722816853262795000',
-  total24HVolume: '600100000000000',
+  totalValueLockInPoolPair: '272281685326279500000000000',
+  total24HVolume: '60010000000000000000000',
 };
 export const expectedPairData = {
   'dETH-DFI': {
-    primaryTokenPrice: '20720393468322',
-    volume24H: '120000000000000',
-    totalLiquidity: '256368632406252443',
-    apr: '1118468743',
-    firstTokenBalance: '60845440937100',
-    secondTokenBalance: '246099134373830200',
-    rewards: '1056525711',
-    commission: '20000000',
-    decimals: '10',
+    primaryTokenPrice: '2072039346832248773200',
+    volume24H: '12000000000000000000000',
+    totalLiquidity: '25636863240625244356535793',
+    apr: '111846874381970730',
+    firstTokenBalance: '6084544093710000000000',
+    secondTokenBalance: '24609913437383020000000000',
+    rewards: '105652571122515230',
+    commission: '2000000000000000',
+    decimals: '18',
   },
   'dBTC-DFI': {
-    primaryTokenPrice: '297944817887563',
-    volume24H: '120010000000000',
-    totalLiquidity: '1155096854913583376',
-    apr: '1252417511',
-    firstTokenBalance: '19065303332500',
-    secondTokenBalance: '1108826510654014500',
-    rewards: '1207452297',
-    commission: '20000000',
-    decimals: '10',
+    primaryTokenPrice: '29794481788756354686900',
+    volume24H: '12001000000000000000000',
+    totalLiquidity: '115509685491358337662696092',
+    apr: '125241751184150370',
+    firstTokenBalance: '1906530333250000000000',
+    secondTokenBalance: '110882651065401450000000000',
+    rewards: '120745229762115770',
+    commission: '2000000000000000',
+    decimals: '18',
   },
 };

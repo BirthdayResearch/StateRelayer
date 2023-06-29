@@ -75,7 +75,7 @@ describe('State Relayer Bot Tests', () => {
       signer: bot,
     });
     const receivedBurnedInfo = await proxy.getBurnedInfo();
-    expect(receivedBurnedInfo[1].fee.toString()).toEqual(expectedBurnedInfo.fee);
+    expect(receivedBurnedInfo[1].fee.toString()).toEqual(expectedBurnedInfo.fee.toString());
     expect(receivedBurnedInfo[1].auction.toString()).toEqual(expectedBurnedInfo.auction);
     expect(receivedBurnedInfo[1].payback.toString()).toEqual(expectedBurnedInfo.payback);
     expect(receivedBurnedInfo[1].emission.toString()).toEqual(expectedBurnedInfo.emission);
@@ -92,6 +92,18 @@ describe('State Relayer Bot Tests', () => {
     expect(dETH[1].rewards.toString()).toEqual(Object.values(expectedPairData['dETH-DFI'])[6]);
     expect(dETH[1].commissions.toString()).toEqual(Object.values(expectedPairData['dETH-DFI'])[7]);
     expect(dETH[1].decimals.toString()).toEqual(Object.values(expectedPairData['dETH-DFI'])[8]);
+
+    // Checking the /dex/dex-pair info
+    const dBTC = await proxy.getDexPairInfo('dBTC-DFI');
+    expect(dBTC[1].primaryTokenPrice.toString()).toEqual(Object.values(expectedPairData['dBTC-DFI'])[0]);
+    expect(dBTC[1].volume24H.toString()).toEqual(Object.values(expectedPairData['dBTC-DFI'])[1]);
+    expect(dBTC[1].totalLiquidity.toString()).toEqual(Object.values(expectedPairData['dBTC-DFI'])[2]);
+    expect(dBTC[1].APR.toString()).toEqual(Object.values(expectedPairData['dBTC-DFI'])[3]);
+    expect(dBTC[1].firstTokenBalance.toString()).toEqual(Object.values(expectedPairData['dBTC-DFI'])[4]);
+    expect(dBTC[1].secondTokenBalance.toString()).toEqual(Object.values(expectedPairData['dBTC-DFI'])[5]);
+    expect(dBTC[1].rewards.toString()).toEqual(Object.values(expectedPairData['dBTC-DFI'])[6]);
+    expect(dBTC[1].commissions.toString()).toEqual(Object.values(expectedPairData['dBTC-DFI'])[7]);
+    expect(dBTC[1].decimals.toString()).toEqual(Object.values(expectedPairData['dBTC-DFI'])[8]);
 
     // Checking /dex info
     const dex = await proxy.getDexInfo();

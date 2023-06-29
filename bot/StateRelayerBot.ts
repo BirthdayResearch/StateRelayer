@@ -14,11 +14,16 @@ import {
 } from './utils/types';
 
 const DENOMINATION = 'USDT';
-const DECIMALS = 10;
+const DECIMALS = 18;
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const transformToEthersBigNumber = (str: string, decimals: number): ethers.BigNumber =>
   ethers.BigNumber.from(
-    new BigNumber(str).multipliedBy(new BigNumber('10').pow(decimals)).integerValue(BigNumber.ROUND_FLOOR).toString(),
+    new BigNumber(str)
+      .multipliedBy(new BigNumber('10').pow(decimals))
+      .integerValue(BigNumber.ROUND_FLOOR)
+      .toFixed(0)
+      .toString(),
   );
 
 export async function handler(props: StateRelayerHandlerProps): Promise<DFCData | undefined> {
@@ -115,11 +120,12 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
       totalValueLockInPoolPair,
       total24HVolume,
     );
+    await stateRelayerContract.updateBurnInfo(burnedData);
+    await stateRelayerContract.updateVaultGeneralInformation(dataVault);
+
     // Update Master Node information
     await stateRelayerContract.updateMasterNodeInformation(dataMasterNode);
-    // // Update Vault general information
-    await stateRelayerContract.updateVaultGeneralInformation(dataVault);
-    await stateRelayerContract.updateBurnInfo(burnedData);
+    // Update Vault general information
 
     return { dataStore, dataVault, dataMasterNode, burnedData };
   } catch (e) {
