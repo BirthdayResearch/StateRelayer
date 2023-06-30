@@ -4,7 +4,7 @@ import { StateRelayer__factory } from '../generated';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { verify } from './utils/verify';
 
-// npx hardhat run --network testnet ./scripts/deployment.ts
+// npx hardhat run --network DMCTestnet ./scripts/deployment.ts
 async function main() {
   const StateRelayerContract = await ethers.getContractFactory('StateRelayer');
   const stateRelayer = await StateRelayerContract.deploy({ gasLimit: 5000000 });
