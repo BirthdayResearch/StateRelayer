@@ -1,6 +1,7 @@
 import { ethers } from 'hardhat';
 
 import { StateRelayer__factory } from '../generated';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { verify } from './utils/verify';
 
 // npx hardhat run --network testnet ./scripts/deployment.ts
