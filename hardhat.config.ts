@@ -89,11 +89,11 @@ const config: HardhatUserConfig = {
   },
   etherscan: {
     apiKey: {
-      MetaChain: '',
+      DMCTestnet: 'abc',
     },
     customChains: [
       {
-        network: 'MetaChain', // network double check
+        network: 'DMCTestnet', // network double check
         chainId: 1133,
         urls: {
           apiURL: 'https://blockscout-index.changi.dfi.team/api/',
