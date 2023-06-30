@@ -7,6 +7,10 @@ export const DEFAULT_CHAINID = 1337;
 export const TX_AUTOMINE_ENV_VAR = 'TRANSACTION_AUTOMINE';
 export const TX_AUTOMINE_INTERVAL_ENV_VAR = 'TRANSACTION_AUTOMINE_INTERVAL';
 
+require('dotenv').config({
+  path: '.env',
+});
+
 interface DeployContractArgs {
   name: string;
   deployargs: string | undefined;
@@ -82,6 +86,21 @@ const config: HardhatUserConfig = {
       accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
       chainId: 1133,
     },
+  },
+  etherscan: {
+    apiKey: {
+      MetaChain: '',
+    },
+    customChains: [
+      {
+        network: 'MetaChain', // network double check
+        chainId: 1133,
+        urls: {
+          apiURL: 'https://blockscout-index.changi.dfi.team/api/',
+          browserURL: 'https://blockscout-index.changi.dfi.team/',
+        },
+      },
+    ],
   },
 };
 
