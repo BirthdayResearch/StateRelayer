@@ -7,15 +7,15 @@ export const DEFAULT_CHAINID = 1337;
 export const TX_AUTOMINE_ENV_VAR = 'TRANSACTION_AUTOMINE';
 export const TX_AUTOMINE_INTERVAL_ENV_VAR = 'TRANSACTION_AUTOMINE_INTERVAL';
 
-require('dotenv').config({
-  path: '.env',
-});
-
 interface DeployContractArgs {
   name: string;
   deployargs: string | undefined;
   libraries: Record<string, string>;
 }
+
+require('dotenv').config({
+  path: '.env',
+});
 
 task('deployContract', 'Deploys a contract based on the name of the contract')
   .addParam(
@@ -81,7 +81,7 @@ const config: HardhatUserConfig = {
       // could be larger than the stipulated max size in EIP-170
       allowUnlimitedContractSize: true,
     },
-    testnet: {
+    DMCTestnet: {
       url: 'http://35.187.53.161:20551',
       accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
       chainId: 1133,
@@ -93,10 +93,10 @@ const config: HardhatUserConfig = {
     },
     customChains: [
       {
-        network: 'DMCTestnet', // network double check
+        network: 'DMCTestnet',
         chainId: 1133,
         urls: {
-          apiURL: 'https://blockscout-index.changi.dfi.team/api/',
+          apiURL: 'https://blockscout-index.changi.dfi.team/api',
           browserURL: 'https://blockscout-index.changi.dfi.team/',
         },
       },

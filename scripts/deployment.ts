@@ -11,7 +11,7 @@ async function main() {
   await stateRelayer.deployTransaction.wait(5);
   console.log('State relayer Contract address: ', stateRelayer.address);
   console.log('Verifying........');
-  await verify({ contractAddress: stateRelayer.address });
+  await verify({ contractAddress: stateRelayer.address, contract: 'contracts/StateRelayer.sol:StateRelayer' });
   // Data to pass to proxy contract
   const encodedData = StateRelayer__factory.createInterface().encodeFunctionData('initialize', [
     '0x5aB853A40b3b9A16891e8bc8e58730AE3Ec102b2', // Admin
@@ -25,7 +25,7 @@ async function main() {
   console.log('Verifying........');
   await verify({
     contractAddress: stateRelayerProxy.address,
-    args: encodedData,
+    args: [stateRelayer.address, encodedData],
     contract: 'contracts/StateRelayerProxy.sol:StateRelayerProxy',
   });
 }
