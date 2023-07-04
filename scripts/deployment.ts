@@ -5,6 +5,8 @@ import { StateRelayer__factory } from '../generated';
 import { verify } from './utils/verify';
 
 // npx hardhat run --network DMCTestnet ./scripts/deployment.ts
+// To deploy Smart contract without providing private keys in evn. Below uses the truffle dashboard with metamask.
+// npx hardhat run --network truffleDashboard ./scripts/deployment.ts
 async function main() {
   const StateRelayerContract = await ethers.getContractFactory('StateRelayer');
   const stateRelayer = await StateRelayerContract.deploy({ gasLimit: 5000000 });
