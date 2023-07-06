@@ -109,17 +109,26 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
     burnedData.decimals = DECIMALS;
     // Call SC Function to update Data
     // Update Dex information
-    await stateRelayerContract.updateDEXInfo(
+    const dexInfoTx = await stateRelayerContract.updateDEXInfo(
       Object.keys(dataStore.pair),
       Object.values(dataStore.pair),
       totalValueLockInPoolPair,
       total24HVolume,
     );
+    await dexInfoTx.wait();
+    await txStatus(dexInfoTx.hash);
     // Update Master Node information
-    await stateRelayerContract.updateMasterNodeInformation(dataMasterNode);
-    // // Update Vault general information
-    await stateRelayerContract.updateVaultGeneralInformation(dataVault);
-    await stateRelayerContract.updateBurnInfo(burnedData);
+    const masterDataTx = await stateRelayerContract.updateMasterNodeInformation(dataMasterNode);
+    await masterDataTx.wait();
+    await txStatus(masterDataTx.hash);
+    // Update Vault general information
+    const valutTx = await stateRelayerContract.updateVaultGeneralInformation(dataVault);
+    await valutTx.wait();
+    await txStatus(valutTx.hash);
+    // Update Burn information
+    const burnTx = await stateRelayerContract.updateBurnInfo(burnedData);
+    await burnTx.wait();
+    await txStatus(burnTx.hash);
 
     return { dataStore, dataVault, dataMasterNode, burnedData };
   } catch (e) {
@@ -133,4 +142,13 @@ interface DFCData {
   dataVault: VaultData;
   dataMasterNode: MasterNodeData;
   burnedData: BurnedInformation;
+}
+
+async function txStatus(hash: string) {
+  const provider = new ethers.providers.JsonRpcProvider(process.env.ALCHEMY_KEY);
+  const txRec = await provider.getTransactionReceipt(hash);
+  if (txRec.status === 0) {
+    console.log('Transaction has failed');
+  }
+  console.log(`Successfully updated: https://sepolia.etherscan.io/tx/${hash}`);
 }
