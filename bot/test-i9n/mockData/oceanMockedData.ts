@@ -429,7 +429,6 @@ export const expectedPairData = {
     secondTokenBalance: '24609913437383020000000000',
     rewards: '105652571122515230',
     commission: '2000000000000000',
-    decimals: '18',
   },
   'dBTC-DFI': {
     primaryTokenPrice: '29794481788756354686900',
@@ -440,6 +439,5 @@ export const expectedPairData = {
     secondTokenBalance: '110882651065401450000000000',
     rewards: '120745229762115770',
     commission: '2000000000000000',
-    decimals: '18',
   },
 };

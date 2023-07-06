@@ -91,7 +91,6 @@ describe('State Relayer Bot Tests', () => {
     expect(dETH[1].secondTokenBalance.toString()).toEqual(Object.values(expectedPairData['dETH-DFI'])[5]);
     expect(dETH[1].rewards.toString()).toEqual(Object.values(expectedPairData['dETH-DFI'])[6]);
     expect(dETH[1].commissions.toString()).toEqual(Object.values(expectedPairData['dETH-DFI'])[7]);
-    expect(dETH[1].decimals.toString()).toEqual(Object.values(expectedPairData['dETH-DFI'])[8]);
 
     // Checking the /dex/dex-pair info
     const dBTC = await proxy.getDexPairInfo('dBTC-DFI');
@@ -103,7 +102,6 @@ describe('State Relayer Bot Tests', () => {
     expect(dBTC[1].secondTokenBalance.toString()).toEqual(Object.values(expectedPairData['dBTC-DFI'])[5]);
     expect(dBTC[1].rewards.toString()).toEqual(Object.values(expectedPairData['dBTC-DFI'])[6]);
     expect(dBTC[1].commissions.toString()).toEqual(Object.values(expectedPairData['dBTC-DFI'])[7]);
-    expect(dBTC[1].decimals.toString()).toEqual(Object.values(expectedPairData['dBTC-DFI'])[8]);
 
     // Checking /dex info
     const dex = await proxy.getDexInfo();

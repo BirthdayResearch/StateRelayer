@@ -21,7 +21,6 @@ describe('State relayer contract data tests', () => {
         zeroYearLocked: 101,
         fiveYearLocked: 102,
         tenYearLocked: 103,
-        decimals: 10,
       };
       await expect(stateRelayerProxy.connect(bot).updateMasterNodeInformation(masterNodeData))
         .to.emit(stateRelayerProxy, 'UpdateMasterNodeInformation')
@@ -38,7 +37,6 @@ describe('State relayer contract data tests', () => {
         totalCollateralValue: 23432,
         totalCollateralizationRatio: 234,
         activeAuctions: 23,
-        decimals: 10,
       };
       await expect(stateRelayerProxy.connect(bot).updateVaultGeneralInformation(vaultInformationData))
         .to.emit(stateRelayerProxy, 'UpdateVaultGeneralInformation')
@@ -60,7 +58,6 @@ describe('State relayer contract data tests', () => {
         secondTokenBalance: 2314,
         rewards: 124,
         commissions: 3,
-        decimals: 18,
       };
       const dexDataBtc: DexInfo = {
         primaryTokenPrice: 112,
@@ -71,7 +68,6 @@ describe('State relayer contract data tests', () => {
         secondTokenBalance: 2312,
         rewards: 123,
         commissions: 2,
-        decimals: 18,
       };
       const dexsData: DexInfo[] = [dexDataEth, dexDataBtc];
       const symbols: string[] = ['eth', 'btc'];
@@ -96,7 +92,6 @@ describe('State relayer contract data tests', () => {
         payback: 61705058,
         emission: 98783549,
         total: 317634155,
-        decimals: 10,
       };
       await stateRelayerProxy.connect(bot).updateBurnInfo(burnInfo);
       const receivedBurnedData = await stateRelayerProxy.getBurnedInfo();
@@ -115,7 +110,6 @@ describe('State relayer contract data tests', () => {
         zeroYearLocked: 101,
         fiveYearLocked: 102,
         tenYearLocked: 103,
-        decimals: 10,
       };
       await expect(stateRelayerProxy.connect(user).updateMasterNodeInformation(masterNodeData)).to.be.reverted;
     });
@@ -128,7 +122,6 @@ describe('State relayer contract data tests', () => {
         totalCollateralValue: 23432,
         totalCollateralizationRatio: 234,
         activeAuctions: 23,
-        decimals: 10,
       };
       await expect(stateRelayerProxy.connect(user).updateVaultGeneralInformation(vaultInformationData)).to.be.reverted;
     });
@@ -145,7 +138,6 @@ describe('State relayer contract data tests', () => {
         secondTokenBalance: 2314,
         rewards: 124,
         commissions: 3,
-        decimals: 18,
       };
       await expect(stateRelayerProxy.connect(user).updateDEXInfo(['eth'], [dexDataEth], 1, 2)).to.be.reverted;
     });
@@ -158,7 +150,6 @@ describe('State relayer contract data tests', () => {
         payback: 61705058,
         emission: 98783549,
         total: 317634155,
-        decimals: 10,
       };
       await expect(stateRelayerProxy.connect(user).updateBurnInfo(burnInfo)).to.reverted;
     });
@@ -173,7 +164,6 @@ describe('State relayer contract data tests', () => {
         zeroYearLocked: 101,
         fiveYearLocked: 102,
         tenYearLocked: 103,
-        decimals: 18,
       };
       const stateRelayerInterface = StateRelayer__factory.createInterface();
       const callDataForUpdatingMasterNodeData = stateRelayerInterface.encodeFunctionData(
@@ -187,7 +177,6 @@ describe('State relayer contract data tests', () => {
         totalCollateralValue: 23432,
         totalCollateralizationRatio: 234,
         activeAuctions: 23,
-        decimals: 18,
       };
       const callDataForUpdatingVaultInformation = stateRelayerInterface.encodeFunctionData(
         'updateVaultGeneralInformation',
@@ -204,7 +193,6 @@ describe('State relayer contract data tests', () => {
         secondTokenBalance: 2314,
         rewards: 124,
         commissions: 3,
-        decimals: 18,
       };
       const dexDataBtc: DexInfo = {
         primaryTokenPrice: 112,
@@ -215,7 +203,6 @@ describe('State relayer contract data tests', () => {
         secondTokenBalance: 2312,
         rewards: 123,
         commissions: 2,
-        decimals: 18,
       };
       const dexsData: DexInfo[] = [dexDataEth, dexDataBtc];
       const symbols: string[] = ['eth', 'btc'];
@@ -233,7 +220,6 @@ describe('State relayer contract data tests', () => {
         payback: 34676234,
         emission: 23546454,
         total: 243563434,
-        decimals: 18,
       };
 
       const callDataBurnedInfo = stateRelayerInterface.encodeFunctionData('updateBurnInfo', [burnedData]);
@@ -270,7 +256,6 @@ describe('State relayer contract data tests', () => {
         zeroYearLocked: 101,
         fiveYearLocked: 102,
         tenYearLocked: 103,
-        decimals: 10,
       };
       const stateRelayerInterface = StateRelayer__factory.createInterface();
       const callDataForUpdatingMasterNodeData = stateRelayerInterface.encodeFunctionData(
@@ -332,7 +317,6 @@ interface MasterNode {
   zeroYearLocked: BigNumber;
   fiveYearLocked: BigNumber;
   tenYearLocked: BigNumber;
-  decimals: BigNumber;
 }
 
 interface VaultGeneralInformation {
@@ -341,7 +325,6 @@ interface VaultGeneralInformation {
   totalCollateralValue: BigNumber;
   totalCollateralizationRatio: BigNumber;
   activeAuctions: BigNumber;
-  decimals: BigNumber;
 }
 
 interface DexInfo {
@@ -353,7 +336,6 @@ interface DexInfo {
   secondTokenBalance: BigNumber;
   rewards: BigNumber;
   commissions: BigNumber;
-  decimals: BigNumber;
 }
 
 interface BurnedInfo {
@@ -362,5 +344,4 @@ interface BurnedInfo {
   payback: number;
   emission: number;
   total: number;
-  decimals: number;
 }

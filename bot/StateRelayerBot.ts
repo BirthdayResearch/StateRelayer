@@ -76,7 +76,6 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
           secondTokenBalance: transformToEthersBigNumber(currPair.tokenB.reserve, DECIMALS),
           rewards: transformToEthersBigNumber(currPair.apr?.reward.toString() ?? '0', DECIMALS),
           commissions: transformToEthersBigNumber(currPair.commission, DECIMALS),
-          decimals: DECIMALS,
         },
       } as PairData;
     }, {} as PairData);
@@ -93,7 +92,6 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
       DECIMALS,
     );
     dataVault.activeAuctions = transformToEthersBigNumber(statsData.loan.count.openAuctions.toString(), 0);
-    dataVault.decimals = DECIMALS;
 
     // Data from Master Nodes
     dataMasterNode.totalValueLockedInMasterNodes = transformToEthersBigNumber(
@@ -103,7 +101,6 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
     dataMasterNode.zeroYearLocked = transformToEthersBigNumber(statsData.masternodes.locked[0].count.toString(), 0);
     dataMasterNode.fiveYearLocked = transformToEthersBigNumber(statsData.masternodes.locked[2].count.toString(), 0);
     dataMasterNode.tenYearLocked = transformToEthersBigNumber(statsData.masternodes.locked[1].count.toString(), 0);
-    dataMasterNode.decimals = DECIMALS;
 
     // Get Data from all burns in ecosystem
     burnedData.fee = transformToEthersBigNumber(statsData.burned.fee.toString(), DECIMALS);
@@ -111,7 +108,6 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
     burnedData.payback = transformToEthersBigNumber(statsData.burned.payback.toString(), DECIMALS);
     burnedData.emission = transformToEthersBigNumber(statsData.burned.emission.toString(), DECIMALS);
     burnedData.total = transformToEthersBigNumber(statsData.burned.total.toString(), DECIMALS);
-    burnedData.decimals = DECIMALS;
     // Call SC Function to update Data
     // Update Dex information
     await stateRelayerContract.updateDEXInfo(
@@ -120,13 +116,12 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
       totalValueLockInPoolPair,
       total24HVolume,
     );
+    // Update Burn information
     await stateRelayerContract.updateBurnInfo(burnedData);
+    // Update Vault general information
     await stateRelayerContract.updateVaultGeneralInformation(dataVault);
-
     // Update Master Node information
     await stateRelayerContract.updateMasterNodeInformation(dataMasterNode);
-    // Update Vault general information
-
     return { dataStore, dataVault, dataMasterNode, burnedData };
   } catch (e) {
     console.error((e as Error).message);

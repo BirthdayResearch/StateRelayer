@@ -11,6 +11,7 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
     uint256 private lastUpdatedMasterNodeInfoTimestamp;
     uint256 private lastUpdatedDexInfoTimestamp;
     uint256 private lastUpdatedBurnedInfoTimestamp;
+    uint256 constant public decimals = 18;
     struct DEXInfo {
         uint256 primaryTokenPrice;
         uint256 volume24H;
@@ -21,8 +22,6 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
         // don't know whether we need price of pooled tokens over here
         uint256 rewards;
         uint256 commissions;
-        // packed information about the decimals of each variable
-        uint40 decimals;
     }
     mapping(string => DEXInfo) private DEXInfoMapping;
 
@@ -32,7 +31,6 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
         uint256 totalCollateralValue;
         uint256 totalCollateralizationRatio;
         uint256 activeAuctions; // integer values, no decimals
-        uint40 decimals;
     }
     VaultGeneralInformation public vaultInfo;
     
@@ -42,7 +40,6 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
         uint256 payback;
         uint256 emission;
         uint256 total;
-        uint40 decimals;
     }
     BurnedInformation public burnedInformation;
 
@@ -51,7 +48,6 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
         uint256 zeroYearLocked; // integer values, no decimals
         uint256 fiveYearLocked; // integer values, no decimals
         uint256 tenYearLocked; // integer values, no decimals
-        uint40 decimals;
     }
 
     MasterNodeInformation private masterNodeInformation;
