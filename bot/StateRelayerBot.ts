@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 import { getWhaleClient } from '@waveshq/walletkit-bot';
+import { EnvironmentNetwork } from '@waveshq/walletkit-core';
 import { BigNumber } from 'bignumber.js';
 import { ethers } from 'ethers';
 
@@ -116,19 +117,19 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
       total24HVolume,
     );
     await dexInfoTx.wait();
-    await txStatus(dexInfoTx.hash);
+    await txStatus(dexInfoTx.hash, envNetwork);
     // Update Master Node information
     const masterDataTx = await stateRelayerContract.updateMasterNodeInformation(dataMasterNode);
     await masterDataTx.wait();
-    await txStatus(masterDataTx.hash);
+    await txStatus(masterDataTx.hash, envNetwork);
     // Update Vault general information
     const valutTx = await stateRelayerContract.updateVaultGeneralInformation(dataVault);
     await valutTx.wait();
-    await txStatus(valutTx.hash);
+    await txStatus(valutTx.hash, envNetwork);
     // Update Burn information
     const burnTx = await stateRelayerContract.updateBurnInfo(burnedData);
     await burnTx.wait();
-    await txStatus(burnTx.hash);
+    await txStatus(burnTx.hash, envNetwork);
 
     return { dataStore, dataVault, dataMasterNode, burnedData };
   } catch (e) {
@@ -144,11 +145,13 @@ interface DFCData {
   burnedData: BurnedInformation;
 }
 
-async function txStatus(hash: string) {
-  const provider = new ethers.providers.JsonRpcProvider(process.env.ALCHEMY_KEY);
-  const txRec = await provider.getTransactionReceipt(hash);
-  if (txRec.status === 0) {
-    console.log('Transaction has failed');
+async function txStatus(hash: string, envNetwork: EnvironmentNetwork) {
+  if (envNetwork !== EnvironmentNetwork.LocalPlayground) {
+    const provider = new ethers.providers.JsonRpcProvider(process.env.ALCHEMY_KEY);
+    const txRec = await provider.getTransactionReceipt(hash);
+    if (txRec.status === 0) {
+      console.log('Transaction has failed');
+    }
+    console.log(`Successfully updated: https://sepolia.etherscan.io/tx/${hash}`);
   }
-  console.log(`Successfully updated: https://sepolia.etherscan.io/tx/${hash}`);
 }
