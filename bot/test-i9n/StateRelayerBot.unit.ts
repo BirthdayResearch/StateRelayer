@@ -77,7 +77,6 @@ describe('State Relayer Bot Tests', () => {
     });
 
     if (output !== undefined) {
-      console.log(output);
       const { dexInfoTxReceipt, masterDataTxReceipt, vaultTxReceipt, burnTxReceipt } = output;
       expect(dexInfoTxReceipt).toBeUndefined();
       expect(masterDataTxReceipt).toBeUndefined();

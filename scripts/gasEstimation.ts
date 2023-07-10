@@ -7,7 +7,7 @@ import { handler } from '../bot/StateRelayerBot';
 import { deployContract } from '../tests/utils/deployment';
 
 // to run this file, run npx hardhat clean && npm i && npx hardhat run scripts/gasEstimation.ts
-async function feedData() {
+async function estimateGasCost() {
   const dexesData: BigNumber[] = [];
   const masterData: BigNumber[] = [];
   const vaultData: BigNumber[] = [];
@@ -86,4 +86,4 @@ async function calculateAverageCost(arr: BigNumber[]): Promise<BigFloatingNumber
   return laterAverageCostUpdateInUSD;
 }
 
-feedData();
+estimateGasCost();
