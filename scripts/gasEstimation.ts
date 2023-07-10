@@ -6,7 +6,7 @@ import { BigNumber } from 'ethers';
 import { handler } from '../bot/StateRelayerBot';
 import { deployContract } from '../tests/utils/deployment';
 
-// to run this file, run npx hardhat run scripts/gasEstimation
+// to run this file, run npx hardhat clean && npm i && npx hardhat run scripts/gasEstimation.ts
 async function feedData() {
   const dexesData: BigNumber[] = [];
   const masterData: BigNumber[] = [];
@@ -29,13 +29,21 @@ async function feedData() {
     await new Promise((r) => setTimeout(r, 10 * 1000));
   }
   console.log('Update DEXes');
-  await displayCost(dexesData);
+  const averageCostUpdateDEX = await calculateAverageCost(dexesData);
   console.log('Update Masterdata');
-  await displayCost(masterData);
+  const averageCostUpdateMasterData = await calculateAverageCost(masterData);
   console.log('Update Vault data');
-  await displayCost(vaultData);
+  const averageCostUpdateVaultData = await calculateAverageCost(vaultData);
   console.log('Update burn data');
-  await displayCost(burnData);
+  const averageCostBurnData = await calculateAverageCost(burnData);
+  console.log(
+    'Average cost of updating all data in USD at one time is ',
+    averageCostUpdateDEX
+      .plus(averageCostUpdateMasterData)
+      .plus(averageCostUpdateVaultData)
+      .plus(averageCostBurnData)
+      .toString(),
+  );
 }
 
 async function getPrice(): Promise<BigFloatingNumber> {
@@ -48,7 +56,7 @@ async function getPrice(): Promise<BigFloatingNumber> {
   return new BigFloatingNumber(response.data.data['5804'].quote.USD.price);
 }
 
-async function displayCost(arr: BigNumber[]) {
+async function calculateAverageCost(arr: BigNumber[]): Promise<BigFloatingNumber> {
   // assume 1 gas = 30 gWei
   const initialCostUpdateInGas = new BigFloatingNumber(arr[0].mul(30).mul(BigNumber.from(10).pow(9)).toString()).div(
     new BigFloatingNumber(10).pow(18),
@@ -75,6 +83,7 @@ async function displayCost(arr: BigNumber[]) {
   console.log(initialCostUpdateInUSD.toString());
   console.log('Later average cost in USD is');
   console.log(laterAverageCostUpdateInUSD.toString());
+  return laterAverageCostUpdateInUSD;
 }
 
 feedData();
