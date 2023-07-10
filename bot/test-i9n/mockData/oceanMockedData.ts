@@ -414,6 +414,7 @@ export const expectedMasterNodeData = {
   fiveYearLocked: '917',
   tenYearLocked: '3491',
 };
+// ["1528620054717725800","10636","917","3491", 18]
 
 export const expectedDexInfo = {
   totalValueLockInPoolPair: '2722816853262795000',

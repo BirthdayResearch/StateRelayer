@@ -32,6 +32,7 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
   try {
     // TODO: Check if Function should run (blockHeight > 30 from previous)
     // Get Data from OCEAN API
+    const provider = await signer.provider; // .getBlockNumber();
     const client = getWhaleClient(urlNetwork, envNetwork);
     const statsData = await client.stats.get();
     const rawPoolPairData = await client.poolpairs.list(200);
@@ -115,21 +116,22 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
       Object.values(dataStore.pair),
       totalValueLockInPoolPair,
       total24HVolume,
+      { gasLimit: '24252373' },
     );
     await dexInfoTx.wait();
-    await txStatus(dexInfoTx.hash, envNetwork);
+    await txStatus(dexInfoTx.hash, envNetwork, provider!);
     // Update Master Node information
-    const masterDataTx = await stateRelayerContract.updateMasterNodeInformation(dataMasterNode);
+    const masterDataTx = await stateRelayerContract.updateMasterNodeInformation(dataMasterNode, { gasLimit: '100000' });
     await masterDataTx.wait();
-    await txStatus(masterDataTx.hash, envNetwork);
+    await txStatus(masterDataTx.hash, envNetwork, provider!);
     // Update Vault general information
-    const valutTx = await stateRelayerContract.updateVaultGeneralInformation(dataVault);
+    const valutTx = await stateRelayerContract.updateVaultGeneralInformation(dataVault, { gasLimit: '250000' });
     await valutTx.wait();
-    await txStatus(valutTx.hash, envNetwork);
+    await txStatus(valutTx.hash, envNetwork, provider!);
     // Update Burn information
-    const burnTx = await stateRelayerContract.updateBurnInfo(burnedData);
+    const burnTx = await stateRelayerContract.updateBurnInfo(burnedData, { gasLimit: '250000' });
     await burnTx.wait();
-    await txStatus(burnTx.hash, envNetwork);
+    await txStatus(burnTx.hash, envNetwork, provider!);
 
     return { dataStore, dataVault, dataMasterNode, burnedData };
   } catch (e) {
@@ -145,13 +147,13 @@ interface DFCData {
   burnedData: BurnedInformation;
 }
 
-async function txStatus(hash: string, envNetwork: EnvironmentNetwork) {
+async function txStatus(hash: string, envNetwork: EnvironmentNetwork, provider: ethers.providers.Provider) {
   if (envNetwork !== EnvironmentNetwork.LocalPlayground) {
-    const provider = new ethers.providers.JsonRpcProvider(process.env.ALCHEMY_KEY);
+    // const provider = new ethers.providers.JsonRpcProvider(process.env.ALCHEMY_KEY);
     const txRec = await provider.getTransactionReceipt(hash);
     if (txRec.status === 0) {
       console.log('Transaction has failed');
     }
-    console.log(`Successfully updated: https://sepolia.etherscan.io/tx/${hash}`);
+    console.log(`Successfully updated: https://testnet-dmc.mydefichain.com:8444/tx/${hash}`);
   }
 }

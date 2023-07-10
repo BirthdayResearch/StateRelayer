@@ -11,16 +11,19 @@ require('dotenv').config({
 
 const app = server();
 const port = 3000;
-const provider = new ethers.providers.JsonRpcProvider(process.env.ALCHEMY_KEY);
+const provider = new ethers.providers.JsonRpcProvider('https://testnet-dmc.mydefichain.com:20551');
 
 async function feedData() {
   const bot = new ethers.Wallet(`0x${process.env.PRIVATE_KEY}`, provider);
+  const blockNumber = await provider.getBlockNumber();
   const data = await handler({
     urlNetwork: 'https://ocean.defichain.com/',
     envNetwork: EnvironmentNetwork.MainNet,
-    contractAddress: '0x329cB816DBE1040D00114741e9A837490097a0c6', // Sepolia test address
+    contractAddress: '0xAE105DE0afC82f91ddBF97cf2197dbd4627a8D16', // Sepolia test address
     signer: bot,
   });
+  // console.log(bot);
+  // console.log(blockNumber);
   return data;
 }
 
