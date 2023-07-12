@@ -83,7 +83,7 @@ const config: HardhatUserConfig = {
       allowUnlimitedContractSize: true,
     },
     DMCTestnet: {
-      url: 'http://35.187.53.161:20551',
+      url: 'https://testnet-dmc.mydefichain.com:20551',
       accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
       chainId: 1133,
     },
