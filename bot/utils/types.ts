@@ -18,6 +18,7 @@ export type MasterNodeData = StateRelayer.MasterNodeInformationStructOutput;
 export type BurnedInformation = StateRelayer.BurnedInfoStructOutput;
 
 export type StateRelayerHandlerProps = {
+  testGasCost: boolean;
   urlNetwork: string;
   envNetwork: EnvironmentNetwork;
   contractAddress: string;
