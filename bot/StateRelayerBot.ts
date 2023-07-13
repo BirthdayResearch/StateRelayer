@@ -154,6 +154,6 @@ async function txStatus(hash: string, envNetwork: EnvironmentNetwork, provider: 
     if (txRec.status === 0) {
       console.log('Transaction has failed');
     }
-    console.log(`Successfully updated: https://testnet-dmc.mydefichain.com:8444/tx/${hash}`);
+    console.log(`Successfully updated: https://changi.ocean.jellyfishsdk.com/tx/${hash}`);
   }
 }
