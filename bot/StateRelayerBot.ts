@@ -110,19 +110,37 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
     burnedData.total = transformToEthersBigNumber(statsData.burned.total.toString(), DECIMALS);
     // Call SC Function to update Data
     // Update Dex information
-    await stateRelayerContract.updateDEXInfo(
+    const dexInfoTx = await stateRelayerContract.updateDEXInfo(
       Object.keys(dataStore.pair),
       Object.values(dataStore.pair),
       totalValueLockInPoolPair,
       total24HVolume,
     );
-    // Update Burn information
-    await stateRelayerContract.updateBurnInfo(burnedData);
-    // Update Vault general information
-    await stateRelayerContract.updateVaultGeneralInformation(dataVault);
+
     // Update Master Node information
-    await stateRelayerContract.updateMasterNodeInformation(dataMasterNode);
-    return { dataStore, dataVault, dataMasterNode, burnedData };
+    const masterDataTx = await stateRelayerContract.updateMasterNodeInformation(dataMasterNode);
+    // Update Vault general information
+    const vaultTx = await stateRelayerContract.updateVaultGeneralInformation(dataVault);
+    // Update Burn information
+    const burnTx = await stateRelayerContract.updateBurnInfo(burnedData);
+    if (!props.testGasCost) {
+      return {
+        dataStore,
+        dataVault,
+        dataMasterNode,
+        burnedData,
+      };
+    }
+    return {
+      dataStore,
+      dataVault,
+      dataMasterNode,
+      burnedData,
+      dexInfoTxReceipt: await dexInfoTx.wait(),
+      masterDataTxReceipt: await masterDataTx.wait(),
+      vaultTxReceipt: await vaultTx.wait(),
+      burnTxReceipt: await burnTx.wait(),
+    };
   } catch (e) {
     console.error((e as Error).message);
     return undefined;
@@ -134,4 +152,8 @@ interface DFCData {
   dataVault: VaultData;
   dataMasterNode: MasterNodeData;
   burnedData: BurnedInformation;
+  dexInfoTxReceipt?: ethers.providers.TransactionReceipt;
+  masterDataTxReceipt?: ethers.providers.TransactionReceipt;
+  vaultTxReceipt?: ethers.providers.TransactionReceipt;
+  burnTxReceipt?: ethers.providers.TransactionReceipt;
 }

@@ -68,12 +68,22 @@ describe('State Relayer Bot Tests', () => {
   });
 
   test('Successfully set the dexInfo data', async () => {
-    await handler({
+    const output = await handler({
+      testGasCost: false,
       envNetwork: EnvironmentNetwork.LocalPlayground,
       urlNetwork: '',
       contractAddress: proxy.address,
       signer: bot,
     });
+
+    if (output !== undefined) {
+      const { dexInfoTxReceipt, masterDataTxReceipt, vaultTxReceipt, burnTxReceipt } = output;
+      expect(dexInfoTxReceipt).toBeUndefined();
+      expect(masterDataTxReceipt).toBeUndefined();
+      expect(vaultTxReceipt).toBeUndefined();
+      expect(burnTxReceipt).toBeUndefined();
+    }
+
     const receivedBurnedInfo = await proxy.getBurnedInfo();
     expect(receivedBurnedInfo[1].fee.toString()).toEqual(expectedBurnedInfo.fee.toString());
     expect(receivedBurnedInfo[1].auction.toString()).toEqual(expectedBurnedInfo.auction);

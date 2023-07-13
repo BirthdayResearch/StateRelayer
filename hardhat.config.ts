@@ -13,6 +13,10 @@ interface DeployContractArgs {
   libraries: Record<string, string>;
 }
 
+require('dotenv').config({
+  path: '.env',
+});
+
 task('deployContract', 'Deploys a contract based on the name of the contract')
   .addParam(
     'name',
@@ -77,6 +81,26 @@ const config: HardhatUserConfig = {
       // could be larger than the stipulated max size in EIP-170
       allowUnlimitedContractSize: true,
     },
+    DMCTestnet: {
+      url: 'http://35.187.53.161:20551',
+      accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+      chainId: 1133,
+    },
+  },
+  etherscan: {
+    apiKey: {
+      DMCTestnet: 'abc',
+    },
+    customChains: [
+      {
+        network: 'DMCTestnet',
+        chainId: 1133,
+        urls: {
+          apiURL: 'https://blockscout-index.changi.dfi.team/api',
+          browserURL: 'https://blockscout-index.changi.dfi.team/',
+        },
+      },
+    ],
   },
 };
 

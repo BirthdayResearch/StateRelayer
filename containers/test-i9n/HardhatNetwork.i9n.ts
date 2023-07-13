@@ -19,7 +19,7 @@ describe('HardhatNetwork', () => {
     it('should be connectable via RPC', async () => {
       const blockNum = await startedHardhatContainer.call('eth_chainId', []);
       // 1337 is the default chain id
-      // Can also be found in the hardhat config in hardhat.config.ts in packages/smartcontracts-queue
+      // Can also be found in the hardhat config in hardhat.config.ts
       expect(blockNum).toStrictEqual(`0x${(1337).toString(16)}`);
     });
 
