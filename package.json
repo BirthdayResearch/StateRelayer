@@ -1,5 +1,7 @@
 {
-  "name": "hardhat-project",
+  "name": "@waveshq/stateRelayerBot",
+  "version": "0.0.0",
+  "private": false,
   "scripts": {
     "build:docker": "docker build -t state-relayer/hardhatnetwork:0.0.0 .",
     "clean": "hardhat clean",
@@ -36,6 +38,7 @@
     "@openzeppelin/contracts": "^4.8.2",
     "@openzeppelin/contracts-upgradeable": "^4.8.2",
     "axios": "^1.4.0",
+    "express": "^4.18.2",
     "solhint": "^3.4.1"
   },
   "devDependencies": {
@@ -45,6 +48,7 @@
     "@birthdayresearch/sticky-testcontainers": "^0.8.5",
     "@birthdayresearch/sticky-typescript": "^0.5.14",
     "@nomicfoundation/hardhat-toolbox": "^2.0.2",
+    "@types/express": "^4.17.17",
     "@types/jest": "^29.5.2",
     "@waveshq/standard-defichain-jellyfishsdk": "^0.52.1",
     "@waveshq/walletkit-bot": "^0.47.0",
