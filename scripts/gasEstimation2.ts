@@ -163,8 +163,9 @@ async function estimateGasCost() {
   console.log('Update burn data costs in gas units');
   console.log(burnData);
 
+  // average estimation
   console.log(
-    'Estimated cost in DFI ',
+    'Average estimated cost in DFI ',
     // take the second element of the array
     new BigFloatingNumber(
       dexesData[1]
@@ -174,6 +175,26 @@ async function estimateGasCost() {
         .add(vaultData[1])
         .add(maxVaultCallDataCost)
         .add(burnData[1])
+        .add(maxBurnCallDataCost)
+        .mul('50000000000') // multiply the gas units with the estimated effectiveGasPrice -- 50 gWei
+        .toString(),
+    )
+      .div(new BigFloatingNumber(10).pow(18)) // decimals of native DFI on DMC = 18
+      .multipliedBy(30 * 24) // multiply by 30 days per month, 24 hours per day.
+      .toString(),
+  );
+
+  // worst-case estimation
+  console.log(
+    'Maximum cost in DFI',
+    new BigFloatingNumber(
+      dexesData[0]
+        .add(maxDexesCallDataCost)
+        .add(masterData[0])
+        .add(maxMasterCallDataCost)
+        .add(vaultData[0])
+        .add(maxVaultCallDataCost)
+        .add(burnData[0])
         .add(maxBurnCallDataCost)
         .mul('50000000000') // multiply the gas units with the estimated effectiveGasPrice -- 50 gWei
         .toString(),

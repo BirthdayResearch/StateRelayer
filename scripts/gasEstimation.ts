@@ -57,8 +57,8 @@ async function getPrice(): Promise<BigFloatingNumber> {
 }
 
 async function calculateAverageCost(arr: BigNumber[]): Promise<BigFloatingNumber> {
-  // assume 1 gas = 30 gWei
-  const initialCostUpdateInGas = new BigFloatingNumber(arr[0].mul(30).mul(BigNumber.from(10).pow(9)).toString()).div(
+  // assume 1 gas = 50 gWei
+  const initialCostUpdateInGas = new BigFloatingNumber(arr[0].mul(50).mul(BigNumber.from(10).pow(9)).toString()).div(
     new BigFloatingNumber(10).pow(18),
   );
 
