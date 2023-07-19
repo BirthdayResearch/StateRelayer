@@ -1,4 +1,5 @@
 import '@nomicfoundation/hardhat-toolbox';
+import '@truffle/dashboard-hardhat-plugin';
 
 import { HardhatUserConfig, task, types } from 'hardhat/config';
 
@@ -82,7 +83,7 @@ const config: HardhatUserConfig = {
       allowUnlimitedContractSize: true,
     },
     DMCTestnet: {
-      url: 'http://35.187.53.161:20551',
+      url: 'http://13.214.74.236:20551/',
       accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
       chainId: 1133,
     },
