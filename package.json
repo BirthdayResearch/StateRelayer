@@ -1,5 +1,5 @@
 {
-  "name": "@waveshq/stateRelayerBot",
+  "name": "staterelayer-bot",
   "version": "0.0.0",
   "private": false,
   "scripts": {
