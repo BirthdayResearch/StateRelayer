@@ -6,7 +6,7 @@ Basically, the cost of our transaction = effective gas price \* gasUsed
 
 ![Intrinsic Gas](./img/Pasted%20Graphic.png)
 
-Some note:
+Some notes:
 
 - For our transactions to update via the three update functions, T_A is an empty set
 
@@ -14,9 +14,13 @@ Some note:
 
 - Therefore, we only care about G_txdatazero and G_txdatanonzero.
 
-2. Then the gas cost is spent on executing every opcode after this (except for the case of creation transaction, the gas cost will be plus the code_deposit because of the creation of the contract)
+2. There are two cases that can happen here:
+   a. The to address is null, then this is contract creation, the code to be executed is the creation bytecode.
+   b. The to address is not null, then it is a message call, the code to be executed is the runtime bytecode of this to field.
 
-3. Along the way, there is going to be a refund for any empty of storage or self-destruct of an account. This refund is reimbursed at the end of the execution and capped at half of the gas spent for the whole transaction.
+3. Then the gas cost is spent on executing every opcode or precompiled contracts after this.
+
+4. Along the way, there is going to be a refund for any empty of storage or self-destruct of an account. This refund is reimbursed at the end of the execution of the transaction and capped at 1/5 of the gas spent for the whole transaction.
 
 According to our implementation up till now, there seems to be only 2 concerns:
 
@@ -36,6 +40,8 @@ Reference:
 https://ethereum.github.io/yellowpaper/paper.pdf
 
 https://github.com/wolflo/evm-opcodes/tree/main
+
+https://github.com/ethereum/go-ethereum/blob/a196f3e8a22b6ad22ced5c2e3baf32bc3ebd4ec9/core/state_transition.go#L355
 
 ## Regarding effective gas price
 

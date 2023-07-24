@@ -138,7 +138,12 @@ async function estimateGasCost() {
     masterData.push(masterDataTxReceipt.gasUsed);
     vaultData.push(vaultTxReceipt.gasUsed);
     burnData.push(burnTxReceipt.gasUsed);
+
     console.log('Successfully update ', i);
+    console.log('Total gas used');
+    console.log(
+      dexUpdateReceipt.gasUsed.add(masterDataTxReceipt.gasUsed).add(vaultTxReceipt.gasUsed).add(burnTxReceipt.gasUsed),
+    );
     if (i === 1) {
       maxDexesCallDataCost = BigNumber.from(((dexUpdate.data.length - 2) / 2) * 16);
       maxMasterCallDataCost = BigNumber.from(((masterDataUpdate.data.length - 2) / 2) * 16);
