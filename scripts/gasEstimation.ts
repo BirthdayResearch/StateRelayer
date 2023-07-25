@@ -14,17 +14,19 @@ async function estimateGasCost() {
   const burnData: BigNumber[] = [];
   const { bot, stateRelayerProxy } = await deployContract();
   for (let i = 0; i < 10; i += 1) {
-    const { dexInfoTxReceipt, masterDataTxReceipt, vaultTxReceipt, burnTxReceipt } = await handler({
+    const data = await handler({
       testGasCost: true,
       urlNetwork: 'https://ocean.defichain.com/',
       envNetwork: EnvironmentNetwork.MainNet,
       contractAddress: stateRelayerProxy.address, // Proxy contract address
       signer: bot,
     });
-    dexesData.push(dexInfoTxReceipt.gasUsed);
-    masterData.push(masterDataTxReceipt.gasUsed);
-    vaultData.push(vaultTxReceipt.gasUsed);
-    burnData.push(burnTxReceipt.gasUsed);
+    if (data === undefined) break;
+    const { dexInfoTxReceipt, masterDataTxReceipt, vaultTxReceipt, burnTxReceipt } = data;
+    dexesData.push(dexInfoTxReceipt!.gasUsed);
+    masterData.push(masterDataTxReceipt!.gasUsed);
+    vaultData.push(vaultTxReceipt!.gasUsed);
+    burnData.push(burnTxReceipt!.gasUsed);
     console.log('Successfully update ', i);
     await new Promise((r) => setTimeout(r, 10 * 1000));
   }
