@@ -12,3 +12,6 @@ artifacts
 # Typings
 hardhat.d.ts
 **/generated
+
+# dist
+dist

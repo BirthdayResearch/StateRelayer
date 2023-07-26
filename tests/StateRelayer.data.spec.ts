@@ -1,12 +1,12 @@
 import { loadFixture, time } from '@nomicfoundation/hardhat-network-helpers';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { expect } from 'chai';
-import { ethers } from 'hardhat';
+import { ethers } from 'ethers';
 
 import { StateRelayer, StateRelayer__factory } from '../generated';
 import { deployContract } from './utils/deployment';
 
-type BigNumber = ethers.bigNumber;
+type BigNumber = ethers.BigNumberish;
 describe('State relayer contract data tests', () => {
   let stateRelayerProxy: StateRelayer;
   let bot: SignerWithAddress;
