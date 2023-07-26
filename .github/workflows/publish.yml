@@ -22,7 +22,7 @@ jobs:
       - name: Publish package on NPM 📦
         run: npm publish --access public
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.WAVESHQ_NPM_TOKEN }}
+          NPM_AUTH_TOKEN: ${{ secrets.WAVESHQ_NPM_TOKEN }}
 
       - run: npm config delete "//registry.npmjs.org/:_authToken" --location=project
         if: always()
