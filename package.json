@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsc --project tsconfig.build.json",
+    "build": "tsc -b tsconfig.build.json",
     "build:docker": "docker build -t state-relayer/hardhatnetwork:0.0.0 .",
     "clean": "hardhat clean",
     "compile": "npm run solhint && hardhat compile",
