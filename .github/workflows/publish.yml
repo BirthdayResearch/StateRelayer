@@ -22,6 +22,6 @@ jobs:
       - name: Publish package on NPM 📦
         run: npm publish --access public --tag latest
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.WAVESHQ_NPM_TOKEN }}
-      - run: npm config delete "//registry.npmjs.org/:_authToken" --location=project
+          NODE_AUTH_TOKEN: ${{ secrets.TEST_TOKEN }}
+      - run: npm config delete '//registry.npmjs.org/:_authToken' --location=project
         if: always()
