@@ -1,5 +1,5 @@
 {
-  "name": "@waveshq/state-relayer-bot",
+  "name": "@cuongvn/state-relayer-bot-random",
   "version": "0.0.0",
   "private": false,
   "main": "dist/index.js",
