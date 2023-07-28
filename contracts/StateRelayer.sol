@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: UNLICENSE
 import '@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol';
 
@@ -5,38 +6,53 @@ error ALREADY_IN_BATCH_CALL_BY_BOT();
 error ERROR_IN_LOW_LEVEL_CALLS();
 
 contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
+    // total value locked in DeFiChain DEX (USD)
     uint256 private totalValueLockInPoolPair;
+    // total 24h volume of the pool pairs on DeFiChain (USD)
     uint256 private total24HVolume;
     uint256 private lastUpdatedVaultInfoTimestamp;
     uint256 private lastUpdatedMasterNodeInfoTimestamp;
     uint256 private lastUpdatedDexInfoTimestamp;
     uint256 private lastUpdatedBurnedInfoTimestamp;
     struct DEXInfo {
+        // the price of the primary token in USDT/ USD
         uint256 primaryTokenPrice;
+        // the 24H trading volume of the pair (in USD)
         uint256 volume24H;
+        // the total liquidity of the pair (in USD)
         uint256 totalLiquidity;
+        // the APR (in percentage)
+        // TODO: may remove this variable later,
+        // as it seems that APR = commissions + decimals
         uint256 APR;
+        // the number of first tokens in the pool
         uint256 firstTokenBalance;
+        // the number of second tokens in the pool
         uint256 secondTokenBalance;
-        // don't know whether we need price of pooled tokens over here
+        // the rewards percentage
         uint256 rewards;
+        // the commissions percentage
         uint256 commissions;
-        // packed information about the decimals of each variable
         uint40 decimals;
     }
     mapping(string => DEXInfo) private DEXInfoMapping;
 
     struct VaultGeneralInformation {
-        uint256 noOfVaults; // integer values, no decimals
+        // the number of open vaults
+        // integer values, no decimals
+        uint256 noOfVaults;
+        // total loan value in USD
         uint256 totalLoanValue;
+        // total collateral value in USD
         uint256 totalCollateralValue;
         uint256 totalCollateralizationRatio;
-        uint256 activeAuctions; // integer values, no decimals
+        // integer values, no decimals
+        uint256 activeAuctions;
         uint40 decimals;
     }
     VaultGeneralInformation public vaultInfo;
-    
-    struct BurnedInformation{
+
+    struct BurnedInformation {
         uint256 fee;
         uint256 auction;
         uint256 payback;
@@ -47,20 +63,32 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
     BurnedInformation public burnedInformation;
 
     struct MasterNodeInformation {
+        // the total value locked in USD in masternodes
         uint256 totalValueLockedInMasterNodes;
-        uint256 zeroYearLocked; // integer values, no decimals
-        uint256 fiveYearLocked; // integer values, no decimals
-        uint256 tenYearLocked; // integer values, no decimals
+        // the number of master nodes that have their DFI locked for 0 years
+        // integer values, no decimals
+        uint256 zeroYearLocked;
+        // the number of master nodes that have their DFI locked for 5 years
+        // integer values, no decimals
+        uint256 fiveYearLocked;
+        // the number of master nodes that have their DFI locked for 10 years
+        // integer values, no decimals
+        uint256 tenYearLocked;
         uint40 decimals;
     }
 
     MasterNodeInformation private masterNodeInformation;
     bool public inBatchCallByBot;
-    bytes32 public constant BOT_ROLE = keccak256("BOT_ROLE");
+    bytes32 public constant BOT_ROLE = keccak256('BOT_ROLE');
 
     // Events
-    event UpdateDEXInfo(string[] dex, DEXInfo[] dexInfo, uint256 timeStamp, 
-        uint256 totalValueLockInPoolPair, uint256 total24HVolume);
+    event UpdateDEXInfo(
+        string[] dex,
+        DEXInfo[] dexInfo,
+        uint256 timeStamp,
+        uint256 totalValueLockInPoolPair,
+        uint256 total24HVolume
+    );
     event UpdateVaultGeneralInformation(VaultGeneralInformation vaultInfo, uint256 timeStamp);
     event UpdateMasterNodeInformation(MasterNodeInformation nodeInformation, uint256 timeStamp);
     event UpdatedBurnedInformation(BurnedInformation burnedInformation, uint256 timeStamp);
@@ -80,6 +108,7 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
         _grantRole(DEFAULT_ADMIN_ROLE, _admin);
         _grantRole(BOT_ROLE, _bot);
     }
+
     function updateDEXInfo(
         string[] calldata dex,
         DEXInfo[] calldata dexInfo,
@@ -111,7 +140,7 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
         emit UpdateMasterNodeInformation(_masterNodeInformation, _lastUpdatedMasterNodeInfoTimestamp);
     }
 
-    function updateBurnInfo( BurnedInformation calldata _burnedInfo) external allowUpdate {
+    function updateBurnInfo(BurnedInformation calldata _burnedInfo) external allowUpdate {
         burnedInformation = _burnedInfo;
         uint256 _lastUpdatedMasterBurnedInfoTimestamp = block.timestamp;
         lastUpdatedBurnedInfoTimestamp = _lastUpdatedMasterBurnedInfoTimestamp;
@@ -144,23 +173,23 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
         inBatchCallByBot = false;
     }
 
-    function getDexInfo() external view returns(uint256, uint256, uint256){
-        return (lastUpdatedDexInfoTimestamp, total24HVolume, totalValueLockInPoolPair ); 
+    function getDexInfo() external view returns (uint256, uint256, uint256) {
+        return (lastUpdatedDexInfoTimestamp, total24HVolume, totalValueLockInPoolPair);
     }
 
-    function getDexPairInfo(string memory pair) external view returns(uint256, DEXInfo memory){
-        return ( lastUpdatedDexInfoTimestamp, DEXInfoMapping[pair]);
+    function getDexPairInfo(string memory pair) external view returns (uint256, DEXInfo memory) {
+        return (lastUpdatedDexInfoTimestamp, DEXInfoMapping[pair]);
     }
 
-    function getVaultInfo() external view returns(uint256, VaultGeneralInformation memory){
+    function getVaultInfo() external view returns (uint256, VaultGeneralInformation memory) {
         return (lastUpdatedVaultInfoTimestamp, vaultInfo);
     }
 
-    function getMasterNodeInfo() external view returns(uint256, MasterNodeInformation memory){
+    function getMasterNodeInfo() external view returns (uint256, MasterNodeInformation memory) {
         return (lastUpdatedMasterNodeInfoTimestamp, masterNodeInformation);
     }
 
-    function getBurnedInfo() external view returns(uint256, BurnedInformation memory){
+    function getBurnedInfo() external view returns (uint256, BurnedInformation memory) {
         return (lastUpdatedBurnedInfoTimestamp, burnedInformation);
     }
 }
