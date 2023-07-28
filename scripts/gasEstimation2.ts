@@ -168,7 +168,7 @@ async function estimateGasCost() {
   console.log('Update burn data costs in gas units');
   console.log(burnData);
 
-  // average estimation
+  // average estimation (173 DFI)
   console.log(
     'Average estimated cost in DFI ',
     // take the second element of the array
@@ -189,7 +189,7 @@ async function estimateGasCost() {
       .toString(),
   );
 
-  // worst-case estimation
+  // worst-case estimation (570 DFI)
   console.log(
     'Maximum cost in DFI',
     new BigFloatingNumber(

@@ -77,7 +77,7 @@ const dexesNames = [
   'dBURN2-DUSD',
 ];
 
-// to run this file, run npx hardhat clean && npm i && npx hardhat run scripts/gasEstimation2.ts
+// to run this file, run npx hardhat clean && npm i && npx hardhat run scripts/gasEstimation3BatchCallByBot.ts
 async function estimateGasCost() {
   const { bot, stateRelayerProxy } = await deployContract();
   const stateRelayerInterface = StateRelayer__factory.createInterface();
@@ -151,7 +151,7 @@ async function estimateGasCost() {
     batchCallStats.push(batchCallTxReceipt.gasUsed);
   }
 
-  // average estimation
+  // average estimation (171 DFI)
   console.log(
     'Average estimated cost in DFI ',
     // take the second element of the array
@@ -166,7 +166,7 @@ async function estimateGasCost() {
       .toString(),
   );
 
-  // worst-case estimation
+  // worst-case estimation (568 DFI)
   console.log(
     'Maximum cost in DFI',
     new BigFloatingNumber(
