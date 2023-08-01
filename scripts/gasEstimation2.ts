@@ -115,11 +115,21 @@ async function estimateGasCost() {
     const masterDataTxReceipt = await masterDataUpdate.wait();
 
     const vaultDataUpdate = await stateRelayerProxy.connect(bot).updateBurnInfo({
-      fee: i,
-      auction: i,
-      payback: i,
-      emission: i,
-      total: i,
+      burnAddress: '8defichainBurnAddressXXXXXXXdRQkSm',
+      amount: i,
+      tokens: [i.toString(), (i = +i).toString()],
+      feeBurn: i,
+      emissionBurn: i,
+      auctionBurn: i,
+      paybackBurn: i,
+      paybackBurnTokens: [i.toString(), (i = +i).toString()],
+      dexFeeTokens: [i.toString(), (i = +i).toString()],
+      dfiPaybackFee: i,
+      dfiPaybackTokens: [i.toString(), (i = +i).toString()],
+      paybackFees: [],
+      paybackTokens: [],
+      dfiP2203: [i.toString(), (i = +i).toString()],
+      dfiP2206F: [],
       decimals: i,
     });
     const vaultTxReceipt = await vaultDataUpdate.wait();
