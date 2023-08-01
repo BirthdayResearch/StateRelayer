@@ -35,7 +35,8 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
     const statsData = await client.stats.get();
     const rawPoolPairData = await client.poolpairs.list(200);
     const dexPriceData = await client.poolpairs.listDexPrices(DENOMINATION);
-
+    const burn = await client.stats.getBurn();
+    console.log(burn);
     // sanitize response data
     const poolPairData = rawPoolPairData.filter((pair: any) => !pair.displaySymbol.includes('/'));
 
@@ -44,12 +45,12 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
     const totalValueLockInPoolPair = transformToEthersBigNumber(statsData.tvl.dex.toString(), DECIMALS);
     // total24HVolume
     const total24HVolume = transformToEthersBigNumber(
-      poolPairData.reduce((acc:any, currPair:any) => acc + (currPair.volume?.h24 ?? 0), 0).toString(),
+      poolPairData.reduce((acc: any, currPair: any) => acc + (currPair.volume?.h24 ?? 0), 0).toString(),
       DECIMALS,
     );
 
     // /dex/pair
-    const pair = poolPairData.reduce<PairData>((acc:any, currPair:any) => {
+    const pair = poolPairData.reduce<PairData>((acc: any, currPair: any) => {
       let tokenPrice = new BigNumber(0);
       // price ratio is
       const priceRatio = currPair.priceRatio.ba;

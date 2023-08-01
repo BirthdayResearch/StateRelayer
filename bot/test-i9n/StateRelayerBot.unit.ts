@@ -10,6 +10,7 @@ import {
   expectedMasterNodeData,
   expectedPairData,
   expectedVaultData,
+  mockedBurnData,
   mockedDexPricesData,
   mockedPoolPairData,
   mockedStatsData,
@@ -19,6 +20,7 @@ jest.mock('@defichain/whale-api-client', () => ({
   WhaleApiClient: jest.fn().mockImplementation(() => ({
     stats: {
       get: () => mockedStatsData,
+      getBurn: () => mockedBurnData,
     },
     poolpairs: {
       list: () => mockedPoolPairData,
