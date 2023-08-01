@@ -38,8 +38,8 @@
     "preset": "@birthdayresearch/sticky-jest"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^4.8.2",
-    "@openzeppelin/contracts-upgradeable": "^4.8.2",
+    "@openzeppelin/contracts": "4.9.3",
+    "@openzeppelin/contracts-upgradeable": "4.9.3",
     "axios": "^1.4.0",
     "solhint": "^3.4.1"
   },
