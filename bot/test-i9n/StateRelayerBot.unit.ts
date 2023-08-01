@@ -87,11 +87,21 @@ describe('State Relayer Bot Tests', () => {
     }
 
     const receivedBurnedInfo = await proxy.getBurnedInfo();
-    expect(receivedBurnedInfo[1].fee.toString()).toEqual(expectedBurnedInfo.fee);
-    expect(receivedBurnedInfo[1].auction.toString()).toEqual(expectedBurnedInfo.auction);
-    expect(receivedBurnedInfo[1].payback.toString()).toEqual(expectedBurnedInfo.payback);
-    expect(receivedBurnedInfo[1].emission.toString()).toEqual(expectedBurnedInfo.emission);
-    expect(receivedBurnedInfo[1].total.toString()).toEqual(expectedBurnedInfo.total);
+    expect(receivedBurnedInfo[1].burnAddress).toEqual(expectedBurnedInfo.address);
+    expect(receivedBurnedInfo[1].amount.toString()).toEqual(expectedBurnedInfo.amount);
+    expect(receivedBurnedInfo[1].tokens).toEqual(expectedBurnedInfo.tokens);
+    expect(receivedBurnedInfo[1].feeBurn.toString()).toEqual(expectedBurnedInfo.feeburn);
+    expect(receivedBurnedInfo[1].emissionBurn.toString()).toEqual(expectedBurnedInfo.emissionburn);
+    expect(receivedBurnedInfo[1].auctionBurn.toString()).toEqual(expectedBurnedInfo.auctionburn);
+    expect(receivedBurnedInfo[1].paybackBurn.toString()).toEqual(expectedBurnedInfo.paybackburn);
+    expect(receivedBurnedInfo[1].paybackBurnTokens).toEqual(expectedBurnedInfo.paybackburntokens);
+    expect(receivedBurnedInfo[1].dexFeeTokens).toEqual(expectedBurnedInfo.dexfeetokens);
+    expect(receivedBurnedInfo[1].dfiPaybackFee.toString()).toEqual(expectedBurnedInfo.dfipaybackfee);
+    expect(receivedBurnedInfo[1].dfiPaybackTokens).toEqual(expectedBurnedInfo.dfipaybacktokens);
+    expect(receivedBurnedInfo[1].paybackFees).toEqual(expectedBurnedInfo.paybackfees);
+    expect(receivedBurnedInfo[1].paybackTokens).toEqual(expectedBurnedInfo.paybacktokens);
+    expect(receivedBurnedInfo[1].dfiP2203).toEqual(expectedBurnedInfo.dfip2203);
+    expect(receivedBurnedInfo[1].dfiP2206F).toEqual(expectedBurnedInfo.dfip2206f);
 
     // Checking the /dex/dex-pair info
     const dETH = await proxy.getDexPairInfo('dETH-DFI');

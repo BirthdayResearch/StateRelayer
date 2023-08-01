@@ -35,8 +35,8 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
     const statsData = await client.stats.get();
     const rawPoolPairData = await client.poolpairs.list(200);
     const dexPriceData = await client.poolpairs.listDexPrices(DENOMINATION);
-    const burn = await client.stats.getBurn();
-    console.log(burn);
+    const burnDataInfo = await client.stats.getBurn();
+
     // sanitize response data
     const poolPairData = rawPoolPairData.filter((pair: any) => !pair.displaySymbol.includes('/'));
 
@@ -102,11 +102,21 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
     dataMasterNode.decimals = DECIMALS;
 
     // Get Data from all burns in ecosystem
-    burnedData.fee = transformToEthersBigNumber(statsData.burned.fee.toString(), DECIMALS);
-    burnedData.auction = transformToEthersBigNumber(statsData.burned.auction.toString(), DECIMALS);
-    burnedData.payback = transformToEthersBigNumber(statsData.burned.payback.toString(), DECIMALS);
-    burnedData.emission = transformToEthersBigNumber(statsData.burned.emission.toString(), DECIMALS);
-    burnedData.total = transformToEthersBigNumber(statsData.burned.total.toString(), DECIMALS);
+    burnedData.burnAddress = burnDataInfo.address;
+    burnedData.amount = transformToEthersBigNumber(burnDataInfo.amount.toString(), DECIMALS);
+    burnedData.tokens = burnDataInfo.tokens;
+    burnedData.feeBurn = transformToEthersBigNumber(burnDataInfo.feeburn.toString(), DECIMALS);
+    burnedData.emissionBurn = transformToEthersBigNumber(burnDataInfo.emissionburn.toString(), DECIMALS);
+    burnedData.auctionBurn = transformToEthersBigNumber(burnDataInfo.auctionburn.toString(), DECIMALS);
+    burnedData.paybackBurn = transformToEthersBigNumber(burnDataInfo.paybackburn.toString(), DECIMALS);
+    burnedData.paybackBurnTokens = burnDataInfo.paybackburntokens;
+    burnedData.dexFeeTokens = burnDataInfo.dexfeetokens;
+    burnedData.dfiPaybackFee = transformToEthersBigNumber(burnDataInfo.dfipaybackfee.toString(), DECIMALS);
+    burnedData.dfiPaybackTokens = burnDataInfo.dfipaybacktokens;
+    burnedData.paybackFees = burnDataInfo.paybackfees;
+    burnedData.paybackTokens = burnDataInfo.paybacktokens;
+    burnedData.dfiP2203 = burnDataInfo.dfip2203;
+    burnedData.dfiP2206F = burnDataInfo.dfip2206f;
     burnedData.decimals = DECIMALS;
     // Call SC Function to update Data
     // Update Dex information
@@ -122,7 +132,7 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
     // Update Vault general information
     const vaultTx = await stateRelayerContract.updateVaultGeneralInformation(dataVault);
     // Update Burn information
-    const burnTx = await stateRelayerContract.updateBurnInfo(burnedData);
+    const burnTx = await stateRelayerContract.updateBurnInfo(burnedData, { gasLimit: 10000000 });
     if (!props.testGasCost) {
       return {
         dataStore,

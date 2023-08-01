@@ -37,11 +37,21 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
     VaultGeneralInformation public vaultInfo;
     
     struct BurnedInformation{
-        uint256 fee;
-        uint256 auction;
-        uint256 payback;
-        uint256 emission;
-        uint256 total;
+        string burnAddress;
+        uint256 amount; // Amount send to burn address
+        string[] tokens; // Token amount send to burn address; formatted as AMOUNT@SYMBOL
+        uint256 feeBurn; // Amount collected via fee burn
+        uint256 emissionBurn; // Amount collected via emission burn
+        uint256 auctionBurn; //Amount collected via auction burn
+        uint256 paybackBurn; // Value of burn after payback
+        string[] paybackBurnTokens; // Formatted as AMOUNT@SYMBOL
+        string[] dexFeeTokens; // Formatted as AMOUNT@SYMBOL
+        uint256 dfiPaybackFee; // Amount of DFI collected from penalty resulting from paying DUSD using DFI
+        string[] dfiPaybackTokens; // Amount of tokens that are paid back; formatted as AMOUNT@SYMBOL
+        string[] paybackFees; // Amount of paybacks
+        string[] paybackTokens; // Amount of tokens that are paid back
+        string[] dfiP2203; // Amount of tokens burned due to futureswap
+        string[] dfiP2206F; // Amount of tokens burned due to DFI-to-DUSD swap
         uint40 decimals;
     }
     BurnedInformation public burnedInformation;

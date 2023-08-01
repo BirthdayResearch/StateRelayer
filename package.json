@@ -12,7 +12,7 @@
     "postinstall": "npm run compile",
     "solhint": "solhint contracts/**/*.sol",
     "test": "npm run solhint && hardhat test",
-    "test-i9n": "jest"
+    "test-i9n": "npm run solhint && hardhat compile && jest"
   },
   "prettier": "@birthdayresearch/sticky-prettier",
   "eslintConfig": {
