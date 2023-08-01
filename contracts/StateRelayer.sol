@@ -6,6 +6,8 @@ error ALREADY_IN_BATCH_CALL_BY_BOT();
 error ERROR_IN_LOW_LEVEL_CALLS();
 
 contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
+    bytes32 public constant BOT_ROLE = keccak256('BOT_ROLE');
+
     // total value locked in DeFiChain DEX (USD)
     uint256 private totalValueLockInPoolPair;
     // total 24h volume of the pool pairs on DeFiChain (USD)
@@ -14,6 +16,8 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
     uint256 private lastUpdatedMasterNodeInfoTimestamp;
     uint256 private lastUpdatedDexInfoTimestamp;
     uint256 private lastUpdatedBurnedInfoTimestamp;
+    bool public inBatchCallByBot;
+
     struct DEXInfo {
         // the price of the primary token in USDT/ USD
         uint256 primaryTokenPrice;
@@ -76,10 +80,7 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
         uint256 tenYearLocked;
         uint40 decimals;
     }
-
     MasterNodeInformation private masterNodeInformation;
-    bool public inBatchCallByBot;
-    bytes32 public constant BOT_ROLE = keccak256('BOT_ROLE');
 
     // Events
     event UpdateDEXInfo(
@@ -104,28 +105,44 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
         _;
     }
 
+    /**
+     @notice function to initialize the proxy contract
+     @param _admin the address to be admin of the proxy contract
+     @param _bot the address to play the bot role of proxy contract
+     */
     function initialize(address _admin, address _bot) external initializer {
         _grantRole(DEFAULT_ADMIN_ROLE, _admin);
         _grantRole(BOT_ROLE, _bot);
     }
 
+    /**
+     @notice Function to update the dex info
+     @param _dex The names of the pool pairs
+     @param _dexInfo Information about the dexes
+     @param _totalValueLocked TVL of the whole dex ecosystem
+     @param _total24HVolume Total 24H volume of the whole dex ecosystem
+     */
     function updateDEXInfo(
-        string[] calldata dex,
-        DEXInfo[] calldata dexInfo,
+        string[] calldata _dex,
+        DEXInfo[] calldata _dexInfo,
         uint256 _totalValueLocked,
         uint256 _total24HVolume
     ) external allowUpdate {
-        require(dex.length == dexInfo.length);
-        for (uint256 i = 0; i < dex.length; ++i) {
-            DEXInfoMapping[dex[i]] = dexInfo[i];
+        require(_dex.length == _dexInfo.length);
+        for (uint256 i = 0; i < _dex.length; ++i) {
+            DEXInfoMapping[_dex[i]] = _dexInfo[i];
         }
         totalValueLockInPoolPair = _totalValueLocked;
         total24HVolume = _total24HVolume;
         uint256 _lastUpdatedDexInfo = block.timestamp;
         lastUpdatedDexInfoTimestamp = _lastUpdatedDexInfo;
-        emit UpdateDEXInfo(dex, dexInfo, _lastUpdatedDexInfo, _totalValueLocked, _total24HVolume);
+        emit UpdateDEXInfo(_dex, _dexInfo, _lastUpdatedDexInfo, _totalValueLocked, _total24HVolume);
     }
 
+    /**
+     @notice Function to update the vault general information
+     @param _vaultInfo the general vault information
+     */
     function updateVaultGeneralInformation(VaultGeneralInformation calldata _vaultInfo) external allowUpdate {
         vaultInfo = _vaultInfo;
         uint256 _lastUpdatedVaultInfoTimestamp = block.timestamp;
@@ -133,6 +150,10 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
         emit UpdateVaultGeneralInformation(_vaultInfo, _lastUpdatedVaultInfoTimestamp);
     }
 
+    /**
+     @notice Function to update master node information
+     @param _masterNodeInformation information about masternodes
+    */
     function updateMasterNodeInformation(MasterNodeInformation calldata _masterNodeInformation) external allowUpdate {
         masterNodeInformation = _masterNodeInformation;
         uint256 _lastUpdatedMasterNodeInfoTimestamp = block.timestamp;
@@ -173,18 +194,40 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
         inBatchCallByBot = false;
     }
 
+    /**
+     * @notice getter function to get the information about dexes
+     * @return last time that information about dexes are updated
+     * @return total24HVolume of all the dexes
+     * @return TVL of all dexes
+     */
     function getDexInfo() external view returns (uint256, uint256, uint256) {
         return (lastUpdatedDexInfoTimestamp, total24HVolume, totalValueLockInPoolPair);
     }
 
-    function getDexPairInfo(string memory pair) external view returns (uint256, DEXInfo memory) {
-        return (lastUpdatedDexInfoTimestamp, DEXInfoMapping[pair]);
+    /**
+     * @notice Getter function to get information about a certain dex
+     * @param _pair the pair to get information about
+     * @return last time that information about all dexes are updated
+     * @return information about that pair
+     */
+    function getDexPairInfo(string memory _pair) external view returns (uint256, DEXInfo memory) {
+        return (lastUpdatedDexInfoTimestamp, DEXInfoMapping[_pair]);
     }
 
+    /**
+     * @notice Getter function for general vault info
+     * @return last time that information about vaults is updated
+     * @return information about vaults
+     */
     function getVaultInfo() external view returns (uint256, VaultGeneralInformation memory) {
         return (lastUpdatedVaultInfoTimestamp, vaultInfo);
     }
 
+    /**
+     * @notice Getter function for master node information
+     * @return last time that information about the master nodes is updated
+     * @return master nodes information
+     */
     function getMasterNodeInfo() external view returns (uint256, MasterNodeInformation memory) {
         return (lastUpdatedMasterNodeInfoTimestamp, masterNodeInformation);
     }
