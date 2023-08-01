@@ -132,7 +132,7 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
     // Update Vault general information
     const vaultTx = await stateRelayerContract.updateVaultGeneralInformation(dataVault);
     // Update Burn information
-    const burnTx = await stateRelayerContract.updateBurnInfo(burnedData, { gasLimit: 10000000 });
+    const burnTx = await stateRelayerContract.updateBurnInfo(burnedData);
     if (!props.testGasCost) {
       return {
         dataStore,
