@@ -91,11 +91,21 @@ describe('State relayer contract data tests', () => {
     it('Should successfully set burned data for all ecosystem', async () => {
       ({ stateRelayerProxy, bot } = await loadFixture(deployContract));
       const burnInfo: BurnedInfo = {
-        fee: 315015,
-        auction: 1512527,
-        payback: 61705058,
-        emission: 98783549,
-        total: 317634155,
+        burnAddress: '8defichainBurnAddressXXXXXXXdRQkSm',
+        amount: 156041703,
+        tokens: ['7260.95539278@DFI', '17089.00000000@ETH'],
+        feeBurn: 336381,
+        emissionBurn: 98783549,
+        auctionBurn: 1784339,
+        paybackBurn: 61705058,
+        paybackBurnTokens: ['61705058.17491060@DFI', '679521.59492769@DUSD', '0.05978433@TSLA/v1'],
+        dexFeeTokens: ['130.17947440@BTC', '44026365.16395163@DUSD'],
+        dfiPaybackFee: 611225,
+        dfiPaybackTokens: ['223563786.46853752@DUSD'],
+        paybackFees: [],
+        paybackTokens: [],
+        dfiP2203: ['95826877.42238083@DUSD', '5717.96146342@BABA'],
+        dfiP2206F: [],
         decimals: 10,
       };
       await stateRelayerProxy.connect(bot).updateBurnInfo(burnInfo);
@@ -153,11 +163,21 @@ describe('State relayer contract data tests', () => {
     it('`updateBurnInfo` - Should successfully revert if the signer is not `bot`', async () => {
       ({ stateRelayerProxy, user } = await loadFixture(deployContract));
       const burnInfo: BurnedInfo = {
-        fee: 315015,
-        auction: 1512527,
-        payback: 61705058,
-        emission: 98783549,
-        total: 317634155,
+        burnAddress: '8defichainBurnAddressXXXXXXXdRQkSm',
+        amount: 156041703,
+        tokens: ['7260.95539278@DFI', '17089.00000000@ETH'],
+        feeBurn: 336381,
+        emissionBurn: 98783549,
+        auctionBurn: 1784339,
+        paybackBurn: 61705058,
+        paybackBurnTokens: ['61705058.17491060@DFI', '679521.59492769@DUSD', '0.05978433@TSLA/v1'],
+        dexFeeTokens: ['130.17947440@BTC', '44026365.16395163@DUSD'],
+        dfiPaybackFee: 611225,
+        dfiPaybackTokens: ['223563786.46853752@DUSD'],
+        paybackFees: [],
+        paybackTokens: [],
+        dfiP2203: ['95826877.42238083@DUSD', '5717.96146342@BABA'],
+        dfiP2206F: [],
         decimals: 10,
       };
       await expect(stateRelayerProxy.connect(user).updateBurnInfo(burnInfo)).to.reverted;
@@ -228,12 +248,22 @@ describe('State relayer contract data tests', () => {
 
       // Burned info data
       const burnedData: BurnedInfo = {
-        fee: 123,
-        auction: 25434,
-        payback: 34676234,
-        emission: 23546454,
-        total: 243563434,
-        decimals: 18,
+        burnAddress: '8defichainBurnAddressXXXXXXXdRQkSm',
+        amount: 156041703,
+        tokens: ['7260.95539278@DFI', '17089.00000000@ETH'],
+        feeBurn: 336381,
+        emissionBurn: 98783549,
+        auctionBurn: 1784339,
+        paybackBurn: 61705058,
+        paybackBurnTokens: ['61705058.17491060@DFI', '679521.59492769@DUSD', '0.05978433@TSLA/v1'],
+        dexFeeTokens: ['130.17947440@BTC', '44026365.16395163@DUSD'],
+        dfiPaybackFee: 611225,
+        dfiPaybackTokens: ['223563786.46853752@DUSD'],
+        paybackFees: [],
+        paybackTokens: [],
+        dfiP2203: ['95826877.42238083@DUSD', '5717.96146342@BABA'],
+        dfiP2206F: [],
+        decimals: 10,
       };
 
       const callDataBurnedInfo = stateRelayerInterface.encodeFunctionData('updateBurnInfo', [burnedData]);
@@ -357,10 +387,20 @@ interface DexInfo {
 }
 
 interface BurnedInfo {
-  fee: number;
-  auction: number;
-  payback: number;
-  emission: number;
-  total: number;
-  decimals: number;
+  burnAddress: string;
+  amount: BigNumber;
+  tokens: string[];
+  feeBurn: BigNumber;
+  emissionBurn: BigNumber;
+  auctionBurn: BigNumber;
+  paybackBurn: BigNumber;
+  paybackBurnTokens: string[];
+  dexFeeTokens: string[];
+  dfiPaybackFee: BigNumber;
+  dfiPaybackTokens: string[];
+  paybackFees: string[];
+  paybackTokens: string[];
+  dfiP2203: string[];
+  dfiP2206F: string[];
+  decimals: BigNumber;
 }
