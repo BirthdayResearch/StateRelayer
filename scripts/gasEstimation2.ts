@@ -114,7 +114,7 @@ async function estimateGasCost() {
     });
     const masterDataTxReceipt = await masterDataUpdate.wait();
 
-    const vaultDataUpdate = await stateRelayerProxy.connect(bot).updateBurnInfo({
+    const burnDataUpdate = await stateRelayerProxy.connect(bot).updateBurnInfo({
       burnAddress: '8defichainBurnAddressXXXXXXXdRQkSm',
       amount: '1560417037859082200',
       tokens: [
@@ -320,9 +320,9 @@ async function estimateGasCost() {
       dfiP2206F: [],
       decimals: 10,
     });
-    const vaultTxReceipt = await vaultDataUpdate.wait();
+    const burnTxReceipt = await burnDataUpdate.wait();
 
-    const burnDataUpdate = await stateRelayerProxy.connect(bot).updateVaultGeneralInformation({
+    const vaultDataUpdate = await stateRelayerProxy.connect(bot).updateVaultGeneralInformation({
       noOfVaults: i,
       totalLoanValue: i,
       totalCollateralValue: i,
@@ -330,7 +330,7 @@ async function estimateGasCost() {
       activeAuctions: i,
       decimals: i,
     });
-    const burnTxReceipt = await burnDataUpdate.wait();
+    const vaultTxReceipt = await vaultDataUpdate.wait();
 
     dexesData.push(dexUpdateReceipt.gasUsed);
     masterData.push(masterDataTxReceipt.gasUsed);
