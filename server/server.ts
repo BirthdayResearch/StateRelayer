@@ -11,16 +11,16 @@ require('dotenv').config({
 
 const app = server();
 const port = 3000;
-const provider = new ethers.providers.JsonRpcProvider('https://testnet-dmc.mydefichain.com:20551');
+const provider = new ethers.providers.JsonRpcProvider('http://13.214.74.236:20551/');
 
 async function feedData() {
   const bot = new ethers.Wallet(`0x${process.env.PRIVATE_KEY}`, provider);
-  const blockNumber = await provider.getBlockNumber();
   const data = await handler({
     urlNetwork: 'https://ocean.defichain.com/',
     envNetwork: EnvironmentNetwork.MainNet,
-    contractAddress: '0xAE105DE0afC82f91ddBF97cf2197dbd4627a8D16', // Sepolia test address
+    contractAddress: '0x1C0b966109152065b234692E2c18Ff75ecf89C45',
     signer: bot,
+    testGasCost: false,
   });
   // console.log(bot);
   // console.log(blockNumber);
@@ -30,6 +30,7 @@ async function feedData() {
 app.get('/data', async (res: Response) => {
   try {
     const data = await feedData();
+    console.log(data?.burnedData);
     if (data === undefined) {
       console.log('Unsuccessful');
     } else {

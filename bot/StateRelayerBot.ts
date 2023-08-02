@@ -79,6 +79,7 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
       } as PairData;
     }, {} as PairData);
     dataStore.pair = pair;
+    // console.log(dataStore.pair);
 
     // Data from vaults
     const totalLoanValue = statsData.loan.value.loan;
@@ -120,6 +121,7 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
     burnedData.dfiP2203 = burnDataInfo.dfip2203;
     burnedData.dfiP2206F = burnDataInfo.dfip2206f;
     burnedData.decimals = DECIMALS;
+    // console.log(burnedData);
     // Call SC Function to update Data
     // Update Dex information
     const dexInfoTx = await stateRelayerContract.updateDEXInfo(
@@ -130,19 +132,19 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
       { gasLimit: '24252373' },
     );
     await dexInfoTx.wait();
-    await txStatus(dexInfoTx.hash, envNetwork, provider!);
+    // await txStatus(dexInfoTx.hash, envNetwork, provider!);
     // Update Master Node information
-    const masterDataTx = await stateRelayerContract.updateMasterNodeInformation(dataMasterNode, { gasLimit: '100000' });
+    const masterDataTx = await stateRelayerContract.updateMasterNodeInformation(dataMasterNode, { gasLimit: '200000' });
     await masterDataTx.wait();
-    await txStatus(masterDataTx.hash, envNetwork, provider!);
+    // await txStatus(masterDataTx.hash, envNetwork, provider!);
     // Update Vault general information
     const valutTx = await stateRelayerContract.updateVaultGeneralInformation(dataVault, { gasLimit: '250000' });
     await valutTx.wait();
-    await txStatus(valutTx.hash, envNetwork, provider!);
+    // await txStatus(valutTx.hash, envNetwork, provider!);
     // Update Burn information
-    const burnTx = await stateRelayerContract.updateBurnInfo(burnedData, { gasLimit: '250000' });
+    const burnTx = await stateRelayerContract.updateBurnInfo(burnedData, { gasLimit: '350000' });
     await burnTx.wait();
-    await txStatus(burnTx.hash, envNetwork, provider!);
+    // await txStatus(burnTx.hash, envNetwork, provider!);
 
     if (!props.testGasCost) {
       return {
@@ -178,6 +180,6 @@ async function txStatus(hash: string, envNetwork: EnvironmentNetwork, provider: 
     if (txRec.status === 0) {
       console.log('Transaction has failed');
     }
-    console.log(`Successfully updated: https://changi.ocean.jellyfishsdk.com/tx/${hash}`);
+    console.log(`Successfully updated: https://testnet-dmc.mydefichain.com:8444/tx/${hash}`);
   }
 }
