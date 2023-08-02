@@ -1,6 +1,11 @@
 {
-  "name": "hardhat-project",
+  "name": "@waveshq/state-relayer-bot",
+  "version": "0.0.0",
+  "private": false,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
+    "build": "tsc -b tsconfig.build.json",
     "build:docker": "docker build -t state-relayer/hardhatnetwork:0.0.0 .",
     "clean": "hardhat clean",
     "compile": "npm run solhint && hardhat compile",
@@ -33,10 +38,9 @@
     "preset": "@birthdayresearch/sticky-jest"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^4.8.2",
-    "@openzeppelin/contracts-upgradeable": "^4.8.2",
+    "@openzeppelin/contracts": "4.9.3",
+    "@openzeppelin/contracts-upgradeable": "4.9.3",
     "axios": "^1.4.0",
-    "express": "^4.18.2",
     "solhint": "^3.4.1"
   },
   "devDependencies": {
@@ -46,7 +50,7 @@
     "@birthdayresearch/sticky-testcontainers": "^0.8.5",
     "@birthdayresearch/sticky-typescript": "^0.5.14",
     "@nomicfoundation/hardhat-toolbox": "^2.0.2",
-    "@types/express": "^4.17.17",
+    "@truffle/dashboard-hardhat-plugin": "^0.2.10",
     "@types/jest": "^29.5.2",
     "@waveshq/standard-defichain-jellyfishsdk": "^0.52.1",
     "@waveshq/walletkit-bot": "^0.47.0",

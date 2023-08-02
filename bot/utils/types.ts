@@ -1,3 +1,4 @@
+// @ts-ignore
 import { EnvironmentNetwork } from '@waveshq/walletkit-core';
 import { ethers } from 'ethers';
 
@@ -15,9 +16,10 @@ export type PairData = {
 };
 export type VaultData = StateRelayer.VaultGeneralInformationStructOutput;
 export type MasterNodeData = StateRelayer.MasterNodeInformationStructOutput;
-export type BurnedInformation = StateRelayer.BurnedInfoStructOutput;
+export type BurnedInformation = StateRelayer.BurnedInformationStructOutput;
 
 export type StateRelayerHandlerProps = {
+  testGasCost: boolean;
   urlNetwork: string;
   envNetwork: EnvironmentNetwork;
   contractAddress: string;

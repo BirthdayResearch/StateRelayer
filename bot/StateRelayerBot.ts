@@ -1,4 +1,4 @@
-/* eslint-disable no-console */
+// @ts-ignore
 import { getWhaleClient } from '@waveshq/walletkit-bot';
 import { EnvironmentNetwork } from '@waveshq/walletkit-core';
 import { BigNumber } from 'bignumber.js';
@@ -46,12 +46,12 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
     const totalValueLockInPoolPair = transformToEthersBigNumber(statsData.tvl.dex.toString(), DECIMALS);
     // total24HVolume
     const total24HVolume = transformToEthersBigNumber(
-      poolPairData.reduce((acc, currPair) => acc + (currPair.volume?.h24 ?? 0), 0).toString(),
+      poolPairData.reduce((acc:any, currPair:any) => acc + (currPair.volume?.h24 ?? 0), 0).toString(),
       DECIMALS,
     );
 
     // /dex/pair
-    const pair = poolPairData.reduce<PairData>((acc, currPair) => {
+    const pair = poolPairData.reduce<PairData>((acc:any, currPair:any) => {
       let tokenPrice = new BigNumber(0);
       // price ratio is
       const priceRatio = currPair.priceRatio.ba;
@@ -133,7 +133,20 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
     await burnTx.wait();
     await txStatus(burnTx.hash, envNetwork, provider!);
 
-    return { dataStore, dataVault, dataMasterNode, burnedData };
+    if (!props.testGasCost) {
+      return {
+        dataStore,
+        dataVault,
+        dataMasterNode,
+        burnedData,
+      };
+    }
+    return {
+      dataStore,
+      dataVault,
+      dataMasterNode,
+      burnedData,
+    };
   } catch (e) {
     console.error((e as Error).message);
     return undefined;

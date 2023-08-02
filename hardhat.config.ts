@@ -1,4 +1,5 @@
 import '@nomicfoundation/hardhat-toolbox';
+import '@truffle/dashboard-hardhat-plugin';
 
 import { HardhatUserConfig, task, types } from 'hardhat/config';
 
