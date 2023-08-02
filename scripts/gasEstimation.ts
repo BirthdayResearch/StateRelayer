@@ -73,7 +73,7 @@ async function calculateAverageCost(arr: BigNumber[]): Promise<BigFloatingNumber
       .toString(),
   )
     .div(arr.length - 1)
-    .multipliedBy(30)
+    .multipliedBy(50)
     .multipliedBy(new BigFloatingNumber(10).pow(9))
     .div(new BigFloatingNumber(10).pow(18));
   const laterAverageCostUpdateInUSD = (await getPrice()).multipliedBy(laterAverageCostUpdateInGas);
