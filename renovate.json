@@ -1,6 +1,4 @@
 {
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:base"
-  ]
+  "extends": ["github>waveshq/standard//renovate-config/web"],
+  "ignoreDeps": ["@openzeppelin/contracts", "@openzeppelin/contracts-upgradeable", "hardhat"]
 }
