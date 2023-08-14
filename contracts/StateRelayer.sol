@@ -7,15 +7,20 @@ error ERROR_IN_LOW_LEVEL_CALLS();
 
 contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
     bytes32 public constant BOT_ROLE = keccak256('BOT_ROLE');
+    uint256 public constant DECIMALS = 18;
 
     // total value locked in DeFiChain DEX (USD)
     uint256 private totalValueLockInPoolPair;
     // total 24h volume of the pool pairs on DeFiChain (USD)
     uint256 private total24HVolume;
-    uint256 private lastUpdatedVaultInfoTimestamp;
-    uint256 private lastUpdatedMasterNodeInfoTimestamp;
-    uint256 private lastUpdatedDexInfoTimestamp;
-    uint256 private lastUpdatedBurnedInfoTimestamp;
+    // integer value, no decimals
+    uint256 private lastUpdatedVaultInfoTimestampNoDecimals;
+    // integer value, no decimals
+    uint256 private lastUpdatedMasterNodeInfoTimestampNoDecimals;
+    // integer value, no decimals
+    uint256 private lastUpdatedDexInfoTimestampNoDecimals;
+    // integer value, no decimals
+    uint256 private lastUpdatedBurnedInfoTimestampNoDecimals;
     bool public inBatchCallByBot;
 
     struct DEXInfo {
@@ -37,32 +42,43 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
         uint256 rewards;
         // the commissions percentage
         uint256 commissions;
-        uint40 decimals;
     }
     mapping(string => DEXInfo) private DEXInfoMapping;
 
     struct VaultGeneralInformation {
         // the number of open vaults
         // integer values, no decimals
-        uint256 noOfVaults;
+        uint256 noOfVaultsNoDecimals;
         // total loan value in USD
         uint256 totalLoanValue;
         // total collateral value in USD
         uint256 totalCollateralValue;
         uint256 totalCollateralizationRatio;
         // integer values, no decimals
-        uint256 activeAuctions;
-        uint40 decimals;
+        uint256 activeAuctionsNoDecimals;
     }
     VaultGeneralInformation public vaultInfo;
 
+    struct AMOUNT_TOKEN {
+        uint256 amount;
+        string token;
+    }
     struct BurnedInformation {
-        uint256 fee;
-        uint256 auction;
-        uint256 payback;
-        uint256 emission;
-        uint256 total;
-        uint40 decimals;
+        string addr;
+        uint256 amount; // Amount of DFI sent to burn address
+        AMOUNT_TOKEN[] auction; // Token amount sent to burn address
+        uint256 feeburn; // Amount of DFI collected via fee burn
+        uint256 emissionburn; // Amount of DFI collected via emission burn
+        uint256 auctionburn; // Amount of DFI collected via auction burn
+        uint256 paybackburn; // Value of burn after payback (in DFI )
+        AMOUNT_TOKEN[] paybackburntokens;
+        AMOUNT_TOKEN[] dexfeetokens;
+        uint256 dfipaybackfee; // Amount of DFI collected from penalty resulting from paying DUSD using dfi
+        AMOUNT_TOKEN[] dfipaybacktokens; // Amount of tokens that are paid back
+        AMOUNT_TOKEN[] paybackfees; // Amount of paybacks
+        AMOUNT_TOKEN[] paybacktokens; // Amount of tokens that are paid back
+        AMOUNT_TOKEN[] dfip2203; // Amount of tokens burned due to futureswap
+        AMOUNT_TOKEN[] dfip2206f; // Amount of tokens burned due to DFI-to-DUSD swap
     }
     BurnedInformation public burnedInformation;
 
@@ -71,14 +87,13 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
         uint256 totalValueLockedInMasterNodes;
         // the number of master nodes that have their DFI locked for 0 years
         // integer values, no decimals
-        uint256 zeroYearLocked;
+        uint256 zeroYearLockedNoDecimals;
         // the number of master nodes that have their DFI locked for 5 years
         // integer values, no decimals
-        uint256 fiveYearLocked;
+        uint256 fiveYearLockedNoDecimals;
         // the number of master nodes that have their DFI locked for 10 years
         // integer values, no decimals
-        uint256 tenYearLocked;
-        uint40 decimals;
+        uint256 tenYearLockedNoDecimals;
     }
     MasterNodeInformation private masterNodeInformation;
 
@@ -135,7 +150,7 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
         totalValueLockInPoolPair = _totalValueLocked;
         total24HVolume = _total24HVolume;
         uint256 _lastUpdatedDexInfo = block.timestamp;
-        lastUpdatedDexInfoTimestamp = _lastUpdatedDexInfo;
+        lastUpdatedDexInfoTimestampNoDecimals = _lastUpdatedDexInfo;
         emit UpdateDEXInfo(_dex, _dexInfo, _lastUpdatedDexInfo, _totalValueLocked, _total24HVolume);
     }
 
@@ -146,7 +161,7 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
     function updateVaultGeneralInformation(VaultGeneralInformation calldata _vaultInfo) external allowUpdate {
         vaultInfo = _vaultInfo;
         uint256 _lastUpdatedVaultInfoTimestamp = block.timestamp;
-        lastUpdatedVaultInfoTimestamp = _lastUpdatedVaultInfoTimestamp;
+        lastUpdatedVaultInfoTimestampNoDecimals = _lastUpdatedVaultInfoTimestamp;
         emit UpdateVaultGeneralInformation(_vaultInfo, _lastUpdatedVaultInfoTimestamp);
     }
 
@@ -157,14 +172,14 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
     function updateMasterNodeInformation(MasterNodeInformation calldata _masterNodeInformation) external allowUpdate {
         masterNodeInformation = _masterNodeInformation;
         uint256 _lastUpdatedMasterNodeInfoTimestamp = block.timestamp;
-        lastUpdatedMasterNodeInfoTimestamp = _lastUpdatedMasterNodeInfoTimestamp;
+        lastUpdatedMasterNodeInfoTimestampNoDecimals = _lastUpdatedMasterNodeInfoTimestamp;
         emit UpdateMasterNodeInformation(_masterNodeInformation, _lastUpdatedMasterNodeInfoTimestamp);
     }
 
     function updateBurnInfo(BurnedInformation calldata _burnedInfo) external allowUpdate {
         burnedInformation = _burnedInfo;
         uint256 _lastUpdatedMasterBurnedInfoTimestamp = block.timestamp;
-        lastUpdatedBurnedInfoTimestamp = _lastUpdatedMasterBurnedInfoTimestamp;
+        lastUpdatedBurnedInfoTimestampNoDecimals = _lastUpdatedMasterBurnedInfoTimestamp;
         emit UpdatedBurnedInformation(_burnedInfo, _lastUpdatedMasterBurnedInfoTimestamp);
     }
 
@@ -201,7 +216,7 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
      * @return TVL of all dexes
      */
     function getDexInfo() external view returns (uint256, uint256, uint256) {
-        return (lastUpdatedDexInfoTimestamp, total24HVolume, totalValueLockInPoolPair);
+        return (lastUpdatedDexInfoTimestampNoDecimals, total24HVolume, totalValueLockInPoolPair);
     }
 
     /**
@@ -211,7 +226,7 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
      * @return information about that pair
      */
     function getDexPairInfo(string memory _pair) external view returns (uint256, DEXInfo memory) {
-        return (lastUpdatedDexInfoTimestamp, DEXInfoMapping[_pair]);
+        return (lastUpdatedDexInfoTimestampNoDecimals, DEXInfoMapping[_pair]);
     }
 
     /**
@@ -220,7 +235,7 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
      * @return information about vaults
      */
     function getVaultInfo() external view returns (uint256, VaultGeneralInformation memory) {
-        return (lastUpdatedVaultInfoTimestamp, vaultInfo);
+        return (lastUpdatedVaultInfoTimestampNoDecimals, vaultInfo);
     }
 
     /**
@@ -229,10 +244,10 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
      * @return master nodes information
      */
     function getMasterNodeInfo() external view returns (uint256, MasterNodeInformation memory) {
-        return (lastUpdatedMasterNodeInfoTimestamp, masterNodeInformation);
+        return (lastUpdatedMasterNodeInfoTimestampNoDecimals, masterNodeInformation);
     }
 
     function getBurnedInfo() external view returns (uint256, BurnedInformation memory) {
-        return (lastUpdatedBurnedInfoTimestamp, burnedInformation);
+        return (lastUpdatedBurnedInfoTimestampNoDecimals, burnedInformation);
     }
 }
