@@ -6,7 +6,13 @@ import { ethers } from 'ethers';
 import { StateRelayer, StateRelayer__factory } from '../generated';
 import { deployContract } from './utils/deployment';
 
+type MasterNodeInformationStruct = StateRelayer.MasterNodeInformationStruct;
+type VaultGeneralInformation = StateRelayer.VaultGeneralInformationStruct;
+type DexInfo = StateRelayer.DEXInfoStruct;
+type BurnedInfo = StateRelayer.BurnedInformationStruct;
+
 type BigNumber = ethers.BigNumberish;
+
 describe('State relayer contract data tests', () => {
   let stateRelayerProxy: StateRelayer;
   let bot: SignerWithAddress;
@@ -16,12 +22,11 @@ describe('State relayer contract data tests', () => {
   describe('Successfully updating individually ', () => {
     it('Should successfully set master node data', async () => {
       ({ stateRelayerProxy, bot } = await loadFixture(deployContract));
-      const masterNodeData: MasterNode = {
+      const masterNodeData: MasterNodeInformationStruct = {
         totalValueLockedInMasterNodes: 108,
-        zeroYearLocked: 101,
-        fiveYearLocked: 102,
-        tenYearLocked: 103,
-        decimals: 10,
+        zeroYearLockedNoDecimals: 101,
+        fiveYearLockedNoDecimals: 102,
+        tenYearLockedNoDecimals: 103,
       };
       await expect(stateRelayerProxy.connect(bot).updateMasterNodeInformation(masterNodeData))
         .to.emit(stateRelayerProxy, 'UpdateMasterNodeInformation')
@@ -33,12 +38,11 @@ describe('State relayer contract data tests', () => {
     it('Should successfully set vault node data', async () => {
       ({ stateRelayerProxy, bot } = await loadFixture(deployContract));
       const vaultInformationData: VaultGeneralInformation = {
-        noOfVaults: 2,
+        noOfVaultsNoDecimals: 2,
         totalLoanValue: 1000,
         totalCollateralValue: 23432,
         totalCollateralizationRatio: 234,
-        activeAuctions: 23,
-        decimals: 10,
+        activeAuctionsNoDecimals: 23,
       };
       await expect(stateRelayerProxy.connect(bot).updateVaultGeneralInformation(vaultInformationData))
         .to.emit(stateRelayerProxy, 'UpdateVaultGeneralInformation')
@@ -60,7 +64,6 @@ describe('State relayer contract data tests', () => {
         secondTokenBalance: 2314,
         rewards: 124,
         commissions: 3,
-        decimals: 18,
       };
       const dexDataBtc: DexInfo = {
         primaryTokenPrice: 112,
@@ -71,7 +74,6 @@ describe('State relayer contract data tests', () => {
         secondTokenBalance: 2312,
         rewards: 123,
         commissions: 2,
-        decimals: 18,
       };
       const dexsData: DexInfo[] = [dexDataEth, dexDataBtc];
       const symbols: string[] = ['eth', 'btc'];
@@ -91,16 +93,49 @@ describe('State relayer contract data tests', () => {
     it('Should successfully set burned data for all ecosystem', async () => {
       ({ stateRelayerProxy, bot } = await loadFixture(deployContract));
       const burnInfo: BurnedInfo = {
-        fee: 315015,
-        auction: 1512527,
-        payback: 61705058,
-        emission: 98783549,
-        total: 317634155,
-        decimals: 10,
+        addr: '0xab',
+        amount: 0,
+        auction: [{ amount: 1, token: 'A' }],
+        feeburn: 0,
+        emissionburn: 0,
+        auctionburn: 0,
+        paybackburn: 0,
+        paybackburntokens: [{ amount: 1, token: 'B' }],
+        dexfeetokens: [{ amount: 1, token: 'X' }],
+        dfipaybackfee: 0,
+        dfipaybacktokens: [{ amount: 1, token: 'C' }],
+        paybackfees: [{ amount: 1, token: 'D' }],
+        paybacktokens: [{ amount: 1, token: 'D' }],
+        dfip2203: [{ amount: 1, token: 'D' }],
+        dfip2206f: [{ amount: 1, token: 'Z' }],
       };
       await stateRelayerProxy.connect(bot).updateBurnInfo(burnInfo);
       const receivedBurnedData = await stateRelayerProxy.getBurnedInfo();
-      expect(receivedBurnedData[1].toString()).to.equal(Object.values(burnInfo).toString());
+      const fieldWithValues = [
+        'addr',
+        'amount',
+        'feeburn',
+        'emissionburn',
+        'auctionburn',
+        'paybackburn',
+        'dfipaybackfee',
+      ];
+      // const indexInReceivedBurnInfo: number = -1;
+      // reference on order of iteration
+      // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/keys#description
+      // https://stackoverflow.com/questions/29477973/does-for-of-loop-iteration-follow-the-array-order-in-javascript
+      for (const k of Object.keys(burnInfo)) {
+        if (k in fieldWithValues) {
+          expect(receivedBurnedData[1][k]).to.equal(burnInfo[k]);
+        } else {
+          const amountTokenArr = receivedBurnedData[1][k];
+          expect(amountTokenArr.length).to.equal(burnInfo[k].length);
+          for (let index = 0; index < amountTokenArr.length; index += 1) {
+            expect(amountTokenArr[index].amount).to.equal(burnInfo[k][index].amount);
+            expect(amountTokenArr[index].token).to.equal(burnInfo[k][index].token);
+          }
+        }
+      }
     });
   });
 
@@ -110,12 +145,11 @@ describe('State relayer contract data tests', () => {
 
     it('`updateMasterNodeInformation` - Should successfully revert if the signer is not `bot`', async () => {
       ({ stateRelayerProxy, user } = await loadFixture(deployContract));
-      const masterNodeData: MasterNode = {
+      const masterNodeData: MasterNodeInformationStruct = {
         totalValueLockedInMasterNodes: 108,
-        zeroYearLocked: 101,
-        fiveYearLocked: 102,
-        tenYearLocked: 103,
-        decimals: 10,
+        zeroYearLockedNoDecimals: 101,
+        fiveYearLockedNoDecimals: 102,
+        tenYearLockedNoDecimals: 103,
       };
       await expect(stateRelayerProxy.connect(user).updateMasterNodeInformation(masterNodeData)).to.be.reverted;
     });
@@ -123,12 +157,11 @@ describe('State relayer contract data tests', () => {
     it('`updateVaultGeneralInformation` - Should successfully revert if the signer is not `bot`', async () => {
       ({ stateRelayerProxy, user } = await loadFixture(deployContract));
       const vaultInformationData: VaultGeneralInformation = {
-        noOfVaults: 2,
+        noOfVaultsNoDecimals: 2,
         totalLoanValue: 1000,
         totalCollateralValue: 23432,
         totalCollateralizationRatio: 234,
-        activeAuctions: 23,
-        decimals: 10,
+        activeAuctionsNoDecimals: 23,
       };
       await expect(stateRelayerProxy.connect(user).updateVaultGeneralInformation(vaultInformationData)).to.be.reverted;
     });
@@ -145,7 +178,6 @@ describe('State relayer contract data tests', () => {
         secondTokenBalance: 2314,
         rewards: 124,
         commissions: 3,
-        decimals: 18,
       };
       await expect(stateRelayerProxy.connect(user).updateDEXInfo(['eth'], [dexDataEth], 1, 2)).to.be.reverted;
     });
@@ -153,12 +185,21 @@ describe('State relayer contract data tests', () => {
     it('`updateBurnInfo` - Should successfully revert if the signer is not `bot`', async () => {
       ({ stateRelayerProxy, user } = await loadFixture(deployContract));
       const burnInfo: BurnedInfo = {
-        fee: 315015,
-        auction: 1512527,
-        payback: 61705058,
-        emission: 98783549,
-        total: 317634155,
-        decimals: 10,
+        addr: '0xab',
+        amount: 0,
+        auction: [{ amount: 1, token: 'A' }],
+        feeburn: 0,
+        emissionburn: 0,
+        auctionburn: 0,
+        paybackburn: 0,
+        paybackburntokens: [{ amount: 1, token: 'B' }],
+        dexfeetokens: [{ amount: 1, token: 'X' }],
+        dfipaybackfee: 0,
+        dfipaybacktokens: [{ amount: 1, token: 'C' }],
+        paybackfees: [{ amount: 1, token: 'D' }],
+        paybacktokens: [{ amount: 1, token: 'D' }],
+        dfip2203: [{ amount: 1, token: 'D' }],
+        dfip2206f: [{ amount: 1, token: 'Z' }],
       };
       await expect(stateRelayerProxy.connect(user).updateBurnInfo(burnInfo)).to.reverted;
     });
@@ -168,12 +209,11 @@ describe('State relayer contract data tests', () => {
     it('Should be able to update in batch ', async () => {
       ({ stateRelayerProxy, bot } = await loadFixture(deployContract));
       // Master node data
-      const masterNodeData: MasterNode = {
+      const masterNodeData: MasterNodeInformationStruct = {
         totalValueLockedInMasterNodes: 108,
-        zeroYearLocked: 101,
-        fiveYearLocked: 102,
-        tenYearLocked: 103,
-        decimals: 18,
+        zeroYearLockedNoDecimals: 101,
+        fiveYearLockedNoDecimals: 102,
+        tenYearLockedNoDecimals: 103,
       };
       const stateRelayerInterface = StateRelayer__factory.createInterface();
       const callDataForUpdatingMasterNodeData = stateRelayerInterface.encodeFunctionData(
@@ -182,12 +222,11 @@ describe('State relayer contract data tests', () => {
       );
       // Vault information data
       const vaultInformationData: VaultGeneralInformation = {
-        noOfVaults: 2,
+        noOfVaultsNoDecimals: 2,
         totalLoanValue: 1000,
         totalCollateralValue: 23432,
         totalCollateralizationRatio: 234,
-        activeAuctions: 23,
-        decimals: 18,
+        activeAuctionsNoDecimals: 23,
       };
       const callDataForUpdatingVaultInformation = stateRelayerInterface.encodeFunctionData(
         'updateVaultGeneralInformation',
@@ -204,7 +243,6 @@ describe('State relayer contract data tests', () => {
         secondTokenBalance: 2314,
         rewards: 124,
         commissions: 3,
-        decimals: 18,
       };
       const dexDataBtc: DexInfo = {
         primaryTokenPrice: 112,
@@ -215,7 +253,6 @@ describe('State relayer contract data tests', () => {
         secondTokenBalance: 2312,
         rewards: 123,
         commissions: 2,
-        decimals: 18,
       };
       const dexsData: DexInfo[] = [dexDataEth, dexDataBtc];
       const symbols: string[] = ['eth', 'btc'];
@@ -228,12 +265,21 @@ describe('State relayer contract data tests', () => {
 
       // Burned info data
       const burnedData: BurnedInfo = {
-        fee: 123,
-        auction: 25434,
-        payback: 34676234,
-        emission: 23546454,
-        total: 243563434,
-        decimals: 18,
+        addr: '0xab',
+        amount: 0,
+        auction: [{ amount: 1, token: 'A' }],
+        feeburn: 0,
+        emissionburn: 0,
+        auctionburn: 0,
+        paybackburn: 0,
+        paybackburntokens: [{ amount: 1, token: 'B' }],
+        dexfeetokens: [{ amount: 1, token: 'X' }],
+        dfipaybackfee: 0,
+        dfipaybacktokens: [{ amount: 1, token: 'C' }],
+        paybackfees: [{ amount: 1, token: 'D' }],
+        paybacktokens: [{ amount: 1, token: 'D' }],
+        dfip2203: [{ amount: 1, token: 'D' }],
+        dfip2206f: [{ amount: 1, token: 'Z' }],
       };
 
       const callDataBurnedInfo = stateRelayerInterface.encodeFunctionData('updateBurnInfo', [burnedData]);
@@ -259,18 +305,37 @@ describe('State relayer contract data tests', () => {
       expect(receivedBtcDexData[1].toString()).to.equal(Object.values(dexDataBtc).toString());
       // Testing that the received is as expected as burnedData
       const receivedBurnedData = await stateRelayerProxy.getBurnedInfo();
-      expect(receivedBurnedData[1].toString()).to.equal(Object.values(burnedData).toString());
+      const fieldWithValues = [
+        'addr',
+        'amount',
+        'feeburn',
+        'emissionburn',
+        'auctionburn',
+        'paybackburn',
+        'dfipaybackfee',
+      ];
+      for (const k of Object.keys(burnedData)) {
+        if (k in fieldWithValues) {
+          expect(receivedBurnedData[1][k]).to.equal(burnedData[k]);
+        } else {
+          const amountTokenArr = receivedBurnedData[1][k];
+          expect(amountTokenArr.length).to.equal(burnedData[k].length);
+          for (let index = 0; index < amountTokenArr.length; index += 1) {
+            expect(amountTokenArr[index].amount).to.equal(burnedData[k][index].amount);
+            expect(amountTokenArr[index].token).to.equal(burnedData[k][index].token);
+          }
+        }
+      }
     });
 
     it('Should fail when the caller is not authorized ', async () => {
       ({ stateRelayerProxy, admin } = await loadFixture(deployContract));
 
-      const masterNodeData: MasterNode = {
+      const masterNodeData: MasterNodeInformationStruct = {
         totalValueLockedInMasterNodes: 108,
-        zeroYearLocked: 101,
-        fiveYearLocked: 102,
-        tenYearLocked: 103,
-        decimals: 10,
+        zeroYearLockedNoDecimals: 101,
+        fiveYearLockedNoDecimals: 102,
+        tenYearLockedNoDecimals: 103,
       };
       const stateRelayerInterface = StateRelayer__factory.createInterface();
       const callDataForUpdatingMasterNodeData = stateRelayerInterface.encodeFunctionData(
@@ -326,41 +391,3 @@ describe('State relayer contract data tests', () => {
     });
   });
 });
-
-interface MasterNode {
-  totalValueLockedInMasterNodes: BigNumber;
-  zeroYearLocked: BigNumber;
-  fiveYearLocked: BigNumber;
-  tenYearLocked: BigNumber;
-  decimals: BigNumber;
-}
-
-interface VaultGeneralInformation {
-  noOfVaults: BigNumber;
-  totalLoanValue: BigNumber;
-  totalCollateralValue: BigNumber;
-  totalCollateralizationRatio: BigNumber;
-  activeAuctions: BigNumber;
-  decimals: BigNumber;
-}
-
-interface DexInfo {
-  primaryTokenPrice: BigNumber;
-  volume24H: BigNumber;
-  totalLiquidity: BigNumber;
-  APR: BigNumber;
-  firstTokenBalance: BigNumber;
-  secondTokenBalance: BigNumber;
-  rewards: BigNumber;
-  commissions: BigNumber;
-  decimals: BigNumber;
-}
-
-interface BurnedInfo {
-  fee: number;
-  auction: number;
-  payback: number;
-  emission: number;
-  total: number;
-  decimals: number;
-}
