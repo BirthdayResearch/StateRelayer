@@ -66,7 +66,7 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
     struct BurnedInformation {
         string addr;
         uint256 amount; // Amount of DFI sent to burn address
-        AMOUNT_TOKEN[] auction; // Token amount sent to burn address
+        AMOUNT_TOKEN[] tokens; // Token amount sent to burn address
         uint256 feeburn; // Amount of DFI collected via fee burn
         uint256 emissionburn; // Amount of DFI collected via emission burn
         uint256 auctionburn; // Amount of DFI collected via auction burn

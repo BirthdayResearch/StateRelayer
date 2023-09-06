@@ -14,15 +14,13 @@ type PoolPairData = AsyncReturnType<typeof poolpairs.PoolPairs.prototype.list>;
 type DexPriceResult = AsyncReturnType<typeof poolpairs.PoolPairs.prototype.listDexPrices>;
 
 const transformToBigInt = (str: string, decimals: number): bigint =>
-  BigInt(
-    new BigNumber(str).multipliedBy(new BigNumber('10').pow(decimals)).integerValue(BigNumber.ROUND_FLOOR).toString(),
-  );
+  BigInt(new BigNumber(str).multipliedBy(new BigNumber('10').pow(decimals)).toFixed(0, 1));
 
 const transformStringToArr = (str: string): StateRelayer.AMOUNT_TOKENStruct => {
   const splitArr = str.split('@');
   return {
-    token: splitArr[0],
-    amount: transformToBigInt(splitArr[1], DECIMALS),
+    token: splitArr[1],
+    amount: transformToBigInt(splitArr[0], DECIMALS),
   };
 };
 
@@ -37,6 +35,7 @@ export function transformBurnData(burnDataInfo: BurnData): BurnedInformation {
   burnedData.auctionburn = transformToBigInt(burnDataInfo.auctionburn.toString(), DECIMALS);
   burnedData.paybackburn = transformToBigInt(burnDataInfo.paybackburn.toString(), DECIMALS);
   burnedData.paybackburntokens = burnDataInfo.paybackburntokens.map((ele) => transformStringToArr(ele));
+  burnedData.paybacktokens = burnDataInfo.paybacktokens.map((ele) => transformStringToArr(ele));
   burnedData.dexfeetokens = burnDataInfo.dexfeetokens.map((ele) => transformStringToArr(ele));
   burnedData.dfipaybackfee = transformToBigInt(burnDataInfo.dfipaybackfee.toString(), DECIMALS);
   burnedData.dfipaybacktokens = burnDataInfo.dfipaybacktokens.map((ele) => transformStringToArr(ele));
