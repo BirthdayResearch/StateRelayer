@@ -15,7 +15,7 @@ export class EvmContractManager {
   constructor(
     private readonly startedHardhatContainer: StartedHardhatNetworkContainer,
     private readonly signer: ethers.Signer,
-    private readonly provider: ethers.providers.Provider,
+    private readonly provider: ethers.Provider,
   ) {}
 
   /**
@@ -39,7 +39,7 @@ export class EvmContractManager {
     if (this.isContractNameInUse(deploymentName)) {
       const existingContract = this.getDeployedContract<Abi>(deploymentName);
       throw Error(
-        `Contract '${deploymentName}' has already been deployed at ${existingContract.address}. Please use another name for the contract.`,
+        `Contract '${deploymentName}' has already been deployed at ${await existingContract.getAddress()}. Please use another name for the contract.`,
       );
     }
 
@@ -75,14 +75,14 @@ export class EvmContractManager {
 
     // Outputs should only be valid EVM addresses. Anything else is considered an error, and
     // means that something went wrong with executing the hardhat contract deployment task
-    if (!ethers.utils.isAddress(output.trim().split(' ')[0])) {
+    if (!ethers.isAddress(output.trim().split(' ')[0])) {
       throw Error(output);
     }
 
     // Enrich the contract with relevant metadata
     const deployedContract: DeployedContract<Abi> = {
       name: deploymentName,
-      ref: new ethers.Contract(output.trim().split(' ')[0], abi, this.signer) as Abi,
+      ref: new ethers.Contract(output.trim().split(' ')[0], abi, this.signer) as unknown as Abi,
       deploymentTxHash: output.trim().split(' ')[1],
     };
     // Register the contract for future access
@@ -101,9 +101,6 @@ export class EvmContractManager {
     }
     // Check if the signer instance is provided by the caller
     if (userSigner !== undefined) {
-      if (!Signer.isSigner(userSigner)) {
-        throw new Error('Signer provided is not valid');
-      }
       return contract.ref.connect(userSigner);
     }
     return contract.ref;
@@ -120,7 +117,7 @@ export class EvmContractManager {
 
   async isContractDeployedOnChain(deployedName: string): Promise<boolean> {
     const contract = this.getDeployedContract(deployedName);
-    return (await this.provider.getCode(contract.address)) !== '0x';
+    return (await this.provider.getCode(await contract.getAddress())) !== '0x';
   }
 
   isContractNameInUse(contractName: string): boolean {

@@ -2,7 +2,6 @@ import { GenericContainer, GenericStartedContainer, Wait } from '@birthdayresear
 import fetch, { Headers } from 'cross-fetch';
 
 import { HardhatNetwork } from './HardhatNetwork';
-import { toZeroStrippedHex } from './Utils';
 
 export class HardhatNetworkContainer extends GenericContainer {
   // Hardcoded image name that is created after running docker build in the smartcontracts package
@@ -42,9 +41,9 @@ export class StartedHardhatNetworkContainer extends GenericStartedContainer {
     const [preFundedAccountAddress] = await this.call('eth_accounts', []);
 
     // Generate 1000 blocks to reduce gas fee for deployments
-    await this.call('hardhat_mine', [toZeroStrippedHex(1_000)]);
+    await this.call('hardhat_mine', [`0x${BigInt(1_000).toString(16)}`]);
 
-    return new HardhatNetwork(this, preFundedAccountAddress);
+    return new HardhatNetwork(this, preFundedAccountAddress).initialize();
   }
 
   getContainerPort(): number {
