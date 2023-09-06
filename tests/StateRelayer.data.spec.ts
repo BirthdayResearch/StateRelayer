@@ -1,5 +1,5 @@
+import { SignerWithAddress } from '@nomicfoundation/hardhat-ethers/signers';
 import { loadFixture, time } from '@nomicfoundation/hardhat-network-helpers';
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { expect } from 'chai';
 
 import { StateRelayer, StateRelayer__factory } from '../generated';
@@ -90,24 +90,36 @@ describe('State relayer contract data tests', () => {
     it('Should successfully set burned data for all ecosystem', async () => {
       ({ stateRelayerProxy, bot } = await loadFixture(deployContract));
       const burnInfo: BurnedInfo = {
-        addr: '0xab',
-        amount: 0,
-        auction: [{ amount: 1, token: 'A' }],
-        feeburn: 0,
-        emissionburn: 0,
-        auctionburn: 0,
-        paybackburn: 0,
-        paybackburntokens: [{ amount: 1, token: 'B' }],
-        dexfeetokens: [{ amount: 1, token: 'X' }],
+        addr: '8defichainBurnAddressXXXXXXXdRQkSm',
+        amount: 156041860,
+        tokens: [
+          { amount: 7260, token: 'DFI' },
+          { amount: 20289, token: 'ETH' },
+        ],
+        feeburn: 358697,
+        emissionburn: 98783549,
+        auctionburn: 1844869,
+        paybackburn: 61705058,
+        paybackburntokens: [
+          { amount: 61705058, token: 'DFI' },
+          { amount: 714593, token: 'DUSD' },
+        ],
+        dexfeetokens: [
+          { amount: 32083, token: 'DFI' },
+          { amount: 131, token: 'BTC' },
+        ],
         dfipaybackfee: 0,
-        dfipaybacktokens: [{ amount: 1, token: 'C' }],
-        paybackfees: [{ amount: 1, token: 'D' }],
-        paybacktokens: [{ amount: 1, token: 'D' }],
-        dfip2203: [{ amount: 1, token: 'D' }],
-        dfip2206f: [{ amount: 1, token: 'Z' }],
+        dfipaybacktokens: [{ amount: 223563786, token: 'DUSD' }],
+        paybackfees: [{ amount: 814, token: 'XOM' }],
+        paybacktokens: [{ amount: 24, token: 'SHEL' }],
+        dfip2203: [
+          { amount: 97359326, token: 'DUSD' },
+          { amount: 5774, token: 'BABA' },
+        ],
+        dfip2206f: [{ amount: 69, token: 'XLE' }],
       };
       await stateRelayerProxy.connect(bot).updateBurnInfo(burnInfo);
-      const receivedBurnedData = await stateRelayerProxy.getBurnedInfo();
+      const receivedBurnedData: [bigint, BurnedInfo] = await stateRelayerProxy.getBurnedInfo();
       const fieldWithValues = [
         'addr',
         'amount',
@@ -116,20 +128,18 @@ describe('State relayer contract data tests', () => {
         'auctionburn',
         'paybackburn',
         'dfipaybackfee',
-      ];
-      // const indexInReceivedBurnInfo: number = -1;
-      // reference on order of iteration
-      // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/keys#description
-      // https://stackoverflow.com/questions/29477973/does-for-of-loop-iteration-follow-the-array-order-in-javascript
+      ] as Array<keyof BurnedInfo>;
       for (const k of Object.keys(burnInfo)) {
-        if (k in fieldWithValues) {
-          expect(receivedBurnedData[1][k]).to.equal(burnInfo[k]);
+        const typedK = k as keyof BurnedInfo;
+        if (fieldWithValues.includes(typedK)) {
+          expect(receivedBurnedData[1][typedK]).to.equal(burnInfo[typedK]);
         } else {
-          const amountTokenArr = receivedBurnedData[1][k];
-          expect(amountTokenArr.length).to.equal(burnInfo[k].length);
+          const amountTokenArr = receivedBurnedData[1][typedK] as StateRelayer.AMOUNT_TOKENStruct[];
+          const burnInfoEntry = burnInfo[typedK] as StateRelayer.AMOUNT_TOKENStruct[];
+          expect(amountTokenArr.length).to.equal(burnInfoEntry.length);
           for (let index = 0; index < amountTokenArr.length; index += 1) {
-            expect(amountTokenArr[index].amount).to.equal(burnInfo[k][index].amount);
-            expect(amountTokenArr[index].token).to.equal(burnInfo[k][index].token);
+            expect(amountTokenArr[index].amount).to.equal(burnInfoEntry[index].amount);
+            expect(amountTokenArr[index].token).to.equal(burnInfoEntry[index].token);
           }
         }
       }
@@ -182,21 +192,33 @@ describe('State relayer contract data tests', () => {
     it('`updateBurnInfo` - Should successfully revert if the signer is not `bot`', async () => {
       ({ stateRelayerProxy, user } = await loadFixture(deployContract));
       const burnInfo: BurnedInfo = {
-        addr: '0xab',
-        amount: 0,
-        auction: [{ amount: 1, token: 'A' }],
-        feeburn: 0,
-        emissionburn: 0,
-        auctionburn: 0,
-        paybackburn: 0,
-        paybackburntokens: [{ amount: 1, token: 'B' }],
-        dexfeetokens: [{ amount: 1, token: 'X' }],
+        addr: '8defichainBurnAddressXXXXXXXdRQkSm',
+        amount: 156041860,
+        tokens: [
+          { amount: 7260, token: 'DFI' },
+          { amount: 20289, token: 'ETH' },
+        ],
+        feeburn: 358697,
+        emissionburn: 98783549,
+        auctionburn: 1844869,
+        paybackburn: 61705058,
+        paybackburntokens: [
+          { amount: 61705058, token: 'DFI' },
+          { amount: 714593, token: 'DUSD' },
+        ],
+        dexfeetokens: [
+          { amount: 32083, token: 'DFI' },
+          { amount: 131, token: 'BTC' },
+        ],
         dfipaybackfee: 0,
-        dfipaybacktokens: [{ amount: 1, token: 'C' }],
-        paybackfees: [{ amount: 1, token: 'D' }],
-        paybacktokens: [{ amount: 1, token: 'D' }],
-        dfip2203: [{ amount: 1, token: 'D' }],
-        dfip2206f: [{ amount: 1, token: 'Z' }],
+        dfipaybacktokens: [{ amount: 223563786, token: 'DUSD' }],
+        paybackfees: [{ amount: 814, token: 'XOM' }],
+        paybacktokens: [{ amount: 24, token: 'SHEL' }],
+        dfip2203: [
+          { amount: 97359326, token: 'DUSD' },
+          { amount: 5774, token: 'BABA' },
+        ],
+        dfip2206f: [{ amount: 69, token: 'XLE' }],
       };
       await expect(stateRelayerProxy.connect(user).updateBurnInfo(burnInfo)).to.reverted;
     });
@@ -262,21 +284,33 @@ describe('State relayer contract data tests', () => {
 
       // Burned info data
       const burnedData: BurnedInfo = {
-        addr: '0xab',
-        amount: 0,
-        auction: [{ amount: 1, token: 'A' }],
-        feeburn: 0,
-        emissionburn: 0,
-        auctionburn: 0,
-        paybackburn: 0,
-        paybackburntokens: [{ amount: 1, token: 'B' }],
-        dexfeetokens: [{ amount: 1, token: 'X' }],
+        addr: '8defichainBurnAddressXXXXXXXdRQkSm',
+        amount: 156041860,
+        tokens: [
+          { amount: 7260, token: 'DFI' },
+          { amount: 20289, token: 'ETH' },
+        ],
+        feeburn: 358697,
+        emissionburn: 98783549,
+        auctionburn: 1844869,
+        paybackburn: 61705058,
+        paybackburntokens: [
+          { amount: 61705058, token: 'DFI' },
+          { amount: 714593, token: 'DUSD' },
+        ],
+        dexfeetokens: [
+          { amount: 32083, token: 'DFI' },
+          { amount: 131, token: 'BTC' },
+        ],
         dfipaybackfee: 0,
-        dfipaybacktokens: [{ amount: 1, token: 'C' }],
-        paybackfees: [{ amount: 1, token: 'D' }],
-        paybacktokens: [{ amount: 1, token: 'D' }],
-        dfip2203: [{ amount: 1, token: 'D' }],
-        dfip2206f: [{ amount: 1, token: 'Z' }],
+        dfipaybacktokens: [{ amount: 223563786, token: 'DUSD' }],
+        paybackfees: [{ amount: 814, token: 'XOM' }],
+        paybacktokens: [{ amount: 24, token: 'SHEL' }],
+        dfip2203: [
+          { amount: 97359326, token: 'DUSD' },
+          { amount: 5774, token: 'BABA' },
+        ],
+        dfip2206f: [{ amount: 69, token: 'XLE' }],
       };
 
       const callDataBurnedInfo = stateRelayerInterface.encodeFunctionData('updateBurnInfo', [burnedData]);
@@ -301,7 +335,7 @@ describe('State relayer contract data tests', () => {
       // Testing that the received is as expected as dexDataBtc
       expect(receivedBtcDexData[1].toString()).to.equal(Object.values(dexDataBtc).toString());
       // Testing that the received is as expected as burnedData
-      const receivedBurnedData = await stateRelayerProxy.getBurnedInfo();
+      const receivedBurnedData: [bigint, BurnedInfo] = await stateRelayerProxy.getBurnedInfo();
       const fieldWithValues = [
         'addr',
         'amount',
@@ -310,16 +344,18 @@ describe('State relayer contract data tests', () => {
         'auctionburn',
         'paybackburn',
         'dfipaybackfee',
-      ];
+      ] as Array<keyof BurnedInfo>;
       for (const k of Object.keys(burnedData)) {
-        if (k in fieldWithValues) {
-          expect(receivedBurnedData[1][k]).to.equal(burnedData[k]);
+        const typedK = k as keyof BurnedInfo;
+        if (fieldWithValues.includes(typedK)) {
+          expect(receivedBurnedData[1][typedK]).to.equal(burnedData[typedK]);
         } else {
-          const amountTokenArr = receivedBurnedData[1][k];
-          expect(amountTokenArr.length).to.equal(burnedData[k].length);
+          const amountTokenArr = receivedBurnedData[1][typedK] as StateRelayer.AMOUNT_TOKENStruct[];
+          const burnInfoEntry = burnedData[typedK] as StateRelayer.AMOUNT_TOKENStruct[];
+          expect(amountTokenArr.length).to.equal(burnInfoEntry.length);
           for (let index = 0; index < amountTokenArr.length; index += 1) {
-            expect(amountTokenArr[index].amount).to.equal(burnedData[k][index].amount);
-            expect(amountTokenArr[index].token).to.equal(burnedData[k][index].token);
+            expect(amountTokenArr[index].amount).to.equal(burnInfoEntry[index].amount);
+            expect(amountTokenArr[index].token).to.equal(burnInfoEntry[index].token);
           }
         }
       }
@@ -355,7 +391,9 @@ describe('State relayer contract data tests', () => {
         bot.address,
       ]);
       await expect(stateRelayerProxy.connect(bot).batchCallByBot([encodedGrantRole])).to.revertedWith(
-        `AccessControl: account ${stateRelayerProxy.address.toLowerCase()} is missing role 0x${'0'.repeat(64)}`,
+        `AccessControl: account ${(await stateRelayerProxy.getAddress()).toLowerCase()} is missing role 0x${'0'.repeat(
+          64,
+        )}`,
       );
     });
 
@@ -368,7 +406,7 @@ describe('State relayer contract data tests', () => {
       ]);
       const botRole = await stateRelayerProxy.BOT_ROLE();
       await expect(stateRelayerProxy.connect(bot).batchCallByBot([encodedGrantRole])).to.revertedWith(
-        `AccessControl: account ${stateRelayerProxy.address.toLowerCase()} is missing role ${botRole}`,
+        `AccessControl: account ${(await stateRelayerProxy.getAddress()).toLowerCase()} is missing role ${botRole}`,
       );
     });
 
@@ -376,7 +414,7 @@ describe('State relayer contract data tests', () => {
     it('Should fail when granting state relayer the bot_role and then doing recursive batch calls', async () => {
       ({ stateRelayerProxy, bot, admin } = await loadFixture(deployContract));
       const botRole = await stateRelayerProxy.BOT_ROLE();
-      await stateRelayerProxy.connect(admin).grantRole(botRole, stateRelayerProxy.address);
+      await stateRelayerProxy.connect(admin).grantRole(botRole, await stateRelayerProxy.getAddress());
       const stateRelayerInterface = StateRelayer__factory.createInterface();
       const encodedGrantRole = stateRelayerInterface.encodeFunctionData('batchCallByBot', [
         [stateRelayerInterface.encodeFunctionData('BOT_ROLE')],
