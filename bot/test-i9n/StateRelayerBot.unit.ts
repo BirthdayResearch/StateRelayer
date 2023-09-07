@@ -1,15 +1,16 @@
+import { getWhaleClient } from '@waveshq/walletkit-bot';
 import { EnvironmentNetwork } from '@waveshq/walletkit-core';
 import { ethers } from 'ethers';
 
 import { HardhatNetwork, HardhatNetworkContainer, StartedHardhatNetworkContainer } from '../../containers';
 import { StateRelayer, StateRelayer__factory, StateRelayerProxy__factory } from '../../generated';
 import { handler } from '../StateRelayerBot';
+import { tranformPairData } from '../utils/transformData';
 import {
-  expectedBurnedInfo,
-  expectedDexInfo,
+  expectedBurnData,
   expectedMasterNodeData,
-  expectedPairData,
   expectedVaultData,
+  mockedBurnData,
   mockedDexPricesData,
   mockedPoolPairData,
   mockedStatsData,
@@ -19,6 +20,7 @@ jest.mock('@defichain/whale-api-client', () => ({
   WhaleApiClient: jest.fn().mockImplementation(() => ({
     stats: {
       get: () => mockedStatsData,
+      getBurn: () => mockedBurnData,
     },
     poolpairs: {
       list: () => mockedPoolPairData,
@@ -30,8 +32,8 @@ jest.mock('@defichain/whale-api-client', () => ({
 describe('State Relayer Bot Tests', () => {
   let startedHardhatContainer: StartedHardhatNetworkContainer;
   let hardhatNetwork: HardhatNetwork;
-  let admin: ethers.providers.JsonRpcSigner;
-  let bot: ethers.providers.JsonRpcSigner;
+  let admin: ethers.Signer;
+  let bot: ethers.Signer;
   let proxy: StateRelayer;
 
   beforeEach(async () => {
@@ -41,26 +43,26 @@ describe('State Relayer Bot Tests', () => {
       })
       .start();
     hardhatNetwork = await startedHardhatContainer.ready();
-    const stateRelayerImplementation = await hardhatNetwork.contracts.deployContract({
+    const stateRelayerImplementation = await hardhatNetwork?.contracts?.deployContract({
       deploymentName: 'StateRelayerImplementation',
       contractName: 'StateRelayer',
       abi: StateRelayer__factory.abi,
     });
-    admin = hardhatNetwork.getHardhatTestWallet(0).testWalletSigner;
-    bot = hardhatNetwork.getHardhatTestWallet(1).testWalletSigner;
-    const stateRelayerProxy = await hardhatNetwork.contracts.deployContract({
+    admin = (await hardhatNetwork.getHardhatTestWallet(0)).testWalletSigner;
+    bot = (await hardhatNetwork.getHardhatTestWallet(1)).testWalletSigner;
+    const stateRelayerProxy = await hardhatNetwork?.contracts?.deployContract({
       deploymentName: 'StateRelayerProxy',
       contractName: 'StateRelayerProxy',
       abi: StateRelayerProxy__factory.abi,
       deployArgs: [
-        stateRelayerImplementation.address,
+        await stateRelayerImplementation?.getAddress(),
         StateRelayer__factory.createInterface().encodeFunctionData('initialize', [
           await admin.getAddress(),
           await bot.getAddress(),
         ]),
       ],
     });
-    proxy = StateRelayer__factory.connect(stateRelayerProxy.address, bot);
+    proxy = StateRelayer__factory.connect((await stateRelayerProxy?.getAddress()) || '', bot);
   });
 
   afterEach(async () => {
@@ -72,10 +74,12 @@ describe('State Relayer Bot Tests', () => {
       testGasCost: false,
       envNetwork: EnvironmentNetwork.LocalPlayground,
       urlNetwork: '',
-      contractAddress: proxy.address,
+      contractAddress: await proxy.getAddress(),
       signer: bot,
     });
 
+    const client = getWhaleClient('', EnvironmentNetwork.LocalPlayground);
+    const testPoolPairData = await client.poolpairs.list(200);
     if (output !== undefined) {
       const { dexInfoTxReceipt, masterDataTxReceipt, vaultTxReceipt, burnTxReceipt } = output;
       expect(dexInfoTxReceipt).toBeUndefined();
@@ -84,47 +88,72 @@ describe('State Relayer Bot Tests', () => {
       expect(burnTxReceipt).toBeUndefined();
     }
 
-    const receivedBurnedInfo = await proxy.getBurnedInfo();
-    expect(receivedBurnedInfo[1].fee.toString()).toEqual(expectedBurnedInfo.fee);
-    expect(receivedBurnedInfo[1].auction.toString()).toEqual(expectedBurnedInfo.auction);
-    expect(receivedBurnedInfo[1].payback.toString()).toEqual(expectedBurnedInfo.payback);
-    expect(receivedBurnedInfo[1].emission.toString()).toEqual(expectedBurnedInfo.emission);
-    expect(receivedBurnedInfo[1].total.toString()).toEqual(expectedBurnedInfo.total);
+    const receivedBurnedInfo: { [index: string]: any } = await proxy.getBurnedInfo();
+
+    const fieldWithValues = [
+      'addr',
+      'amount',
+      'feeburn',
+      'emissionburn',
+      'auctionburn',
+      'paybackburn',
+      'dfipaybackfee',
+    ];
+    for (const k of Object.keys(expectedBurnData)) {
+      if (fieldWithValues.includes(k)) {
+        expect(receivedBurnedInfo[1][k]).toStrictEqual(expectedBurnData[k]);
+      } else {
+        const amountTokenArr = receivedBurnedInfo[1][k];
+        expect(amountTokenArr.length).toStrictEqual(expectedBurnData[k].length);
+        for (let index = 0; index < amountTokenArr.length; index += 1) {
+          expect(amountTokenArr[index].amount).toStrictEqual(expectedBurnData[k][index].amount);
+          expect(amountTokenArr[index].token).toStrictEqual(expectedBurnData[k][index].token);
+        }
+      }
+    }
 
     // Checking the /dex/dex-pair info
     const dETH = await proxy.getDexPairInfo('dETH-DFI');
-    expect(dETH[1].primaryTokenPrice.toString()).toEqual(Object.values(expectedPairData['dETH-DFI'])[0]);
-    expect(dETH[1].volume24H.toString()).toEqual(Object.values(expectedPairData['dETH-DFI'])[1]);
-    expect(dETH[1].totalLiquidity.toString()).toEqual(Object.values(expectedPairData['dETH-DFI'])[2]);
-    expect(dETH[1].APR.toString()).toEqual(Object.values(expectedPairData['dETH-DFI'])[3]);
-    expect(dETH[1].firstTokenBalance.toString()).toEqual(Object.values(expectedPairData['dETH-DFI'])[4]);
-    expect(dETH[1].secondTokenBalance.toString()).toEqual(Object.values(expectedPairData['dETH-DFI'])[5]);
-    expect(dETH[1].rewards.toString()).toEqual(Object.values(expectedPairData['dETH-DFI'])[6]);
-    expect(dETH[1].commissions.toString()).toEqual(Object.values(expectedPairData['dETH-DFI'])[7]);
-    expect(dETH[1].decimals.toString()).toEqual(Object.values(expectedPairData['dETH-DFI'])[8]);
+    const expectedDexInfo = tranformPairData(testPoolPairData, mockedStatsData, mockedDexPricesData);
+    const lastETHDFIInfo = expectedDexInfo.dexInfo[expectedDexInfo.dex.lastIndexOf('dETH-DFI')];
+    // for sure both two sides have the same type as bigint
+    expect(dETH[1].primaryTokenPrice).toStrictEqual(Object.values(lastETHDFIInfo)[0]);
+    expect(dETH[1].volume24H).toStrictEqual(Object.values(lastETHDFIInfo)[1]);
+    expect(dETH[1].totalLiquidity).toStrictEqual(Object.values(lastETHDFIInfo)[2]);
+    expect(dETH[1].APR).toStrictEqual(Object.values(lastETHDFIInfo)[3]);
+    expect(dETH[1].firstTokenBalance).toStrictEqual(Object.values(lastETHDFIInfo)[4]);
+    expect(dETH[1].secondTokenBalance).toStrictEqual(Object.values(lastETHDFIInfo)[5]);
+    expect(dETH[1].rewards).toStrictEqual(Object.values(lastETHDFIInfo)[6]);
+    expect(dETH[1].commissions).toStrictEqual(Object.values(lastETHDFIInfo)[7]);
 
     // Checking /dex info
     const dex = await proxy.getDexInfo();
-    expect(dex[2].toString()).toEqual(expectedDexInfo.totalValueLockInPoolPair);
-    expect(dex[1].toString()).toEqual(expectedDexInfo.total24HVolume);
+    expect(dex[2]).toStrictEqual(expectedDexInfo.totalValueLocked);
+    expect(dex[1]).toStrictEqual(expectedDexInfo.total24HVolume);
 
     // Checking MasterNode information
     const receivedMasterNodeData = await proxy.getMasterNodeInfo();
-    expect(receivedMasterNodeData[1].totalValueLockedInMasterNodes.toString()).toEqual(
+    expect(receivedMasterNodeData[1].totalValueLockedInMasterNodes).toStrictEqual(
       expectedMasterNodeData.totalValueLockedInMasterNodes,
     );
-    expect(receivedMasterNodeData[1].zeroYearLocked.toString()).toEqual(expectedMasterNodeData.zeroYearLocked);
-    expect(receivedMasterNodeData[1].fiveYearLocked.toString()).toEqual(expectedMasterNodeData.fiveYearLocked);
-    expect(receivedMasterNodeData[1].tenYearLocked.toString()).toEqual(expectedMasterNodeData.tenYearLocked);
+    expect(receivedMasterNodeData[1].zeroYearLockedNoDecimals).toStrictEqual(
+      expectedMasterNodeData.zeroYearLockedNoDecimals,
+    );
+    expect(receivedMasterNodeData[1].fiveYearLockedNoDecimals).toStrictEqual(
+      expectedMasterNodeData.fiveYearLockedNoDecimals,
+    );
+    expect(receivedMasterNodeData[1].tenYearLockedNoDecimals).toStrictEqual(
+      expectedMasterNodeData.tenYearLockedNoDecimals,
+    );
 
     // Checking VaultInfo
     const receivedVaultData = await proxy.getVaultInfo();
-    expect(receivedVaultData[1].noOfVaults.toString()).toEqual(expectedVaultData.noOfVaults);
-    expect(receivedVaultData[1].totalLoanValue.toString()).toEqual(expectedVaultData.totalLoanValue);
-    expect(receivedVaultData[1].totalCollateralValue.toString()).toEqual(expectedVaultData.totalCollateralValue);
-    expect(receivedVaultData[1].totalCollateralizationRatio.toString()).toEqual(
+    expect(receivedVaultData[1].noOfVaultsNoDecimals).toStrictEqual(expectedVaultData.noOfVaultsNoDecimals);
+    expect(receivedVaultData[1].totalLoanValue).toStrictEqual(expectedVaultData.totalLoanValue);
+    expect(receivedVaultData[1].totalCollateralValue).toStrictEqual(expectedVaultData.totalCollateralValue);
+    expect(receivedVaultData[1].totalCollateralizationRatio).toStrictEqual(
       expectedVaultData.totalCollateralizationRatio,
     );
-    expect(receivedVaultData[1].activeAuctions.toString()).toEqual(expectedVaultData.activeAuctions);
+    expect(receivedVaultData[1].activeAuctionsNoDecimals).toStrictEqual(expectedVaultData.activeAuctionsNoDecimals);
   });
 });
