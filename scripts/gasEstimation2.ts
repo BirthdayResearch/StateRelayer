@@ -1,6 +1,6 @@
 import { BigNumber as BigFloatingNumber } from 'bignumber.js';
-import { BigNumber } from 'ethers';
 
+import { mockedBurnData } from '../bot/test-i9n/mockData/oceanMockedData';
 import { deployContract } from '../tests/utils/deployment';
 
 // dex names crawled from the mainnet defichain
@@ -76,79 +76,90 @@ const dexesNames = [
   'dBURN2-DUSD',
 ];
 
+const tokensSymbol = mockedBurnData.tokens.map((str) => str.split('@')[1]);
+const paybackburntokensSymbol = mockedBurnData.paybackburntokens.map((str) => str.split('@')[1]);
+const dexfeetokensSymbol = mockedBurnData.paybackburntokens.map((str) => str.split('@')[1]);
+const dfipaybacktokensSymbol = mockedBurnData.dexfeetokens.map((str) => str.split('@')[1]);
+const dfip2023Symbol = mockedBurnData.dfip2203.map((str) => str.split('@')[1]);
+
 // to run this file, run npx hardhat clean && npm i && npx hardhat run scripts/gasEstimation2.ts
 async function estimateGasCost() {
-  const dexesData: BigNumber[] = [];
-  const masterData: BigNumber[] = [];
-  const vaultData: BigNumber[] = [];
-  const burnData: BigNumber[] = [];
-  let maxDexesCallDataCost = BigNumber.from(0);
-  let maxMasterCallDataCost = BigNumber.from(0);
-  let maxVaultCallDataCost = BigNumber.from(0);
-  let maxBurnCallDataCost = BigNumber.from(0);
+  const dexesGasData: bigint[] = [];
+  const masterGasData: bigint[] = [];
+  const vaultGasData: bigint[] = [];
+  const burnGasData: bigint[] = [];
+  let maxDexesCallDataCost = 0n;
+  let maxMasterCallDataCost = 0n;
+  let maxVaultCallDataCost = 0n;
+  let maxBurnCallDataCost = 0n;
   const { bot, stateRelayerProxy } = await deployContract();
   for (let i = 1; i < 5; i += 1) {
-    const dexValues: any[] = [];
-    for (let j = 0; j < 69; j += 1) {
-      dexValues.push({
-        primaryTokenPrice: i,
-        volume24H: i,
-        totalLiquidity: i,
-        APR: i,
-        firstTokenBalance: i,
-        secondTokenBalance: i,
-        rewards: i,
-        commissions: i,
-        decimals: i,
-      });
-    }
+    const dexValues = new Array(dexesNames.length).fill({
+      primaryTokenPrice: i,
+      volume24H: i,
+      totalLiquidity: i,
+      APR: i,
+      firstTokenBalance: i,
+      secondTokenBalance: i,
+      rewards: i,
+      commissions: i,
+      decimals: i,
+    });
+
     const dexUpdate = await stateRelayerProxy.connect(bot).updateDEXInfo(dexesNames, dexValues, 1, 1);
     const dexUpdateReceipt = await dexUpdate.wait();
 
     const masterDataUpdate = await stateRelayerProxy.connect(bot).updateMasterNodeInformation({
       totalValueLockedInMasterNodes: i,
-      zeroYearLocked: i,
-      fiveYearLocked: i,
-      tenYearLocked: i,
-      decimals: i,
+      zeroYearLockedNoDecimals: i,
+      fiveYearLockedNoDecimals: i,
+      tenYearLockedNoDecimals: i,
     });
     const masterDataTxReceipt = await masterDataUpdate.wait();
 
     const vaultDataUpdate = await stateRelayerProxy.connect(bot).updateBurnInfo({
-      fee: i,
-      auction: i,
-      payback: i,
-      emission: i,
-      total: i,
-      decimals: i,
+      addr: '8defichainBurnAddressXXXXXXXdRQkSm',
+      amount: i,
+      tokens: tokensSymbol.map((symbol) => ({ amount: i, token: symbol })),
+      feeburn: i,
+      emissionburn: i,
+      auctionburn: i,
+      paybackburn: i,
+      paybackburntokens: paybackburntokensSymbol.map((symbol) => ({ amount: i, token: symbol })),
+      dexfeetokens: dexfeetokensSymbol.map((symbol) => ({ amount: i, token: symbol })),
+      dfipaybackfee: i,
+      dfipaybacktokens: dfipaybacktokensSymbol.map((symbol) => ({ amount: i, token: symbol })),
+      paybackfees: [],
+      paybacktokens: [],
+      dfip2203: dfip2023Symbol.map((symbol) => ({ amount: i, token: symbol })),
+      dfip2206f: [],
     });
     const vaultTxReceipt = await vaultDataUpdate.wait();
 
     const burnDataUpdate = await stateRelayerProxy.connect(bot).updateVaultGeneralInformation({
-      noOfVaults: i,
+      noOfVaultsNoDecimals: i,
       totalLoanValue: i,
       totalCollateralValue: i,
       totalCollateralizationRatio: i,
-      activeAuctions: i,
-      decimals: i,
+      activeAuctionsNoDecimals: i,
     });
     const burnTxReceipt = await burnDataUpdate.wait();
 
-    dexesData.push(dexUpdateReceipt.gasUsed);
-    masterData.push(masterDataTxReceipt.gasUsed);
-    vaultData.push(vaultTxReceipt.gasUsed);
-    burnData.push(burnTxReceipt.gasUsed);
+    dexesGasData.push(dexUpdateReceipt!.gasUsed);
+    masterGasData.push(masterDataTxReceipt!.gasUsed);
+    vaultGasData.push(vaultTxReceipt!.gasUsed);
+    burnGasData.push(burnTxReceipt!.gasUsed);
 
     console.log('Successfully update ', i);
     console.log('Total gas used');
     console.log(
-      dexUpdateReceipt.gasUsed.add(masterDataTxReceipt.gasUsed).add(vaultTxReceipt.gasUsed).add(burnTxReceipt.gasUsed),
+      dexUpdateReceipt!.gasUsed + masterDataTxReceipt!.gasUsed + vaultTxReceipt!.gasUsed + burnTxReceipt!.gasUsed,
     );
     if (i === 1) {
-      maxDexesCallDataCost = BigNumber.from(((dexUpdate.data.length - 2) / 2) * 16);
-      maxMasterCallDataCost = BigNumber.from(((masterDataUpdate.data.length - 2) / 2) * 16);
-      maxVaultCallDataCost = BigNumber.from(((vaultDataUpdate.data.length - 2) / 2) * 16);
-      maxBurnCallDataCost = BigNumber.from(((burnDataUpdate.data.length - 2) / 2) * 16);
+      maxDexesCallDataCost = BigInt((dexUpdate.data.length - 2) / 2) * 16n;
+      maxMasterCallDataCost = BigInt((masterDataUpdate.data.length - 2) / 2) * 16n;
+      maxVaultCallDataCost = BigInt((vaultDataUpdate.data.length - 2) / 2) * 16n;
+      maxBurnCallDataCost = BigInt((burnDataUpdate.data.length - 2) / 2) * 16n;
     }
   }
 
@@ -160,28 +171,30 @@ async function estimateGasCost() {
   // their representation in input data comprise the same number of non-zero / zero bytes
   // --> updating cost between when i = 2, i = 3 and i = 4 are the same
   console.log('Update dex data costs in gas units');
-  console.log(dexesData);
+  console.log(dexesGasData);
   console.log('Update Master data costs in gas units');
-  console.log(masterData);
+  console.log(masterGasData);
   console.log('Update Vault data costs in gas units');
-  console.log(vaultData);
+  console.log(vaultGasData);
   console.log('Update burn data costs in gas units');
-  console.log(burnData);
+  console.log(burnGasData);
 
   // average estimation (173 DFI)
   console.log(
     'Average estimated cost in DFI ',
     // take the second element of the array
     new BigFloatingNumber(
-      dexesData[1]
-        .add(maxDexesCallDataCost)
-        .add(masterData[1])
-        .add(maxMasterCallDataCost)
-        .add(vaultData[1])
-        .add(maxVaultCallDataCost)
-        .add(burnData[1])
-        .add(maxBurnCallDataCost)
-        .mul('50000000000') // multiply the gas units with the estimated effectiveGasPrice -- 50 gWei
+      (
+        (dexesGasData[1] +
+          maxDexesCallDataCost +
+          masterGasData[1] +
+          maxMasterCallDataCost +
+          vaultGasData[1] +
+          maxVaultCallDataCost +
+          burnGasData[1] +
+          maxBurnCallDataCost) *
+        BigInt('50000000000')
+      ) // multiply the gas units with the estimated effectiveGasPrice -- 50 gWei
         .toString(),
     )
       .div(new BigFloatingNumber(10).pow(18)) // decimals of native DFI on DMC = 18
@@ -193,15 +206,17 @@ async function estimateGasCost() {
   console.log(
     'Maximum cost in DFI',
     new BigFloatingNumber(
-      dexesData[0]
-        .add(maxDexesCallDataCost)
-        .add(masterData[0])
-        .add(maxMasterCallDataCost)
-        .add(vaultData[0])
-        .add(maxVaultCallDataCost)
-        .add(burnData[0])
-        .add(maxBurnCallDataCost)
-        .mul('50000000000') // multiply the gas units with the estimated effectiveGasPrice -- 50 gWei
+      (
+        (dexesGasData[0] +
+          maxDexesCallDataCost +
+          masterGasData[0] +
+          maxMasterCallDataCost +
+          vaultGasData[0] +
+          maxVaultCallDataCost +
+          burnGasData[0] +
+          maxBurnCallDataCost) *
+        BigInt('50000000000')
+      ) // multiply the gas units with the estimated effectiveGasPrice -- 50 gWei
         .toString(),
     )
       .div(new BigFloatingNumber(10).pow(18)) // decimals of native DFI on DMC = 18
