@@ -1,7 +1,6 @@
 import { EnvironmentNetwork } from '@waveshq/walletkit-core';
 import axios from 'axios';
 import { BigNumber as BigFloatingNumber } from 'bignumber.js';
-import { BigNumber } from 'ethers';
 
 import { handler } from '../bot/StateRelayerBot';
 import { deployContract } from '../tests/utils/deployment';
@@ -9,17 +8,17 @@ import { deployContract } from '../tests/utils/deployment';
 // to run this file, run npx hardhat clean && npm i && npx hardhat run scripts/gasEstimation.ts
 // some old estimation: at 0.34 USD, estimation is 35 USD per month
 async function estimateGasCost() {
-  const dexesData: BigNumber[] = [];
-  const masterData: BigNumber[] = [];
-  const vaultData: BigNumber[] = [];
-  const burnData: BigNumber[] = [];
+  const dexesData: BigInt[] = [];
+  const masterData: BigInt[] = [];
+  const vaultData: BigInt[] = [];
+  const burnData: BigInt[] = [];
   const { bot, stateRelayerProxy } = await deployContract();
   for (let i = 0; i < 10; i += 1) {
     const data = await handler({
       testGasCost: true,
       urlNetwork: 'https://ocean.defichain.com/',
       envNetwork: EnvironmentNetwork.MainNet,
-      contractAddress: stateRelayerProxy.address, // Proxy contract address
+      contractAddress: await stateRelayerProxy.getAddress(), // Proxy contract address
       signer: bot,
     });
     if (data === undefined) break;
@@ -32,13 +31,13 @@ async function estimateGasCost() {
     await new Promise((r) => setTimeout(r, 10 * 1000));
   }
   console.log('Update DEXes');
-  const averageCostUpdateDEX = await calculateAverageCost(dexesData);
+  const averageCostUpdateDEX = await calculateAverageCost(dexesData.map((x) => x.valueOf()));
   console.log('Update Masterdata');
-  const averageCostUpdateMasterData = await calculateAverageCost(masterData);
+  const averageCostUpdateMasterData = await calculateAverageCost(masterData.map((x) => x.valueOf()));
   console.log('Update Vault data');
-  const averageCostUpdateVaultData = await calculateAverageCost(vaultData);
+  const averageCostUpdateVaultData = await calculateAverageCost(vaultData.map((x) => x.valueOf()));
   console.log('Update burn data');
-  const averageCostBurnData = await calculateAverageCost(burnData);
+  const averageCostBurnData = await calculateAverageCost(burnData.map((x) => x.valueOf()));
   console.log(
     'Average cost of updating all data in USD at one time is ',
     averageCostUpdateDEX
@@ -59,9 +58,9 @@ async function getPrice(): Promise<BigFloatingNumber> {
   return new BigFloatingNumber(response.data.data['5804'].quote.USD.price);
 }
 
-async function calculateAverageCost(arr: BigNumber[]): Promise<BigFloatingNumber> {
+async function calculateAverageCost(arr: bigint[]): Promise<BigFloatingNumber> {
   // assume 1 gas = 50 gWei
-  const initialCostUpdateInGas = new BigFloatingNumber(arr[0].mul(50).mul(BigNumber.from(10).pow(9)).toString()).div(
+  const initialCostUpdateInGas = new BigFloatingNumber((arr[0] * BigInt(50 * 10 ** 9)).toString()).div(
     new BigFloatingNumber(10).pow(18),
   );
 
@@ -69,11 +68,11 @@ async function calculateAverageCost(arr: BigNumber[]): Promise<BigFloatingNumber
   const laterAverageCostUpdateInGas = new BigFloatingNumber(
     arr
       .slice(1)
-      .reduce((accu, ele) => accu.add(ele), BigNumber.from(0))
+      .reduce((accu, ele) => accu + ele, 0n)
       .toString(),
   )
     .div(arr.length - 1)
-    .multipliedBy(30)
+    .multipliedBy(50)
     .multipliedBy(new BigFloatingNumber(10).pow(9))
     .div(new BigFloatingNumber(10).pow(18));
   const laterAverageCostUpdateInUSD = (await getPrice()).multipliedBy(laterAverageCostUpdateInGas);
