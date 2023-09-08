@@ -19,8 +19,6 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
     uint256 private lastUpdatedMasterNodeInfoTimestampNoDecimals;
     // integer value, no decimals
     uint256 private lastUpdatedDexInfoTimestampNoDecimals;
-    // integer value, no decimals
-    uint256 private lastUpdatedBurnedInfoTimestampNoDecimals;
     bool public inBatchCallByBot;
 
     struct DEXInfo {
@@ -63,24 +61,6 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
         uint256 amount;
         string token;
     }
-    struct BurnedInformation {
-        string addr;
-        uint256 amount; // Amount of DFI sent to burn address
-        AMOUNT_TOKEN[] tokens; // Token amount sent to burn address
-        uint256 feeburn; // Amount of DFI collected via fee burn
-        uint256 emissionburn; // Amount of DFI collected via emission burn
-        uint256 auctionburn; // Amount of DFI collected via auction burn
-        uint256 paybackburn; // Value of burn after payback (in DFI )
-        AMOUNT_TOKEN[] paybackburntokens;
-        AMOUNT_TOKEN[] dexfeetokens;
-        uint256 dfipaybackfee; // Amount of DFI collected from penalty resulting from paying DUSD using dfi
-        AMOUNT_TOKEN[] dfipaybacktokens; // Amount of tokens that are paid back
-        AMOUNT_TOKEN[] paybackfees; // Amount of paybacks
-        AMOUNT_TOKEN[] paybacktokens; // Amount of tokens that are paid back
-        AMOUNT_TOKEN[] dfip2203; // Amount of tokens burned due to futureswap
-        AMOUNT_TOKEN[] dfip2206f; // Amount of tokens burned due to DFI-to-DUSD swap
-    }
-    BurnedInformation public burnedInformation;
 
     struct MasterNodeInformation {
         // the total value locked in USD in masternodes
@@ -107,7 +87,6 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
     );
     event UpdateVaultGeneralInformation(VaultGeneralInformation vaultInfo, uint256 timeStamp);
     event UpdateMasterNodeInformation(MasterNodeInformation nodeInformation, uint256 timeStamp);
-    event UpdatedBurnedInformation(BurnedInformation burnedInformation, uint256 timeStamp);
 
     function _authorizeUpgrade(address newImplementation) internal override onlyRole(DEFAULT_ADMIN_ROLE) {}
 
@@ -176,13 +155,6 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
         emit UpdateMasterNodeInformation(_masterNodeInformation, _lastUpdatedMasterNodeInfoTimestamp);
     }
 
-    function updateBurnInfo(BurnedInformation calldata _burnedInfo) external allowUpdate {
-        burnedInformation = _burnedInfo;
-        uint256 _lastUpdatedMasterBurnedInfoTimestamp = block.timestamp;
-        lastUpdatedBurnedInfoTimestampNoDecimals = _lastUpdatedMasterBurnedInfoTimestamp;
-        emit UpdatedBurnedInformation(_burnedInfo, _lastUpdatedMasterBurnedInfoTimestamp);
-    }
-
     /**
      *  @notice function for the bot to update a lot of data at the same time
      *  @param funcCalls the calldata used to make call back to this smart contract
@@ -245,9 +217,5 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
      */
     function getMasterNodeInfo() external view returns (uint256, MasterNodeInformation memory) {
         return (lastUpdatedMasterNodeInfoTimestampNoDecimals, masterNodeInformation);
-    }
-
-    function getBurnedInfo() external view returns (uint256, BurnedInformation memory) {
-        return (lastUpdatedBurnedInfoTimestampNoDecimals, burnedInformation);
     }
 }
