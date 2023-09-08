@@ -7,10 +7,8 @@ import { StateRelayer, StateRelayer__factory, StateRelayerProxy__factory } from 
 import { handler } from '../StateRelayerBot';
 import { tranformPairData } from '../utils/transformData';
 import {
-  expectedBurnData,
   expectedMasterNodeData,
   expectedVaultData,
-  mockedBurnData,
   mockedDexPricesData,
   mockedPoolPairData,
   mockedStatsData,
@@ -20,7 +18,6 @@ jest.mock('@defichain/whale-api-client', () => ({
   WhaleApiClient: jest.fn().mockImplementation(() => ({
     stats: {
       get: () => mockedStatsData,
-      getBurn: () => mockedBurnData,
     },
     poolpairs: {
       list: () => mockedPoolPairData,
@@ -81,41 +78,16 @@ describe('State Relayer Bot Tests', () => {
     const client = getWhaleClient('', EnvironmentNetwork.LocalPlayground);
     const testPoolPairData = await client.poolpairs.list(200);
     if (output !== undefined) {
-      const { dexInfoTxReceipt, masterDataTxReceipt, vaultTxReceipt, burnTxReceipt } = output;
+      const { dexInfoTxReceipt, masterDataTxReceipt, vaultTxReceipt } = output;
       expect(dexInfoTxReceipt).toBeUndefined();
       expect(masterDataTxReceipt).toBeUndefined();
       expect(vaultTxReceipt).toBeUndefined();
-      expect(burnTxReceipt).toBeUndefined();
-    }
-
-    const receivedBurnedInfo: { [index: string]: any } = await proxy.getBurnedInfo();
-
-    const fieldWithValues = [
-      'addr',
-      'amount',
-      'feeburn',
-      'emissionburn',
-      'auctionburn',
-      'paybackburn',
-      'dfipaybackfee',
-    ];
-    for (const k of Object.keys(expectedBurnData)) {
-      if (fieldWithValues.includes(k)) {
-        expect(receivedBurnedInfo[1][k]).toStrictEqual(expectedBurnData[k]);
-      } else {
-        const amountTokenArr = receivedBurnedInfo[1][k];
-        expect(amountTokenArr.length).toStrictEqual(expectedBurnData[k].length);
-        for (let index = 0; index < amountTokenArr.length; index += 1) {
-          expect(amountTokenArr[index].amount).toStrictEqual(expectedBurnData[k][index].amount);
-          expect(amountTokenArr[index].token).toStrictEqual(expectedBurnData[k][index].token);
-        }
-      }
     }
 
     // Checking the /dex/dex-pair info
     const dETH = await proxy.getDexPairInfo('dETH-DFI');
     const expectedDexInfo = tranformPairData(testPoolPairData, mockedStatsData, mockedDexPricesData);
-    const lastETHDFIInfo = expectedDexInfo.dexInfo[expectedDexInfo.dex.lastIndexOf('dETH-DFI')];
+    const lastETHDFIInfo = expectedDexInfo.dexInfo[expectedDexInfo.dex.indexOf('dETH-DFI')];
     // for sure both two sides have the same type as bigint
     expect(dETH[1].primaryTokenPrice).toStrictEqual(Object.values(lastETHDFIInfo)[0]);
     expect(dETH[1].volume24H).toStrictEqual(Object.values(lastETHDFIInfo)[1]);
