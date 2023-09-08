@@ -8,7 +8,6 @@ import { deployContract } from './utils/deployment';
 type MasterNodeInformationStruct = StateRelayer.MasterNodeInformationStruct;
 type VaultGeneralInformation = StateRelayer.VaultGeneralInformationStruct;
 type DexInfo = StateRelayer.DEXInfoStruct;
-type BurnedInfo = StateRelayer.BurnedInformationStruct;
 
 describe('State relayer contract data tests', () => {
   let stateRelayerProxy: StateRelayer;
@@ -86,64 +85,6 @@ describe('State relayer contract data tests', () => {
       // Testing that the received is as expected as dexDataBtc
       expect(receivedBtcDexData[1].toString()).to.equal(Object.values(dexDataBtc).toString());
     });
-
-    it('Should successfully set burned data for all ecosystem', async () => {
-      ({ stateRelayerProxy, bot } = await loadFixture(deployContract));
-      const burnInfo: BurnedInfo = {
-        addr: '8defichainBurnAddressXXXXXXXdRQkSm',
-        amount: 156041860,
-        tokens: [
-          { amount: 7260, token: 'DFI' },
-          { amount: 20289, token: 'ETH' },
-        ],
-        feeburn: 358697,
-        emissionburn: 98783549,
-        auctionburn: 1844869,
-        paybackburn: 61705058,
-        paybackburntokens: [
-          { amount: 61705058, token: 'DFI' },
-          { amount: 714593, token: 'DUSD' },
-        ],
-        dexfeetokens: [
-          { amount: 32083, token: 'DFI' },
-          { amount: 131, token: 'BTC' },
-        ],
-        dfipaybackfee: 0,
-        dfipaybacktokens: [{ amount: 223563786, token: 'DUSD' }],
-        paybackfees: [{ amount: 814, token: 'XOM' }],
-        paybacktokens: [{ amount: 24, token: 'SHEL' }],
-        dfip2203: [
-          { amount: 97359326, token: 'DUSD' },
-          { amount: 5774, token: 'BABA' },
-        ],
-        dfip2206f: [{ amount: 69, token: 'XLE' }],
-      };
-      await stateRelayerProxy.connect(bot).updateBurnInfo(burnInfo);
-      const receivedBurnedData: [bigint, BurnedInfo] = await stateRelayerProxy.getBurnedInfo();
-      const fieldWithValues = [
-        'addr',
-        'amount',
-        'feeburn',
-        'emissionburn',
-        'auctionburn',
-        'paybackburn',
-        'dfipaybackfee',
-      ] as Array<keyof BurnedInfo>;
-      for (const k of Object.keys(burnInfo)) {
-        const typedK = k as keyof BurnedInfo;
-        if (fieldWithValues.includes(typedK)) {
-          expect(receivedBurnedData[1][typedK]).to.equal(burnInfo[typedK]);
-        } else {
-          const amountTokenArr = receivedBurnedData[1][typedK] as StateRelayer.AMOUNT_TOKENStruct[];
-          const burnInfoEntry = burnInfo[typedK] as StateRelayer.AMOUNT_TOKENStruct[];
-          expect(amountTokenArr.length).to.equal(burnInfoEntry.length);
-          for (let index = 0; index < amountTokenArr.length; index += 1) {
-            expect(amountTokenArr[index].amount).to.equal(burnInfoEntry[index].amount);
-            expect(amountTokenArr[index].token).to.equal(burnInfoEntry[index].token);
-          }
-        }
-      }
-    });
   });
 
   describe('Unsuccessfully updating individually', () => {
@@ -187,40 +128,6 @@ describe('State relayer contract data tests', () => {
         commissions: 3,
       };
       await expect(stateRelayerProxy.connect(user).updateDEXInfo(['eth'], [dexDataEth], 1, 2)).to.be.reverted;
-    });
-
-    it('`updateBurnInfo` - Should successfully revert if the signer is not `bot`', async () => {
-      ({ stateRelayerProxy, user } = await loadFixture(deployContract));
-      const burnInfo: BurnedInfo = {
-        addr: '8defichainBurnAddressXXXXXXXdRQkSm',
-        amount: 156041860,
-        tokens: [
-          { amount: 7260, token: 'DFI' },
-          { amount: 20289, token: 'ETH' },
-        ],
-        feeburn: 358697,
-        emissionburn: 98783549,
-        auctionburn: 1844869,
-        paybackburn: 61705058,
-        paybackburntokens: [
-          { amount: 61705058, token: 'DFI' },
-          { amount: 714593, token: 'DUSD' },
-        ],
-        dexfeetokens: [
-          { amount: 32083, token: 'DFI' },
-          { amount: 131, token: 'BTC' },
-        ],
-        dfipaybackfee: 0,
-        dfipaybacktokens: [{ amount: 223563786, token: 'DUSD' }],
-        paybackfees: [{ amount: 814, token: 'XOM' }],
-        paybacktokens: [{ amount: 24, token: 'SHEL' }],
-        dfip2203: [
-          { amount: 97359326, token: 'DUSD' },
-          { amount: 5774, token: 'BABA' },
-        ],
-        dfip2206f: [{ amount: 69, token: 'XLE' }],
-      };
-      await expect(stateRelayerProxy.connect(user).updateBurnInfo(burnInfo)).to.reverted;
     });
   });
 
@@ -282,45 +189,12 @@ describe('State relayer contract data tests', () => {
         2,
       ]);
 
-      // Burned info data
-      const burnedData: BurnedInfo = {
-        addr: '8defichainBurnAddressXXXXXXXdRQkSm',
-        amount: 156041860,
-        tokens: [
-          { amount: 7260, token: 'DFI' },
-          { amount: 20289, token: 'ETH' },
-        ],
-        feeburn: 358697,
-        emissionburn: 98783549,
-        auctionburn: 1844869,
-        paybackburn: 61705058,
-        paybackburntokens: [
-          { amount: 61705058, token: 'DFI' },
-          { amount: 714593, token: 'DUSD' },
-        ],
-        dexfeetokens: [
-          { amount: 32083, token: 'DFI' },
-          { amount: 131, token: 'BTC' },
-        ],
-        dfipaybackfee: 0,
-        dfipaybacktokens: [{ amount: 223563786, token: 'DUSD' }],
-        paybackfees: [{ amount: 814, token: 'XOM' }],
-        paybacktokens: [{ amount: 24, token: 'SHEL' }],
-        dfip2203: [
-          { amount: 97359326, token: 'DUSD' },
-          { amount: 5774, token: 'BABA' },
-        ],
-        dfip2206f: [{ amount: 69, token: 'XLE' }],
-      };
-
-      const callDataBurnedInfo = stateRelayerInterface.encodeFunctionData('updateBurnInfo', [burnedData]);
       await stateRelayerProxy
         .connect(bot)
         .batchCallByBot([
           callDataForUpdatingMasterNodeData,
           callDataForUpdatingVaultInformation,
           callDataForUpdatingDexInfos,
-          callDataBurnedInfo,
         ]);
       const receivedMasterNodeData = await stateRelayerProxy.getMasterNodeInfo();
       expect(receivedMasterNodeData[1].toString()).to.equal(Object.values(masterNodeData).toString());
@@ -334,31 +208,6 @@ describe('State relayer contract data tests', () => {
       const receivedBtcDexData = await stateRelayerProxy.getDexPairInfo(symbols[1]);
       // Testing that the received is as expected as dexDataBtc
       expect(receivedBtcDexData[1].toString()).to.equal(Object.values(dexDataBtc).toString());
-      // Testing that the received is as expected as burnedData
-      const receivedBurnedData: [bigint, BurnedInfo] = await stateRelayerProxy.getBurnedInfo();
-      const fieldWithValues = [
-        'addr',
-        'amount',
-        'feeburn',
-        'emissionburn',
-        'auctionburn',
-        'paybackburn',
-        'dfipaybackfee',
-      ] as Array<keyof BurnedInfo>;
-      for (const k of Object.keys(burnedData)) {
-        const typedK = k as keyof BurnedInfo;
-        if (fieldWithValues.includes(typedK)) {
-          expect(receivedBurnedData[1][typedK]).to.equal(burnedData[typedK]);
-        } else {
-          const amountTokenArr = receivedBurnedData[1][typedK] as StateRelayer.AMOUNT_TOKENStruct[];
-          const burnInfoEntry = burnedData[typedK] as StateRelayer.AMOUNT_TOKENStruct[];
-          expect(amountTokenArr.length).to.equal(burnInfoEntry.length);
-          for (let index = 0; index < amountTokenArr.length; index += 1) {
-            expect(amountTokenArr[index].amount).to.equal(burnInfoEntry[index].amount);
-            expect(amountTokenArr[index].token).to.equal(burnInfoEntry[index].token);
-          }
-        }
-      }
     });
 
     it('Should fail when the caller is not authorized ', async () => {
