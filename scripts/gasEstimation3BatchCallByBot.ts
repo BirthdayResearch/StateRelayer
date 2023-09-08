@@ -1,6 +1,6 @@
 import { BigNumber as BigFloatingNumber } from 'bignumber.js';
-import { BigNumber } from 'ethers';
 
+import { mockedBurnData } from '../bot/test-i9n/mockData/oceanMockedData';
 import { StateRelayer__factory } from '../generated';
 import { deployContract } from '../tests/utils/deployment';
 
@@ -77,63 +77,72 @@ const dexesNames = [
   'dBURN2-DUSD',
 ];
 
+const tokensSymbol = mockedBurnData.tokens.map((str) => str.split('@')[1]);
+const paybackburntokensSymbol = mockedBurnData.paybackburntokens.map((str) => str.split('@')[1]);
+const dexfeetokensSymbol = mockedBurnData.paybackburntokens.map((str) => str.split('@')[1]);
+const dfipaybacktokensSymbol = mockedBurnData.dexfeetokens.map((str) => str.split('@')[1]);
+const dfip2023Symbol = mockedBurnData.dfip2203.map((str) => str.split('@')[1]);
+
 // to run this file, run npx hardhat clean && npm i && npx hardhat run scripts/gasEstimation3BatchCallByBot.ts
 async function estimateGasCost() {
   const { bot, stateRelayerProxy } = await deployContract();
   const stateRelayerInterface = StateRelayer__factory.createInterface();
-  const batchCallStats: BigNumber[] = [];
+  const batchCallStats: bigint[] = [];
   // the size of calldata between these batch calls should be the same
   // (due to the same names of dex pools)
-  let maxBatchCallCallDataCost = BigNumber.from(0);
+  let maxBatchCallCallDataCost: bigint = 0n;
 
   for (let i = 1; i < 5; i += 1) {
-    const dexValues: any[] = [];
-
-    for (let j = 0; j < 69; j += 1) {
-      dexValues.push({
-        primaryTokenPrice: i,
-        volume24H: i,
-        totalLiquidity: i,
-        APR: i,
-        firstTokenBalance: i,
-        secondTokenBalance: i,
-        rewards: i,
-        commissions: i,
-        decimals: i,
-      });
-    }
+    const dexValues = new Array(dexesNames.length).fill({
+      primaryTokenPrice: i,
+      volume24H: i,
+      totalLiquidity: i,
+      APR: i,
+      firstTokenBalance: i,
+      secondTokenBalance: i,
+      rewards: i,
+      commissions: i,
+      decimals: i,
+    });
 
     const dexUpdateCallData = stateRelayerInterface.encodeFunctionData('updateDEXInfo', [dexesNames, dexValues, 1, 1]);
 
     const masterDataUpdateCallData = stateRelayerInterface.encodeFunctionData('updateMasterNodeInformation', [
       {
         totalValueLockedInMasterNodes: i,
-        zeroYearLocked: i,
-        fiveYearLocked: i,
-        tenYearLocked: i,
-        decimals: i,
+        zeroYearLockedNoDecimals: i,
+        fiveYearLockedNoDecimals: i,
+        tenYearLockedNoDecimals: i,
       },
     ]);
 
     const vaultDataUpdateCallData = stateRelayerInterface.encodeFunctionData('updateBurnInfo', [
       {
-        fee: i,
-        auction: i,
-        payback: i,
-        emission: i,
-        total: i,
-        decimals: i,
+        addr: '8defichainBurnAddressXXXXXXXdRQkSm',
+        amount: i,
+        tokens: tokensSymbol.map((symbol) => ({ amount: i, token: symbol })),
+        feeburn: i,
+        emissionburn: i,
+        auctionburn: i,
+        paybackburn: i,
+        paybackburntokens: paybackburntokensSymbol.map((symbol) => ({ amount: i, token: symbol })),
+        dexfeetokens: dexfeetokensSymbol.map((symbol) => ({ amount: i, token: symbol })),
+        dfipaybackfee: i,
+        dfipaybacktokens: dfipaybacktokensSymbol.map((symbol) => ({ amount: i, token: symbol })),
+        paybackfees: [],
+        paybacktokens: [],
+        dfip2203: dfip2023Symbol.map((symbol) => ({ amount: i, token: symbol })),
+        dfip2206f: [],
       },
     ]);
 
     const burnUpdateCallData = stateRelayerInterface.encodeFunctionData('updateVaultGeneralInformation', [
       {
-        noOfVaults: i,
+        noOfVaultsNoDecimals: i,
         totalLoanValue: i,
         totalCollateralValue: i,
         totalCollateralizationRatio: i,
-        activeAuctions: i,
-        decimals: i,
+        activeAuctionsNoDecimals: i,
       },
     ]);
 
@@ -143,12 +152,12 @@ async function estimateGasCost() {
     const batchCallTxReceipt = await batchCallTx.wait();
 
     console.log('Successfully update ', i);
-    console.log('The gas used for the batch call is ', batchCallTxReceipt.gasUsed);
+    console.log('The gas used for the batch call is ', batchCallTxReceipt!.gasUsed);
     if (i === 1) {
-      maxBatchCallCallDataCost = BigNumber.from(((batchCallTx.data.length - 2) / 2) * 16);
+      maxBatchCallCallDataCost = BigInt((batchCallTx.data.length - 2) / 2) * 16n;
     }
 
-    batchCallStats.push(batchCallTxReceipt.gasUsed);
+    batchCallStats.push(batchCallTxReceipt!.gasUsed);
   }
 
   // average estimation (171 DFI)
@@ -156,9 +165,7 @@ async function estimateGasCost() {
     'Average estimated cost in DFI ',
     // take the second element of the array
     new BigFloatingNumber(
-      batchCallStats[1]
-        .add(maxBatchCallCallDataCost)
-        .mul('50000000000') // multiply the gas units with the estimated effectiveGasPrice -- 50 gWei
+      ((batchCallStats[1] + maxBatchCallCallDataCost) * BigInt('50000000000')) // multiply the gas units with the estimated effectiveGasPrice -- 50 gWei
         .toString(),
     )
       .div(new BigFloatingNumber(10).pow(18)) // decimals of native DFI on DMC = 18
@@ -170,9 +177,7 @@ async function estimateGasCost() {
   console.log(
     'Maximum cost in DFI',
     new BigFloatingNumber(
-      batchCallStats[0]
-        .add(maxBatchCallCallDataCost)
-        .mul('50000000000') // multiply the gas units with the estimated effectiveGasPrice -- 50 gWei
+      ((batchCallStats[0] + maxBatchCallCallDataCost) * BigInt('50000000000')) // multiply the gas units with the estimated effectiveGasPrice -- 50 gWei
         .toString(),
     )
       .div(new BigFloatingNumber(10).pow(18)) // decimals of native DFI on DMC = 18
