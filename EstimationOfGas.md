@@ -60,3 +60,4 @@ Therefore, let's put the gas price for our one tx = 125 % \* 40 = 50
 
 testcommit
 testcommit2
+testcommit3
