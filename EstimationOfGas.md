@@ -57,3 +57,5 @@ Link: https://etherscan.io/chart/gasprice
 
 A calculation of the average gas price for the last 6 months indicates a value of 40 gWei.
 Therefore, let's put the gas price for our one tx = 125 % \* 40 = 50
+
+testcommit
