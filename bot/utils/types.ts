@@ -13,7 +13,6 @@ export type PairData = {
 };
 export type VaultData = StateRelayer.VaultGeneralInformationStruct;
 export type MasterNodeData = StateRelayer.MasterNodeInformationStruct;
-export type BurnedInformation = StateRelayer.BurnedInformationStruct;
 
 export type StateRelayerHandlerProps = {
   testGasCost: boolean;

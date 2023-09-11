@@ -6,12 +6,11 @@ import { handler } from '../bot/StateRelayerBot';
 import { deployContract } from '../tests/utils/deployment';
 
 // to run this file, run npx hardhat clean && npm i && npx hardhat run scripts/gasEstimation.ts
-// some old estimation: at 0.34 USD, estimation is 35 USD per month
+// estimation is 33.12 USD per month
 async function estimateGasCost() {
   const dexesData: BigInt[] = [];
   const masterData: BigInt[] = [];
   const vaultData: BigInt[] = [];
-  const burnData: BigInt[] = [];
   const { bot, stateRelayerProxy } = await deployContract();
   for (let i = 0; i < 10; i += 1) {
     const data = await handler({
@@ -22,11 +21,10 @@ async function estimateGasCost() {
       signer: bot,
     });
     if (data === undefined) break;
-    const { dexInfoTxReceipt, masterDataTxReceipt, vaultTxReceipt, burnTxReceipt } = data;
+    const { dexInfoTxReceipt, masterDataTxReceipt, vaultTxReceipt } = data;
     dexesData.push(dexInfoTxReceipt!.gasUsed);
     masterData.push(masterDataTxReceipt!.gasUsed);
     vaultData.push(vaultTxReceipt!.gasUsed);
-    burnData.push(burnTxReceipt!.gasUsed);
     console.log('Successfully update ', i);
     await new Promise((r) => setTimeout(r, 10 * 1000));
   }
@@ -36,15 +34,9 @@ async function estimateGasCost() {
   const averageCostUpdateMasterData = await calculateAverageCost(masterData.map((x) => x.valueOf()));
   console.log('Update Vault data');
   const averageCostUpdateVaultData = await calculateAverageCost(vaultData.map((x) => x.valueOf()));
-  console.log('Update burn data');
-  const averageCostBurnData = await calculateAverageCost(burnData.map((x) => x.valueOf()));
   console.log(
     'Average cost of updating all data in USD at one time is ',
-    averageCostUpdateDEX
-      .plus(averageCostUpdateMasterData)
-      .plus(averageCostUpdateVaultData)
-      .plus(averageCostBurnData)
-      .toString(),
+    averageCostUpdateDEX.plus(averageCostUpdateMasterData).plus(averageCostUpdateVaultData).toString(),
   );
 }
 

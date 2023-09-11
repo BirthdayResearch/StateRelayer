@@ -2,49 +2,18 @@ import { poolpairs, stats } from '@defichain/whale-api-client';
 import { BigNumber } from 'bignumber.js';
 
 import { StateRelayer } from '../../generated';
-import { BurnedInformation, MasterNodeData, PairData, VaultData } from './types';
+import { MasterNodeData, PairData, VaultData } from './types';
 
 const DECIMALS = 18;
 const DENOMINATION = 'USDT';
 
 type AsyncReturnType<T extends (...args: any) => any> = T extends (...args: any) => Promise<infer R> ? R : any;
-type BurnData = AsyncReturnType<typeof stats.Stats.prototype.getBurn>;
 type StatsData = AsyncReturnType<typeof stats.Stats.prototype.get>;
 type PoolPairData = AsyncReturnType<typeof poolpairs.PoolPairs.prototype.list>;
 type DexPriceResult = AsyncReturnType<typeof poolpairs.PoolPairs.prototype.listDexPrices>;
 
 const transformToBigInt = (str: string, decimals: number): bigint =>
   BigInt(new BigNumber(str).multipliedBy(new BigNumber('10').pow(decimals)).toFixed(0, 1));
-
-const transformStringToArr = (str: string): StateRelayer.AMOUNT_TOKENStruct => {
-  const splitArr = str.split('@');
-  return {
-    token: splitArr[1],
-    amount: transformToBigInt(splitArr[0], DECIMALS),
-  };
-};
-
-export function transformBurnData(burnDataInfo: BurnData): BurnedInformation {
-  const burnedData = {} as BurnedInformation;
-  // Get Data from all burns in ecosystem
-  burnedData.addr = burnDataInfo.address;
-  burnedData.amount = transformToBigInt(burnDataInfo.amount.toString(), DECIMALS);
-  burnedData.tokens = burnDataInfo.tokens.map((ele) => transformStringToArr(ele));
-  burnedData.feeburn = transformToBigInt(burnDataInfo.feeburn.toString(), DECIMALS);
-  burnedData.emissionburn = transformToBigInt(burnDataInfo.emissionburn.toString(), DECIMALS);
-  burnedData.auctionburn = transformToBigInt(burnDataInfo.auctionburn.toString(), DECIMALS);
-  burnedData.paybackburn = transformToBigInt(burnDataInfo.paybackburn.toString(), DECIMALS);
-  burnedData.paybackburntokens = burnDataInfo.paybackburntokens.map((ele) => transformStringToArr(ele));
-  burnedData.paybacktokens = burnDataInfo.paybacktokens.map((ele) => transformStringToArr(ele));
-  burnedData.dexfeetokens = burnDataInfo.dexfeetokens.map((ele) => transformStringToArr(ele));
-  burnedData.dfipaybackfee = transformToBigInt(burnDataInfo.dfipaybackfee.toString(), DECIMALS);
-  burnedData.dfipaybacktokens = burnDataInfo.dfipaybacktokens.map((ele) => transformStringToArr(ele));
-  burnedData.paybackfees = burnDataInfo.paybackfees.map((ele) => transformStringToArr(ele));
-  burnedData.paybackburntokens = burnDataInfo.paybackburntokens.map((ele) => transformStringToArr(ele));
-  burnedData.dfip2203 = burnDataInfo.dfip2203.map((ele) => transformStringToArr(ele));
-  burnedData.dfip2206f = burnDataInfo.dfip2206f.map((ele) => transformStringToArr(ele));
-  return burnedData;
-}
 
 export function transformDataVault(statsData: StatsData): VaultData {
   const dataVault = {} as VaultData;
