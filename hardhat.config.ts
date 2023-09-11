@@ -87,10 +87,16 @@ const config: HardhatUserConfig = {
       accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
       chainId: 1133,
     },
+    sepolia: {
+      url: process.env.SEPOLIA_URL || '',
+      accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+      chainId: 11155111,
+    }
   },
   etherscan: {
     apiKey: {
       DMCTestnet: 'abc',
+      sepolia: process.env.ETHERSCAN_API_KEY || ''
     },
     customChains: [
       {
