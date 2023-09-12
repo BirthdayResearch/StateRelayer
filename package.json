@@ -52,6 +52,7 @@
     "@birthdayresearch/sticky-typescript": "^0.5.14",
     "@nomicfoundation/hardhat-toolbox": "^3.0.0",
     "@truffle/dashboard-hardhat-plugin": "^0.2.10",
+    "@types/aws-lambda": "^8.10.120",
     "@types/jest": "^29.5.2",
     "@waveshq/standard-defichain-jellyfishsdk": "^0.52.1",
     "@waveshq/walletkit-bot": "^0.47.0",

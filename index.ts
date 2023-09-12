@@ -13,4 +13,9 @@ exports.handler = async function (event: APIGatewayProxyEvent, context: Context)
         contractAddress: process.env.CONTRACT_ADDRESS || '',
         signer: new ethers.Wallet(process.env.PRIVATE_KEY || '', ethereumProvider )
     })
+
+    return {
+        statusCode: 200,
+        body: JSON.stringify('Cron job executed successfully!')
+      };
 } 
