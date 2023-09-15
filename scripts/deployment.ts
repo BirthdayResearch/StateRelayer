@@ -11,7 +11,7 @@ import { verify } from './utils/verify';
 // npx hardhat run --network truffleDashboard ./scripts/deployment.ts
 async function main() {
   const stateRelayer = await ethers.deployContract("StateRelayer");
-  await stateRelayer.deploymentTransaction().wait(5);
+  await stateRelayer.deploymentTransaction()?.wait(5);
   const stateRelayerAddress = await stateRelayer.getAddress();
   console.log('State relayer Contract address: ', stateRelayerAddress);
   console.log('Verifying........');
@@ -23,7 +23,7 @@ async function main() {
   ]);
   // Deploying StateRelayerProxy contract
   const stateRelayerProxy = await ethers.deployContract("StateRelayerProxy", [stateRelayerAddress, encodedData]);
-  await stateRelayerProxy.deploymentTransaction().wait(5);
+  await stateRelayerProxy.deploymentTransaction()?.wait(5);
   const stateRelayerProxyAddress = await stateRelayerProxy.getAddress();
   console.log('State relayer proxy address: ', stateRelayerProxyAddress);
   console.log('Verifying........');

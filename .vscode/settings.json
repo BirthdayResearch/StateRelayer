@@ -13,7 +13,6 @@
     }
   ],
   "files.exclude": {
-    "**/node_modules": true,
     "**/.git": true
   },
   "prettier.bracketSameLine": false,
