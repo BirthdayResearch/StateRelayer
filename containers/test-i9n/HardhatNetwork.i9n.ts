@@ -24,14 +24,14 @@ describe('HardhatNetwork', () => {
     });
 
     it('should be able to connect via ethers', async () => {
-      const provider = new ethers.providers.JsonRpcProvider(startedHardhatContainer.rpcUrl);
+      const provider = new ethers.JsonRpcProvider(startedHardhatContainer.rpcUrl);
       const accounts = await provider.listAccounts();
       expect(accounts.length).toBeGreaterThan(0);
     });
 
     it('should have some pre-funded accounts', async () => {
       const [preFundedAccount] = await startedHardhatContainer.call('eth_accounts', []);
-      const provider = new ethers.providers.JsonRpcProvider(startedHardhatContainer.rpcUrl);
+      const provider = new ethers.JsonRpcProvider(startedHardhatContainer.rpcUrl);
       expect(await provider.getBalance(preFundedAccount)).not.toStrictEqual('0x0');
     });
   });
@@ -50,30 +50,34 @@ describe('HardhatNetwork', () => {
     });
 
     it('should error if not generating at least 1 block', async () => {
-      await expect(() => hardhatNetwork.generate(0)).rejects.toThrow(/Minimum of 1 block needs to be generated./);
-      await expect(() => hardhatNetwork.generate(-1)).rejects.toThrow(/Minimum of 1 block needs to be generated./);
+      await expect(hardhatNetwork.generate(0)).rejects.toEqual(Error('Minimum of 1 block needs to be generated.'));
+      await expect(hardhatNetwork.generate(-1)).rejects.toEqual(Error('Minimum of 1 block needs to be generated.'));
       await hardhatNetwork.generate(1);
     });
 
     it('should be able to create a funded test wallet', async () => {
       const { testWalletAddress } = await hardhatNetwork.createTestWallet();
       const testWalletBalance = await hardhatNetwork.ethersRpcProvider.getBalance(testWalletAddress);
-      expect(testWalletBalance.eq(ethers.constants.MaxInt256)).toStrictEqual(true);
+      expect(testWalletBalance === ethers.MaxInt256).toStrictEqual(true);
     });
 
     describe('getHardhatTestWallet', () => {
       it('should return a test wallet connected to a pre-initialised Hardhat account', async () => {
-        await expect(hardhatNetwork.getHardhatTestWallet(0).testWalletSigner.getAddress()).resolves.toStrictEqual(
-          HardhatNetwork.hardhatAccounts[0],
-        );
-        await expect(hardhatNetwork.getHardhatTestWallet(19).testWalletSigner.getAddress()).resolves.toStrictEqual(
-          HardhatNetwork.hardhatAccounts[19],
-        );
+        await expect(
+          (await hardhatNetwork.getHardhatTestWallet(0)).testWalletSigner.getAddress(),
+        ).resolves.toStrictEqual(HardhatNetwork.hardhatAccounts[0]);
+        await expect(
+          (await hardhatNetwork.getHardhatTestWallet(19)).testWalletSigner.getAddress(),
+        ).resolves.toStrictEqual(HardhatNetwork.hardhatAccounts[19]);
       });
 
       it('should throw an error when trying to get a test wallet for a Hardhat account that does not exist', async () => {
-        expect(() => hardhatNetwork.getHardhatTestWallet(-1)).toThrow('Please select an index from 0 to 19');
-        expect(() => hardhatNetwork.getHardhatTestWallet(20)).toThrow('Please select an index from 0 to 19');
+        await expect(hardhatNetwork.getHardhatTestWallet(-1)).rejects.toEqual(
+          Error('Please select an index from 0 to 19 (inclusive) when creating a hardhat wallet'),
+        );
+        await expect(hardhatNetwork.getHardhatTestWallet(20)).rejects.toEqual(
+          Error('Please select an index from 0 to 19 (inclusive) when creating a hardhat wallet'),
+        );
       });
     });
   });
@@ -99,13 +103,13 @@ describe('HardhatNetwork', () => {
 
       const txHash = await hardhatNetwork.sendEther({
         from: testWalletAddress,
-        to: ethers.constants.AddressZero,
+        to: ethers.ZeroAddress,
         value: 1000000,
       });
 
       const txReceipt = await hardhatNetwork.ethersRpcProvider.getTransactionReceipt(txHash);
       // should have 1 confirmation even though we have not mined any blocks
-      expect(txReceipt.confirmations).toStrictEqual(1);
+      expect(await txReceipt?.confirmations()).toStrictEqual(1);
     });
 
     it('should not auto-mine transactions by default', async () => {
@@ -116,7 +120,7 @@ describe('HardhatNetwork', () => {
 
       const txHash = await hardhatNetwork.sendEther({
         from: testWalletAddress,
-        to: ethers.constants.AddressZero,
+        to: ethers.ZeroAddress,
         value: 1000000,
       });
 
@@ -127,7 +131,7 @@ describe('HardhatNetwork', () => {
       await hardhatNetwork.generate(1);
       const txReceiptAfterMining = await hardhatNetwork.ethersRpcProvider.getTransactionReceipt(txHash);
       // Should now have 1 confirmation after explicitly mining a block
-      expect(txReceiptAfterMining.confirmations).toStrictEqual(1);
+      expect(await txReceiptAfterMining?.confirmations()).toStrictEqual(1);
     });
   });
 });

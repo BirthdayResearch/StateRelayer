@@ -50,7 +50,7 @@ task('deployContract', 'Deploys a contract based on the name of the contract')
 
       // Logs the contract address as the output of this task
       // Can be picked up by the task executor to create a contract instance with the outputted contract address
-      console.log(`${contract.address} ${contract.deployTransaction.hash}`);
+      console.log(`${await contract.getAddress()} ${contract.deploymentTransaction()?.hash}`);
     } catch (e) {
       // Logs the error message to be picked up by the caller. Errors start with 'Error: ...'
       console.log(e);
@@ -61,7 +61,7 @@ const config: HardhatUserConfig = {
   solidity: '0.8.18',
   typechain: {
     outDir: './generated',
-    target: 'ethers-v5',
+    target: 'ethers-v6',
   },
   paths: {
     sources: './contracts',
@@ -87,10 +87,16 @@ const config: HardhatUserConfig = {
       accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
       chainId: 1133,
     },
+    sepolia: {
+      url: process.env.SEPOLIA_URL || '',
+      accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+      chainId: 11155111,
+    }
   },
   etherscan: {
     apiKey: {
       DMCTestnet: 'abc',
+      sepolia: process.env.ETHERSCAN_API_KEY || ''
     },
     customChains: [
       {
