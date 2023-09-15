@@ -1,22 +1,17 @@
-// @ts-ignore
 import { EnvironmentNetwork } from '@waveshq/walletkit-core';
 import { ethers } from 'ethers';
 
 import { StateRelayer } from '../../generated';
-
-// eslint-disable-next-line @typescript-eslint/naming-convention
-export type bigNumber = ethers.BigNumberish;
 
 export type DataStore = {
   pair: PairData;
 };
 
 export type PairData = {
-  [pairSymbol: string]: StateRelayer.DEXInfoStructOutput;
+  [pairSymbol: string]: StateRelayer.DEXInfoStruct;
 };
-export type VaultData = StateRelayer.VaultGeneralInformationStructOutput;
-export type MasterNodeData = StateRelayer.MasterNodeInformationStructOutput;
-export type BurnedInformation = StateRelayer.BurnedInformationStructOutput;
+export type VaultData = StateRelayer.VaultGeneralInformationStruct;
+export type MasterNodeData = StateRelayer.MasterNodeInformationStruct;
 
 export type StateRelayerHandlerProps = {
   testGasCost: boolean;

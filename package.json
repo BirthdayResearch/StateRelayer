@@ -38,8 +38,8 @@
     "preset": "@birthdayresearch/sticky-jest"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^4.8.2",
-    "@openzeppelin/contracts-upgradeable": "^4.8.2",
+    "@openzeppelin/contracts": "4.9.3",
+    "@openzeppelin/contracts-upgradeable": "4.9.3",
     "axios": "^1.4.0",
     "solhint": "^3.4.1"
   },
@@ -49,7 +49,7 @@
     "@birthdayresearch/sticky-prettier": "^0.8.5",
     "@birthdayresearch/sticky-testcontainers": "^0.8.5",
     "@birthdayresearch/sticky-typescript": "^0.5.14",
-    "@nomicfoundation/hardhat-toolbox": "^2.0.2",
+    "@nomicfoundation/hardhat-toolbox": "^3.0.0",
     "@truffle/dashboard-hardhat-plugin": "^0.2.10",
     "@types/jest": "^29.5.2",
     "@waveshq/standard-defichain-jellyfishsdk": "^0.52.1",

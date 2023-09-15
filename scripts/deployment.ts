@@ -10,26 +10,26 @@ import { verify } from './utils/verify';
 // npx truffle dashboard
 // npx hardhat run --network truffleDashboard ./scripts/deployment.ts
 async function main() {
-  const StateRelayerContract = await ethers.getContractFactory('StateRelayer');
-  const stateRelayer = await StateRelayerContract.deploy({ gasLimit: 5000000 });
-  await stateRelayer.deployTransaction.wait(5);
-  console.log('State relayer Contract address: ', stateRelayer.address);
+  const stateRelayer = await ethers.deployContract("StateRelayer");
+  await stateRelayer.deploymentTransaction().wait(5);
+  const stateRelayerAddress = await stateRelayer.getAddress();
+  console.log('State relayer Contract address: ', stateRelayerAddress);
   console.log('Verifying........');
-  await verify({ contractAddress: stateRelayer.address, contract: 'contracts/StateRelayer.sol:StateRelayer' });
+  await verify({ contractAddress: stateRelayerAddress, contract: 'contracts/StateRelayer.sol:StateRelayer' });
   // Data to pass to proxy contract
   const encodedData = StateRelayer__factory.createInterface().encodeFunctionData('initialize', [
-    '0x5aB853A40b3b9A16891e8bc8e58730AE3Ec102b2', // Admin
-    '0x5aB853A40b3b9A16891e8bc8e58730AE3Ec102b2', // Bot
+    '0x17D6bb95cCF124324995F08204132cdf75048284', // Admin
+    '0x17D6bb95cCF124324995F08204132cdf75048284', // Bot
   ]);
   // Deploying StateRelayerProxy contract
-  const StateRelayerProxyContract = await ethers.getContractFactory('StateRelayerProxy');
-  const stateRelayerProxy = await StateRelayerProxyContract.deploy(stateRelayer.address, encodedData);
-  await stateRelayerProxy.deployTransaction.wait(5);
-  console.log('State relayer proxy address: ', stateRelayerProxy.address);
+  const stateRelayerProxy = await ethers.deployContract("StateRelayerProxy", [stateRelayerAddress, encodedData]);
+  await stateRelayerProxy.deploymentTransaction().wait(5);
+  const stateRelayerProxyAddress = await stateRelayerProxy.getAddress();
+  console.log('State relayer proxy address: ', stateRelayerProxyAddress);
   console.log('Verifying........');
   await verify({
-    contractAddress: stateRelayerProxy.address,
-    args: [stateRelayer.address, encodedData],
+    contractAddress: stateRelayerProxyAddress,
+    args: [stateRelayerAddress, encodedData],
     contract: 'contracts/StateRelayerProxy.sol:StateRelayerProxy',
   });
 }

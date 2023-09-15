@@ -6,7 +6,7 @@ RUN apk add --no-cache --virtual .gyp python3 make g++
 
 WORKDIR /staterelayer
 
-COPY package.json hardhat.config.ts .solhint.json ./
+COPY package.json hardhat.config.ts .solhint.json tsconfig.json tsconfig.build.json ./
 COPY contracts ./contracts
 
 RUN npm install 

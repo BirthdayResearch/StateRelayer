@@ -2,25 +2,32 @@ import { BigNumberish, ethers } from 'ethers';
 
 import { EvmContractManager } from './EvmContractManager';
 import type { StartedHardhatNetworkContainer } from './HardhatNetworkContainer';
-import { toZeroStrippedHex } from './Utils';
-
 /**
  * Class that exposes the methods available to the HardhatNetwork
  */
 export class HardhatNetwork {
-  readonly ethersRpcProvider: ethers.providers.StaticJsonRpcProvider;
+  readonly ethersRpcProvider: ethers.JsonRpcProvider;
 
-  readonly contracts: EvmContractManager;
+  readonly contractSignerAddress: string;
 
-  readonly contractSigner: ethers.providers.JsonRpcSigner;
+  contracts?: EvmContractManager;
+
+  contractSigner?: ethers.JsonRpcSigner;
 
   constructor(
     private readonly startedHardhatContainer: StartedHardhatNetworkContainer,
     readonly contractDeployerAddress: string,
   ) {
-    this.ethersRpcProvider = new ethers.providers.StaticJsonRpcProvider(startedHardhatContainer.rpcUrl);
-    this.contractSigner = this.ethersRpcProvider.getSigner(contractDeployerAddress);
-    this.contracts = new EvmContractManager(startedHardhatContainer, this.contractSigner, this.ethersRpcProvider);
+    this.ethersRpcProvider = new ethers.JsonRpcProvider(startedHardhatContainer.rpcUrl, undefined, {
+      cacheTimeout: -1,
+    });
+    this.contractSignerAddress = contractDeployerAddress;
+  }
+
+  async initialize(): Promise<HardhatNetwork> {
+    this.contractSigner = await this.ethersRpcProvider.getSigner(this.contractSignerAddress);
+    this.contracts = new EvmContractManager(this.startedHardhatContainer, this.contractSigner, this.ethersRpcProvider);
+    return this;
   }
 
   /**
@@ -45,22 +52,22 @@ export class HardhatNetwork {
    * Creates test wallet data and funds it with the maximum amount of Ether
    */
   async createTestWallet(): Promise<TestWalletData> {
-    const testWalletAddress = ethers.Wallet.createRandom().address;
+    const testWalletSigner = ethers.Wallet.createRandom();
+    const testWalletAddress = testWalletSigner.address;
+
     await this.activateAccount(testWalletAddress);
-    await this.fundAddress(testWalletAddress, ethers.constants.MaxInt256);
+    await this.fundAddress(testWalletAddress, ethers.MaxInt256);
     return {
       testWalletAddress,
-      testWalletSigner: this.ethersRpcProvider.getSigner(testWalletAddress),
+      testWalletSigner,
     };
   }
 
   // Sets the address' balance to the specified amount. The Ganache EVM will mine a block before returning
-  async fundAddress(address: string, amountToFund: BigNumberish): Promise<void> {
-    // convert amount to fund to hex
-    const amountToFundInHex = ethers.BigNumber.from(amountToFund).toHexString();
+  async fundAddress(address: string, amountToFund: BigInt): Promise<void> {
     const fundAccountStatus = await this.startedHardhatContainer.call('hardhat_setBalance', [
       address,
-      toZeroStrippedHex(amountToFundInHex), // hardhat expects no leading zeroes
+      `0x${amountToFund.toString(16)}`, // hardhat expects no leading zeroes
     ]);
 
     if (fundAccountStatus === false) {
@@ -81,11 +88,11 @@ export class HardhatNetwork {
    * @param numBlocks
    */
   async generate(numBlocks: BigNumberish): Promise<void> {
-    if (ethers.BigNumber.from(numBlocks).lte(ethers.constants.Zero)) {
+    if (BigInt(numBlocks) <= 0n) {
       throw Error('Minimum of 1 block needs to be generated.');
     }
 
-    await this.startedHardhatContainer.call('hardhat_mine', [toZeroStrippedHex(numBlocks)]);
+    await this.startedHardhatContainer.call('hardhat_mine', [`0x${BigInt(numBlocks).toString(16)}`]);
   }
 
   /**
@@ -126,7 +133,7 @@ export class HardhatNetwork {
    *
    * @param index zero indexed, meaning that 0 is the first account. There are a total of 20 accounts.
    */
-  getHardhatTestWallet(index: number): TestWalletData {
+  async getHardhatTestWallet(index: number): Promise<TestWalletData> {
     const testWalletAddress = HardhatNetwork.hardhatAccounts[index];
 
     if (testWalletAddress === undefined) {
@@ -135,7 +142,7 @@ export class HardhatNetwork {
 
     return {
       testWalletAddress,
-      testWalletSigner: this.ethersRpcProvider.getSigner(testWalletAddress),
+      testWalletSigner: await this.ethersRpcProvider.getSigner(testWalletAddress),
     };
   }
 
@@ -155,7 +162,7 @@ export class HardhatNetwork {
       {
         from,
         to,
-        value: toZeroStrippedHex(value),
+        value: `0x${BigInt(value).toString(16)}`,
       },
     ]);
   }
@@ -169,5 +176,5 @@ export interface SendEtherParams {
 
 export interface TestWalletData {
   testWalletAddress: string;
-  testWalletSigner: ethers.providers.JsonRpcSigner;
+  testWalletSigner: ethers.Signer;
 }
