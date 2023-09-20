@@ -4,8 +4,8 @@ import { ethers } from 'ethers';
 import { StateRelayer__factory } from '../generated';
 import { tranformPairData, transformDataMasternode, transformDataVault } from './utils/transformData';
 import { DataStore, MasterNodeData, StateRelayerHandlerProps, VaultData } from './utils/types';
-import { ApiPagedResponse} from '@defichain/whale-api-client'
-import { PoolPairData } from '@defichain/whale-api-client/dist/api/poolpairs'
+import { ApiPagedResponse } from '@defichain/whale-api-client';
+import { PoolPairData } from '@defichain/whale-api-client/dist/api/poolpairs';
 
 const DENOMINATION = 'USDT';
 const PAGESIZE = 50;
@@ -20,14 +20,14 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
     const client = getWhaleClient(urlNetwork, envNetwork);
     const statsData = await client.stats.get();
 
-    let rawPoolPairData : Array<PoolPairData> = [];
+    let rawPoolPairData: Array<PoolPairData> = [];
     let pagedPoolPairData: ApiPagedResponse<PoolPairData> = await client.poolpairs.list(PAGESIZE);
     rawPoolPairData = rawPoolPairData.concat(pagedPoolPairData);
     while (pagedPoolPairData.hasNext) {
       pagedPoolPairData = await client.paginate(pagedPoolPairData);
       rawPoolPairData = rawPoolPairData.concat(pagedPoolPairData);
     }
-    
+
     const dexPriceData = await client.poolpairs.listDexPrices(DENOMINATION);
 
     const inputForDexUpdate = tranformPairData(rawPoolPairData, statsData, dexPriceData);
@@ -43,8 +43,8 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
     const dexInfoTx = await stateRelayerContract.updateDEXInfo(
       inputForDexUpdate.dex,
       inputForDexUpdate.dexInfo,
-      inputForDexUpdate.totalValueLocked.toString(),
-      inputForDexUpdate.total24HVolume.toString(),
+      inputForDexUpdate.totalValueLocked,
+      inputForDexUpdate.total24HVolume,
     );
 
     // Update Master Node information
