@@ -65,9 +65,11 @@ contract ExampleUsage {
         _latestBTCPrice = _initialBTCPrice;
     }  
 
-    function getBTCPrice() public view returns (uint256) {
+    function getBTCPrice() public returns (uint256) {
         (, IStateRelayer.DEXInfo memory dex) = IStateRelayer(_stateRelayer).getDexPairInfo('dBTC-DFI');
         // check if the value is maximum or not, if it is maximum, meaning the value is invalid, revert to the previous price
-        return dex.primaryTokenPrice == type(uint256).max ? _latestBTCPrice : dex.primaryTokenPrice;
+        _latestBTCPrice =  dex.primaryTokenPrice == type(uint256).max ? _latestBTCPrice : dex.primaryTokenPrice;
+
+        return _latestBTCPrice;
     }  
 }
