@@ -38,6 +38,8 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
     // Data from Master Nodes
     const dataMasterNode = transformDataMasternode(statsData);
 
+    const nonce = await signer.getNonce();
+
     // Call SC Function to update Data
     // Update Dex information
     const dexInfoTx = await stateRelayerContract.updateDEXInfo(
@@ -45,12 +47,25 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
       inputForDexUpdate.dexInfo,
       inputForDexUpdate.totalValueLocked,
       inputForDexUpdate.total24HVolume,
+      { gasLimit: 10_000_000, nonce: nonce },
     );
 
     // Update Master Node information
-    const masterDataTx = await stateRelayerContract.updateMasterNodeInformation(dataMasterNode);
+    const masterDataTx = await stateRelayerContract.updateMasterNodeInformation(dataMasterNode, {
+      gasLimit: 200_000,
+      nonce: nonce + 1,
+    });
+
     // Update Vault general information
-    const vaultTx = await stateRelayerContract.updateVaultGeneralInformation(dataVault);
+    const vaultTx = await stateRelayerContract.updateVaultGeneralInformation(dataVault, {
+      gasLimit: 200_000,
+      nonce: nonce + 2,
+    });
+
+    console.log('Hash of dex update transaction', dexInfoTx.hash);
+    console.log('Hash of master update transaction', masterDataTx.hash);
+    console.log('Hash of vault update transaction', vaultTx.hash);
+
     if (!props.testGasCost) {
       return {
         dataStore,

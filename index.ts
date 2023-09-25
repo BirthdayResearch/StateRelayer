@@ -15,8 +15,11 @@ export const handler = async function (event: APIGatewayProxyEvent, context: Con
   const headers = {
     'X-Aws-Parameters-Secrets-Token': awsSessionToken,
   };
+  console.log('Handler version 25 Sep afternoon 2:40 PM');
 
   const secretsExtensionEndpoint = `http://localhost:${secretsExtensionHttpPort}/secretsmanager/get?secretId=${secretName}`;
+
+  await new Promise((f) => setTimeout(f, 30_000));
 
   const response = await axios.get(secretsExtensionEndpoint, { headers });
   const secretObj = JSON.parse(response.data.SecretString);
