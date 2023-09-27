@@ -79,6 +79,10 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
     }
     MasterNodeInformation private masterNodeInformation;
 
+    event UpdateDEXInfo();
+    event UpdateVaultGeneralInformation();
+    event UpdateMasterNodeInformation(); 
+
     function _authorizeUpgrade(address newImplementation) internal override onlyRole(DEFAULT_ADMIN_ROLE) {}
 
     constructor() {
@@ -121,6 +125,7 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
         total24HVolume = _total24HVolume;
         uint256 _lastUpdatedDexInfo = block.timestamp;
         lastUpdatedDexInfoTimestampNoDecimals = _lastUpdatedDexInfo;
+        emit UpdateDEXInfo();
     }
 
     /**
@@ -131,6 +136,7 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
         vaultInfo = _vaultInfo;
         uint256 _lastUpdatedVaultInfoTimestamp = block.timestamp;
         lastUpdatedVaultInfoTimestampNoDecimals = _lastUpdatedVaultInfoTimestamp;
+        emit UpdateVaultGeneralInformation();
     }
 
     /**
@@ -141,6 +147,7 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
         masterNodeInformation = _masterNodeInformation;
         uint256 _lastUpdatedMasterNodeInfoTimestamp = block.timestamp;
         lastUpdatedMasterNodeInfoTimestampNoDecimals = _lastUpdatedMasterNodeInfoTimestamp;
+        emit UpdateMasterNodeInformation(); 
     }
 
     /**
