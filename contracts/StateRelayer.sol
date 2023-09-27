@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: UNLICENSE
+pragma solidity ^0.8.18;
+
 import '@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol';
 
-error ALREADY_IN_BATCH_CALL_BY_BOT();
 error ERROR_IN_LOW_LEVEL_CALLS();
 
 // @NOTE: if a uint256 is equal to 2**256 - 1, the value is not reliable and therefore should not be used
@@ -20,7 +21,7 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
     uint256 private lastUpdatedMasterNodeInfoTimestampNoDecimals;
     // integer value, no decimals
     uint256 private lastUpdatedDexInfoTimestampNoDecimals;
-    bool public inBatchCallByBot;
+    bool private inBatchCallByBot;
 
     struct DEXInfo {
         // the price of the primary token in USDT/ USD
@@ -56,7 +57,7 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
         // integer values, no decimals
         uint256 activeAuctionsNoDecimals;
     }
-    VaultGeneralInformation public vaultInfo;
+    VaultGeneralInformation private vaultInfo;
 
     struct AMOUNT_TOKEN {
         uint256 amount;
@@ -77,17 +78,6 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
         uint256 tenYearLockedNoDecimals;
     }
     MasterNodeInformation private masterNodeInformation;
-
-    // Events
-    event UpdateDEXInfo(
-        string[] dex,
-        DEXInfo[] dexInfo,
-        uint256 timeStamp,
-        uint256 totalValueLockInPoolPair,
-        uint256 total24HVolume
-    );
-    event UpdateVaultGeneralInformation(VaultGeneralInformation vaultInfo, uint256 timeStamp);
-    event UpdateMasterNodeInformation(MasterNodeInformation nodeInformation, uint256 timeStamp);
 
     function _authorizeUpgrade(address newImplementation) internal override onlyRole(DEFAULT_ADMIN_ROLE) {}
 
@@ -131,7 +121,6 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
         total24HVolume = _total24HVolume;
         uint256 _lastUpdatedDexInfo = block.timestamp;
         lastUpdatedDexInfoTimestampNoDecimals = _lastUpdatedDexInfo;
-        emit UpdateDEXInfo(_dex, _dexInfo, _lastUpdatedDexInfo, _totalValueLocked, _total24HVolume);
     }
 
     /**
@@ -142,7 +131,6 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
         vaultInfo = _vaultInfo;
         uint256 _lastUpdatedVaultInfoTimestamp = block.timestamp;
         lastUpdatedVaultInfoTimestampNoDecimals = _lastUpdatedVaultInfoTimestamp;
-        emit UpdateVaultGeneralInformation(_vaultInfo, _lastUpdatedVaultInfoTimestamp);
     }
 
     /**
@@ -153,18 +141,14 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
         masterNodeInformation = _masterNodeInformation;
         uint256 _lastUpdatedMasterNodeInfoTimestamp = block.timestamp;
         lastUpdatedMasterNodeInfoTimestampNoDecimals = _lastUpdatedMasterNodeInfoTimestamp;
-        emit UpdateMasterNodeInformation(_masterNodeInformation, _lastUpdatedMasterNodeInfoTimestamp);
     }
 
     /**
      *  @notice function for the bot to update a lot of data at the same time
      *  @param funcCalls the calldata used to make call back to this smart contract
-     *  (for the best security, don't grant any roles to the StateRelayerProxy contract address)
+     *  DONT grant any roles to the StateRelayerProxy contract address
      */
     function batchCallByBot(bytes[] calldata funcCalls) external onlyRole(BOT_ROLE) {
-        // just a sanity check, actually, if we don't grant any roles to the proxy address
-        // we will not have a recursive batchCallByBot call.
-        if (inBatchCallByBot) revert ALREADY_IN_BATCH_CALL_BY_BOT();
         inBatchCallByBot = true;
         for (uint256 i = 0; i < funcCalls.length; ++i) {
             (bool success, bytes memory returnData) = address(this).call(funcCalls[i]);

@@ -24,9 +24,7 @@ describe('State relayer contract data tests', () => {
         fiveYearLockedNoDecimals: 102,
         tenYearLockedNoDecimals: 103,
       };
-      await expect(stateRelayerProxy.connect(bot).updateMasterNodeInformation(masterNodeData))
-        .to.emit(stateRelayerProxy, 'UpdateMasterNodeInformation')
-        .withArgs(Object.values(masterNodeData), (await time.latest()) + 1);
+      await stateRelayerProxy.connect(bot).updateMasterNodeInformation(masterNodeData);
       const receivedMasterNodeData = await stateRelayerProxy.getMasterNodeInfo();
       expect(receivedMasterNodeData[1].toString()).to.equal(Object.values(masterNodeData).toString());
     });
@@ -40,9 +38,7 @@ describe('State relayer contract data tests', () => {
         totalCollateralizationRatio: 234,
         activeAuctionsNoDecimals: 23,
       };
-      await expect(stateRelayerProxy.connect(bot).updateVaultGeneralInformation(vaultInformationData))
-        .to.emit(stateRelayerProxy, 'UpdateVaultGeneralInformation')
-        .withArgs(Object.values(vaultInformationData), (await time.latest()) + 1);
+      await stateRelayerProxy.connect(bot).updateVaultGeneralInformation(vaultInformationData);
       const receivedVaultInformationData = await stateRelayerProxy.getVaultInfo();
       expect(receivedVaultInformationData[1].toString()).to.equal(Object.values(vaultInformationData).toString());
     });
@@ -73,9 +69,7 @@ describe('State relayer contract data tests', () => {
       };
       const dexsData: DexInfo[] = [dexDataEth, dexDataBtc];
       const symbols: string[] = ['eth', 'btc'];
-      await expect(
-        stateRelayerProxy.connect(bot).updateDEXInfo(symbols, dexsData, totalValueLockInPoolPair, total24HVolume),
-      ).to.emit(stateRelayerProxy, 'UpdateDEXInfo');
+      await stateRelayerProxy.connect(bot).updateDEXInfo(symbols, dexsData, totalValueLockInPoolPair, total24HVolume);
       // Getting ETH dex Data
       const receivedEThDexData = await stateRelayerProxy.getDexPairInfo(symbols[0]);
       // Testing that the received is as expected as dexDataEth
@@ -256,21 +250,6 @@ describe('State relayer contract data tests', () => {
       const botRole = await stateRelayerProxy.BOT_ROLE();
       await expect(stateRelayerProxy.connect(bot).batchCallByBot([encodedGrantRole])).to.revertedWith(
         `AccessControl: account ${(await stateRelayerProxy.getAddress()).toLowerCase()} is missing role ${botRole}`,
-      );
-    });
-
-    // This is to check whether the sanity works, in reality, NEVER GRANT THE SMART CONTRACT STATE RELAYER PROXY any role
-    it('Should fail when granting state relayer the bot_role and then doing recursive batch calls', async () => {
-      ({ stateRelayerProxy, bot, admin } = await loadFixture(deployContract));
-      const botRole = await stateRelayerProxy.BOT_ROLE();
-      await stateRelayerProxy.connect(admin).grantRole(botRole, await stateRelayerProxy.getAddress());
-      const stateRelayerInterface = StateRelayer__factory.createInterface();
-      const encodedGrantRole = stateRelayerInterface.encodeFunctionData('batchCallByBot', [
-        [stateRelayerInterface.encodeFunctionData('BOT_ROLE')],
-      ]);
-      await expect(stateRelayerProxy.connect(bot).batchCallByBot([encodedGrantRole])).to.revertedWithCustomError(
-        stateRelayerProxy,
-        'ALREADY_IN_BATCH_CALL_BY_BOT',
       );
     });
   });
