@@ -19,8 +19,8 @@ jobs:
       - name: 'Build docker image'
         run: 'npm run build:docker'
 
-      - name: 'Install the dependencies'
-        run: 'npm install'
+      - name: 'Install the dependencies and compile smart contracts'
+        run: 'npm run setup'
 
       - name: 'Test smart contracts'
         run: 'npm run test'
