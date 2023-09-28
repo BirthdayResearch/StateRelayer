@@ -1,6 +1,6 @@
 {
   "name": "@waveshq/state-relayer-bot",
-  "version": "0.0.0-beta.3",
+  "version": "0.0.0-beta.4",
   "private": false,
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -41,8 +41,9 @@
     "@openzeppelin/contracts": "4.9.3",
     "@openzeppelin/contracts-upgradeable": "4.9.3",
     "axios": "^1.4.0",
+    "hardhat": "^2.13.1",
     "solhint": "^3.4.1",
-    "hardhat": "^2.13.1"
+    "typescript": "^5.2.2"
   },
   "devDependencies": {
     "@birthdayresearch/eslint-config": "^0.5.14",
