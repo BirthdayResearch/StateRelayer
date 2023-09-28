@@ -20,7 +20,7 @@ jobs:
         run: 'npm run build:docker'
 
       - name: 'Install the dependencies and compile smart contracts'
-        run: 'npm run setup'
+        run: 'npm install && npm run compile'
 
       - name: 'Test smart contracts'
         run: 'npm run test'

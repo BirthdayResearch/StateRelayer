@@ -10,7 +10,6 @@
     "build:docker": "docker build -t state-relayer/hardhatnetwork:0.0.0 .",
     "clean": "hardhat clean",
     "compile": "npm run solhint && hardhat compile",
-    "setup": "npm i && npm run compile",
     "solhint": "solhint contracts/**/*.sol",
     "test": "npm run solhint && hardhat test",
     "test-i9n": "jest"

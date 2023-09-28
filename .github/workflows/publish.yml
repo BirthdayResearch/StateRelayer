@@ -16,7 +16,7 @@ jobs:
           # Defaults to the user or organization that owns the workflow file
           scope: '@waveshq'
       - name: Install dependencies and compile smart contracts
-        run: npm run setup
+        run: npm ci && npm run compile
       - name: Build the package
         run: npm run build
       - run: npm config set "//registry.npmjs.org/:_authToken" "\${NODE_AUTH_TOKEN}" --location=project

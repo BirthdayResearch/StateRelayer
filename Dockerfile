@@ -9,6 +9,6 @@ WORKDIR /staterelayer
 COPY package.json hardhat.config.ts .solhint.json tsconfig.json tsconfig.build.json ./
 COPY contracts ./contracts
 
-RUN npm run setup
+RUN npm install && npm run compile
 
 CMD npx hardhat --config ./hardhat.config.ts node
