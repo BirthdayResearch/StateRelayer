@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: UNLICENSE
+pragma solidity ^0.8.18;
+
 interface IStateRelayer {
     struct DEXInfo {
         // the price of the primary token in USDT/ USD
@@ -67,7 +70,8 @@ contract ExampleUsage {
 
     function getBTCPrice() public returns (uint256) {
         (, IStateRelayer.DEXInfo memory dex) = IStateRelayer(_stateRelayer).getDexPairInfo('dBTC-DFI');
-        // check if the value is maximum or not, if it is maximum, meaning the value is invalid, revert to the previous price
+        // check if the value is maximum or not, if it is maximum, 
+        // meaning the value is invalid, revert to the previous price
         _latestBTCPrice =  dex.primaryTokenPrice == type(uint256).max ? _latestBTCPrice : dex.primaryTokenPrice;
 
         return _latestBTCPrice;
