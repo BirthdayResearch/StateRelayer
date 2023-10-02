@@ -6,7 +6,7 @@ import { handler } from '../bot/StateRelayerBot';
 import { deployContract } from '../tests/utils/deployment';
 
 // to run this file, run npx hardhat clean && npm i && npx hardhat run scripts/gasEstimation.ts
-// estimation is 33.12 USD per month
+// estimation is 22.46 USD per month
 async function estimateGasCost() {
   const dexesData: BigInt[] = [];
   const masterData: BigInt[] = [];

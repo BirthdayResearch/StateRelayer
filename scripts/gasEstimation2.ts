@@ -145,7 +145,7 @@ async function estimateGasCost() {
   console.log('Update Vault data costs in gas units');
   console.log(vaultGasData);
 
-  // average estimation (153 DFI)
+  // average estimation (137.5 DFI)
   console.log(
     'Average estimated cost in DFI ',
     // take the second element of the array
@@ -166,7 +166,7 @@ async function estimateGasCost() {
       .toString(),
   );
 
-  // worst-case estimation (502 DFI)
+  // worst-case estimation (486 DFI)
   console.log(
     'Maximum cost in DFI',
     new BigFloatingNumber(
