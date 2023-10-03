@@ -53,9 +53,9 @@
     "@birthdayresearch/sticky-testcontainers": "^0.8.5",
     "@nomicfoundation/hardhat-toolbox": "^3.0.0",
     "@truffle/dashboard-hardhat-plugin": "^0.2.10",
-    "@types/jest": "^29.5.2",
-    "jest": "^29.5.0",
-    "ts-jest": "^29.1.0",
+    "@types/jest": "^29.5.5",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.1",
     "@birthdayresearch/sticky-typescript": "^0.5.14",
     "solhint": "^3.4.1"
   }
