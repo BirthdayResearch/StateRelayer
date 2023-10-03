@@ -19,4 +19,7 @@ export type StateRelayerHandlerProps = {
   envNetwork: EnvironmentNetwork;
   contractAddress: string;
   signer: ethers.Signer;
+  gasUpdateDEX?: bigint;
+  gasUpdateMaster?: bigint;
+  gasUpdateVault?: bigint;
 };
