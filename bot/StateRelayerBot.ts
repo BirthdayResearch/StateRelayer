@@ -39,6 +39,20 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
     const dataMasterNode = transformDataMasternode(statsData);
 
     const nonce = await signer.getNonce();
+    const feeData = await signer.provider?.getFeeData();
+    const baseFeePerGas = (await signer.provider?.getBlock('latest'))?.baseFeePerGas || 10_000_000_000n;
+    let maxFeePerGas: bigint;
+    let maxPriorityFeePerGas: bigint;
+    if (feeData?.maxPriorityFeePerGas) {
+      maxFeePerGas =
+        feeData.maxFeePerGas ||
+        baseFeePerGas +
+          (feeData.maxPriorityFeePerGas >= 10_000_000_000n ? feeData.maxPriorityFeePerGas : 10_000_000_000n);
+      maxPriorityFeePerGas = feeData.maxPriorityFeePerGas;
+    } else {
+      maxFeePerGas = baseFeePerGas + 10_000_000_000n;
+      maxPriorityFeePerGas = 2_000_000_000n;
+    }
     // Call SC Function to update Data
     // Update Dex information
     const dexInfoTx = await stateRelayerContract.updateDEXInfo(
@@ -46,18 +60,27 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
       inputForDexUpdate.dexInfo,
       inputForDexUpdate.totalValueLocked,
       inputForDexUpdate.total24HVolume,
-      { nonce: nonce, gasLimit: props.gasUpdateDEX },
+      {
+        nonce: nonce,
+        gasLimit: props.gasUpdateDEX,
+        maxFeePerGas: maxFeePerGas,
+        maxPriorityFeePerGas: maxPriorityFeePerGas,
+      },
     );
 
     // Update Master Node information
     const masterDataTx = await stateRelayerContract.updateMasterNodeInformation(dataMasterNode, {
       nonce: nonce + 1,
       gasLimit: props.gasUpdateMaster,
+      maxFeePerGas: maxFeePerGas,
+      maxPriorityFeePerGas: maxPriorityFeePerGas,
     });
     // Update Vault general information
     const vaultTx = await stateRelayerContract.updateVaultGeneralInformation(dataVault, {
       nonce: nonce + 2,
       gasLimit: props.gasUpdateVault,
+      maxFeePerGas: maxFeePerGas,
+      maxPriorityFeePerGas: maxPriorityFeePerGas,
     });
 
     console.log('Hash of dex update transaction', dexInfoTx.hash);

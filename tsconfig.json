@@ -1,6 +1,9 @@
 {
   "extends": "@birthdayresearch/sticky-typescript",
   "compilerOptions": {
+    "lib": [
+      "es2020", "esnext"
+    ],
     "rootDir": "./"
   }
 }
