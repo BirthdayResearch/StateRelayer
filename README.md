@@ -2,7 +2,7 @@
 
 A project comprising of smart contracts and scripts to port certain information from DeFiChain to DeFiMetaChain
 
-### Direcrtory Structure
+### Directory Structure
 
 ```
 ├── bot // <-- Logic for the bot + integration test
@@ -12,7 +12,7 @@ A project comprising of smart contracts and scripts to port certain information 
 ├── containers // <- Containers for integration tests
 ```
 
-### How to use the package
+### How to use the package to update information on DeFiMetaChain
 
 ```typescript
 import {handler} from "@waveshq/state-relayer-bot";
@@ -20,7 +20,7 @@ import { EnvironmentNetwork } from "@waveshq/walletkit-core"
 
 handler({
     testGasCost: false,
-    urlNetwork: /* RPC Provider URL */,
+    urlNetwork: /* Defi Meta Chain RPC Provider URL */,
     envNetwork: EnvironmentNetwork.MainNet,
     contractAddress: /* YOUR STATE RELAYER PROXY ADDRESS */,
     signer: /* signer object */,
@@ -29,3 +29,7 @@ handler({
     gasUpdateVault: /* gas limit for vault update transaction */
 })
 ```
+
+### Instruction to consume the smart contract information
+
+Examples on how to consume the information exposed by the smart contract is showcased via [this folder](./contracts/example)
