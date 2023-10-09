@@ -1,6 +1,6 @@
-import { StateRelayer__factory } from '../generated';
+import { StateRelayer__factory } from '../../generated';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { verify } from './utils/verify';
+import { verify } from '../utils/verify';
 
 async function main() {
   const stateRelayerAddress = '';

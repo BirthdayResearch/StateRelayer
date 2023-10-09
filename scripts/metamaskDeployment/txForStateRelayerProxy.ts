@@ -1,5 +1,5 @@
 import { ethers } from 'hardhat';
-import { StateRelayer__factory } from '../generated';
+import { StateRelayer__factory } from '../../generated';
 
 async function main() {
   const stateRelayerAddress = ethers.getCreateAddress({
