@@ -20,7 +20,7 @@ import { EnvironmentNetwork } from "@waveshq/walletkit-core"
 
 handler({
     testGasCost: false,
-    urlNetwork: /* Defi Meta Chain RPC Provider URL */,
+    urlNetwork: "https://ocean.defichain.com/",
     envNetwork: EnvironmentNetwork.MainNet,
     contractAddress: /* YOUR STATE RELAYER PROXY ADDRESS */,
     signer: /* signer object */,
