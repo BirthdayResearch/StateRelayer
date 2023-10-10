@@ -1,5 +1,5 @@
 import { BigNumber } from 'bignumber.js';
-import { StateRelayer } from '../../generated';
+import { IStateRelayer } from '../../generated';
 import { MasterNodeData, PairData, VaultData } from './types';
 import { DexPricesResult, PoolPairData } from '@defichain/whale-api-client/dist/api/poolpairs';
 import { StatsData } from '@defichain/whale-api-client/dist/api/stats';
@@ -59,7 +59,7 @@ export function tranformPairData(
   dexPriceData: DexPricesResult,
 ): {
   dex: string[];
-  dexInfo: StateRelayer.DEXInfoStruct[];
+  dexInfo: IStateRelayer.DEXInfoStruct[];
   totalValueLocked: bigint;
   total24HVolume: bigint;
 } {
