@@ -33,3 +33,18 @@ handler({
 ### Instruction to consume the smart contract information
 
 Examples on how to consume the information exposed by the smart contract is showcased via [this folder](./contracts/example)
+
+### How to deploy smart contracts via Metamask
+
+These are instructions on how to deploy via Metamask using developer sections of Chrome:
+
+1. Open etherscan.io, then use :
+   npx hardhat run scripts/metamaskDeployment/txForStateRelayer.ts > txForStateRelayer.txt
+   to print out the necessary commands for deployment of StateRelayer
+
+2. Open etherscan.io, then use :
+   npx hardhat run scripts/metamaskDeployment/txForStateRelayerProxy.ts > txForStateRelayerProxy.txt
+   to print out the necessary commands for deployment of StateRelayerProxy
+
+3. To verify, run:
+   npx hardhat run --network {networkOfYourChoice} scripts/metamaskDeployment/verificationScript.ts
