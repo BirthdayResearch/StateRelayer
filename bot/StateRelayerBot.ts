@@ -4,8 +4,8 @@ import { ethers } from 'ethers';
 import { StateRelayer__factory } from '../generated';
 import { tranformPairData, transformDataMasternode, transformDataVault } from './utils/transformData';
 import { DataStore, MasterNodeData, StateRelayerHandlerProps, VaultData } from './utils/types';
-import { ApiPagedResponse} from '@defichain/whale-api-client'
-import { PoolPairData } from '@defichain/whale-api-client/dist/api/poolpairs'
+import { ApiPagedResponse } from '@defichain/whale-api-client';
+import { PoolPairData } from '@defichain/whale-api-client/dist/api/poolpairs';
 
 const DENOMINATION = 'USDT';
 const PAGESIZE = 50;
@@ -20,14 +20,14 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
     const client = getWhaleClient(urlNetwork, envNetwork);
     const statsData = await client.stats.get();
 
-    let rawPoolPairData : Array<PoolPairData> = [];
+    let rawPoolPairData: Array<PoolPairData> = [];
     let pagedPoolPairData: ApiPagedResponse<PoolPairData> = await client.poolpairs.list(PAGESIZE);
     rawPoolPairData = rawPoolPairData.concat(pagedPoolPairData);
     while (pagedPoolPairData.hasNext) {
       pagedPoolPairData = await client.paginate(pagedPoolPairData);
       rawPoolPairData = rawPoolPairData.concat(pagedPoolPairData);
     }
-    
+
     const dexPriceData = await client.poolpairs.listDexPrices(DENOMINATION);
 
     const inputForDexUpdate = tranformPairData(rawPoolPairData, statsData, dexPriceData);
@@ -38,19 +38,32 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
     // Data from Master Nodes
     const dataMasterNode = transformDataMasternode(statsData);
 
+    const nonce = await signer.getNonce();
     // Call SC Function to update Data
     // Update Dex information
     const dexInfoTx = await stateRelayerContract.updateDEXInfo(
       inputForDexUpdate.dex,
       inputForDexUpdate.dexInfo,
-      inputForDexUpdate.totalValueLocked.toString(),
-      inputForDexUpdate.total24HVolume.toString(),
+      inputForDexUpdate.totalValueLocked,
+      inputForDexUpdate.total24HVolume,
+      { nonce: nonce, gasLimit: props.gasUpdateDEX },
     );
 
     // Update Master Node information
-    const masterDataTx = await stateRelayerContract.updateMasterNodeInformation(dataMasterNode);
+    const masterDataTx = await stateRelayerContract.updateMasterNodeInformation(dataMasterNode, {
+      nonce: nonce + 1,
+      gasLimit: props.gasUpdateMaster,
+    });
     // Update Vault general information
-    const vaultTx = await stateRelayerContract.updateVaultGeneralInformation(dataVault);
+    const vaultTx = await stateRelayerContract.updateVaultGeneralInformation(dataVault, {
+      nonce: nonce + 2,
+      gasLimit: props.gasUpdateVault,
+    });
+
+    console.log('Hash of dex update transaction', dexInfoTx.hash);
+    console.log('Hash of master update transaction', masterDataTx.hash);
+    console.log('Hash of vault update transaction', vaultTx.hash);
+
     if (!props.testGasCost) {
       return {
         dataStore,

@@ -133,7 +133,7 @@ async function estimateGasCost() {
     batchCallStats.push(batchCallTxReceipt!.gasUsed);
   }
 
-  // average estimation (152 DFI)
+  // average estimation (136.5 DFI)
   console.log(
     'Average estimated cost in DFI ',
     // take the second element of the array
@@ -146,7 +146,7 @@ async function estimateGasCost() {
       .toString(),
   );
 
-  // worst-case estimation (501 DFI)
+  // worst-case estimation (485 DFI)
   console.log(
     'Maximum cost in DFI',
     new BigFloatingNumber(

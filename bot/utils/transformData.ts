@@ -10,11 +10,15 @@ const MAXIMUM_UINT256 = 2n ** 256n - 1n;
 
 const transformToBigInt = (val: BigNumber.Value, decimals: number): bigint => {
   const bigNumberVal = new BigNumber(val);
-  if (bigNumberVal.isNaN() || !bigNumberVal.isFinite()) return MAXIMUM_UINT256;
+  let res: bigint;
+  if (bigNumberVal.isNaN() || !bigNumberVal.isFinite()) res = MAXIMUM_UINT256;
   else {
     const bigIntVal = BigInt(bigNumberVal.multipliedBy(new BigNumber('10').pow(decimals)).toFixed(0, 1));
-    return bigIntVal < MAXIMUM_UINT256 ? bigIntVal : MAXIMUM_UINT256;
+    res = bigIntVal < MAXIMUM_UINT256 ? bigIntVal : MAXIMUM_UINT256;
   }
+
+  if (res === MAXIMUM_UINT256) console.log('Invalid value generated');
+  return res;
 };
 
 export function transformDataVault(statsData: StatsData): VaultData {
