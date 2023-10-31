@@ -5,6 +5,8 @@ import '@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol';
 
 error ERROR_IN_LOW_LEVEL_CALLS();
+error NOT_BOT_ROLE_OR_NOT_IN_BATCH_CALL_IN_BOT();
+error DEX_AND_DEXINFO_NOT_HAVE_THE_SAME_LENGTH();
 
 // @NOTE: if a uint256 is equal to 2**256 - 1, the value is not reliable and therefore should not be used
 contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
@@ -59,11 +61,6 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
     }
     VaultGeneralInformation private vaultInfo;
 
-    struct AMOUNT_TOKEN {
-        uint256 amount;
-        string token;
-    }
-
     struct MasterNodeInformation {
         // the total value locked in USD in masternodes
         uint256 totalValueLockedInMasterNodes;
@@ -90,7 +87,7 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
     }
 
     modifier allowUpdate() {
-        require(hasRole(BOT_ROLE, msg.sender) || inBatchCallByBot);
+        if (!(hasRole(BOT_ROLE, msg.sender) || inBatchCallByBot)) revert NOT_BOT_ROLE_OR_NOT_IN_BATCH_CALL_IN_BOT();
         _;
     }
 
@@ -117,7 +114,7 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
         uint256 _totalValueLocked,
         uint256 _total24HVolume
     ) external allowUpdate {
-        require(_dex.length == _dexInfo.length);
+        if (_dex.length != _dexInfo.length) revert DEX_AND_DEXINFO_NOT_HAVE_THE_SAME_LENGTH();
         for (uint256 i = 0; i < _dex.length; ++i) {
             DEXInfoMapping[_dex[i]] = _dexInfo[i];
         }
@@ -189,7 +186,7 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable {
      * @return last time that information about all dexes are updated
      * @return information about that pair
      */
-    function getDexPairInfo(string memory _pair) external view returns (uint256, DEXInfo memory) {
+    function getDexPairInfo(string calldata _pair) external view returns (uint256, DEXInfo memory) {
         return (lastUpdatedDexInfoTimestampNoDecimals, DEXInfoMapping[_pair]);
     }
 
