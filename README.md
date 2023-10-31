@@ -33,3 +33,24 @@ handler({
 ### Instruction to consume the smart contract information
 
 Examples on how to consume the information exposed by the smart contract is showcased via [this folder](./contracts/example)
+
+### How to deploy your smart contract on DMCTestnet
+
+Install the dependencies and compile smart contracts:
+
+```
+npm ci
+npx hardhat compile
+```
+
+1. If you use .env file, just execute this:
+
+```
+npx hardhat run --network DMCTestnet scripts/deployment.ts
+```
+
+2. If you want to use Ledger, comment the accounts line and uncomment the ledgerAccounts line under DMCTestnet section. Execute this command:
+
+```
+npx hardhat run --network DMCTestnet scripts/deployment.ts
+```

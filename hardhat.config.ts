@@ -1,5 +1,5 @@
 import '@nomicfoundation/hardhat-toolbox';
-import '@truffle/dashboard-hardhat-plugin';
+import '@nomicfoundation/hardhat-ledger';
 
 import { HardhatUserConfig, task, types } from 'hardhat/config';
 
@@ -83,28 +83,29 @@ const config: HardhatUserConfig = {
       allowUnlimitedContractSize: true,
     },
     DMCTestnet: {
-      url: 'http://13.214.74.236:20551/',
+      url: 'https://testnet-dmc.mydefichain.com:20551/',
       accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+      // ledgerAccounts: ['first EVM address of your ledger'],
       chainId: 1133,
     },
     sepolia: {
       url: process.env.SEPOLIA_URL || '',
       accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
       chainId: 11155111,
-    }
+    },
   },
   etherscan: {
     apiKey: {
       DMCTestnet: 'abc',
-      sepolia: process.env.ETHERSCAN_API_KEY || ''
+      sepolia: process.env.ETHERSCAN_API_KEY || '',
     },
     customChains: [
       {
         network: 'DMCTestnet',
         chainId: 1133,
         urls: {
-          apiURL: 'https://blockscout-index.changi.dfi.team/api',
-          browserURL: 'https://blockscout-index.changi.dfi.team/',
+          apiURL: 'https://testnet-dmc.mydefichain.com:8444/api',
+          browserURL: 'https://testnet-dmc.mydefichain.com:8444',
         },
       },
     ],
