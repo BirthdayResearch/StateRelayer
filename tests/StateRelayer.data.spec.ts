@@ -15,7 +15,7 @@ describe('State relayer contract data tests', () => {
   let user: SignerWithAddress;
   let admin: SignerWithAddress;
 
-  describe('Successfully updating individually ', () => {
+  describe('Test update master node data', () => {
     it('Should successfully set master node data', async () => {
       ({ stateRelayerProxy, bot } = await loadFixture(deployContract));
       const masterNodeData: MasterNodeInformationStruct = {
@@ -32,6 +32,21 @@ describe('State relayer contract data tests', () => {
       expect(receivedMasterNodeData[1].toString()).to.equal(Object.values(masterNodeData).toString());
     });
 
+    it('Should successfully revert if the signer is not `bot`', async () => {
+      ({ stateRelayerProxy, user } = await loadFixture(deployContract));
+      const masterNodeData: MasterNodeInformationStruct = {
+        totalValueLockedInMasterNodes: 108,
+        zeroYearLockedNoDecimals: 101,
+        fiveYearLockedNoDecimals: 102,
+        tenYearLockedNoDecimals: 103,
+      };
+      await expect(
+        stateRelayerProxy.connect(user).updateMasterNodeInformation(masterNodeData),
+      ).to.be.revertedWithCustomError(stateRelayerProxy, 'NOT_BOT_ROLE_OR_NOT_IN_BATCH_CALL_IN_BOT');
+    });
+  });
+
+  describe('Test update vault data', () => {
     it('Should successfully set vault node data', async () => {
       ({ stateRelayerProxy, bot } = await loadFixture(deployContract));
       const vaultInformationData: VaultGeneralInformation = {
@@ -49,6 +64,22 @@ describe('State relayer contract data tests', () => {
       expect(receivedVaultInformationData[1].toString()).to.equal(Object.values(vaultInformationData).toString());
     });
 
+    it('Should successfully revert if the signer is not `bot`', async () => {
+      ({ stateRelayerProxy, user } = await loadFixture(deployContract));
+      const vaultInformationData: VaultGeneralInformation = {
+        noOfVaultsNoDecimals: 2,
+        totalLoanValue: 1000,
+        totalCollateralValue: 23432,
+        totalCollateralizationRatio: 234,
+        activeAuctionsNoDecimals: 23,
+      };
+      await expect(
+        stateRelayerProxy.connect(user).updateVaultGeneralInformation(vaultInformationData),
+      ).to.be.revertedWithCustomError(stateRelayerProxy, 'NOT_BOT_ROLE_OR_NOT_IN_BATCH_CALL_IN_BOT');
+    });
+  });
+
+  describe('Test update dexs data ', () => {
     it('Should successfully set dexs data', async () => {
       ({ stateRelayerProxy, bot } = await loadFixture(deployContract));
       const totalValueLockInPoolPair = 76354685;
@@ -87,36 +118,8 @@ describe('State relayer contract data tests', () => {
       // Testing that the received is as expected as dexDataBtc
       expect(receivedBtcDexData[1].toString()).to.equal(Object.values(dexDataBtc).toString());
     });
-  });
 
-  describe('Unsuccessfully updating individually', () => {
-    // These tests should fail as the signer does not have the `BOT_ROLE` assigned.
-    // Only addresses with role assigned as `BOT_ROLE` can perform the updates.
-
-    it('`updateMasterNodeInformation` - Should successfully revert if the signer is not `bot`', async () => {
-      ({ stateRelayerProxy, user } = await loadFixture(deployContract));
-      const masterNodeData: MasterNodeInformationStruct = {
-        totalValueLockedInMasterNodes: 108,
-        zeroYearLockedNoDecimals: 101,
-        fiveYearLockedNoDecimals: 102,
-        tenYearLockedNoDecimals: 103,
-      };
-      await expect(stateRelayerProxy.connect(user).updateMasterNodeInformation(masterNodeData)).to.be.reverted;
-    });
-
-    it('`updateVaultGeneralInformation` - Should successfully revert if the signer is not `bot`', async () => {
-      ({ stateRelayerProxy, user } = await loadFixture(deployContract));
-      const vaultInformationData: VaultGeneralInformation = {
-        noOfVaultsNoDecimals: 2,
-        totalLoanValue: 1000,
-        totalCollateralValue: 23432,
-        totalCollateralizationRatio: 234,
-        activeAuctionsNoDecimals: 23,
-      };
-      await expect(stateRelayerProxy.connect(user).updateVaultGeneralInformation(vaultInformationData)).to.be.reverted;
-    });
-
-    it('`updateDEXInfo` - Should successfully revert if the signer is not `bot`', async () => {
+    it('Should successfully revert if the signer is not `bot`', async () => {
       ({ stateRelayerProxy, user } = await loadFixture(deployContract));
 
       const dexDataEth: DexInfo = {
@@ -129,7 +132,40 @@ describe('State relayer contract data tests', () => {
         rewards: 124,
         commissions: 3,
       };
-      await expect(stateRelayerProxy.connect(user).updateDEXInfo(['eth'], [dexDataEth], 1, 2)).to.be.reverted;
+      await expect(
+        stateRelayerProxy.connect(user).updateDEXInfo(['eth'], [dexDataEth], 1, 2),
+      ).to.be.revertedWithCustomError(stateRelayerProxy, 'NOT_BOT_ROLE_OR_NOT_IN_BATCH_CALL_IN_BOT');
+    });
+
+    it('Should successfully revert if there is a mismatch between the length of _dexInfo and _dex', async () => {
+      ({ stateRelayerProxy, bot } = await loadFixture(deployContract));
+      const totalValueLockInPoolPair = 76354685;
+      const total24HVolume = 65738274;
+      const dexDataEth: DexInfo = {
+        primaryTokenPrice: 113,
+        volume24H: 102021,
+        totalLiquidity: 2164,
+        APR: 14,
+        firstTokenBalance: 31269,
+        secondTokenBalance: 2314,
+        rewards: 124,
+        commissions: 3,
+      };
+      const dexDataBtc: DexInfo = {
+        primaryTokenPrice: 112,
+        volume24H: 102020,
+        totalLiquidity: 2163,
+        APR: 12,
+        firstTokenBalance: 31265,
+        secondTokenBalance: 2312,
+        rewards: 123,
+        commissions: 2,
+      };
+      const dexsData: DexInfo[] = [dexDataEth, dexDataBtc];
+      const symbols: string[] = ['eth', 'btc', 'dfi'];
+      await expect(
+        stateRelayerProxy.connect(bot).updateDEXInfo(symbols, dexsData, totalValueLockInPoolPair, total24HVolume),
+      ).to.revertedWithCustomError(stateRelayerProxy, 'DEX_AND_DEXINFO_NOT_HAVE_THE_SAME_LENGTH');
     });
   });
 
