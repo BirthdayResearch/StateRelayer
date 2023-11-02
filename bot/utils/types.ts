@@ -1,17 +1,17 @@
 import { EnvironmentNetwork } from '@waveshq/walletkit-core';
 import { ethers } from 'ethers';
 
-import { StateRelayer } from '../../generated';
+import { IStateRelayer } from '../../generated';
 
 export type DataStore = {
   pair: PairData;
 };
 
 export type PairData = {
-  [pairSymbol: string]: StateRelayer.DEXInfoStruct;
+  [pairSymbol: string]: IStateRelayer.DEXInfoStruct;
 };
-export type VaultData = StateRelayer.VaultGeneralInformationStruct;
-export type MasterNodeData = StateRelayer.MasterNodeInformationStruct;
+export type VaultData = IStateRelayer.VaultGeneralInformationStruct;
+export type MasterNodeData = IStateRelayer.MasterNodeInformationStruct;
 
 export type StateRelayerHandlerProps = {
   testGasCost: boolean;

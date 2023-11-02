@@ -32,7 +32,7 @@ handler({
 
 ### Instruction to consume the smart contract information
 
-Examples on how to consume the information exposed by the smart contract is showcased via [this folder](./contracts/example)
+Examples on how to consume the information exposed by the smart contract is showcased via [this folder](./contracts/example) and [this folder](./scripts/example)
 
 ### How to deploy your smart contract on DMCTestnet
 

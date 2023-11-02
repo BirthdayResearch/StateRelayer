@@ -2,6 +2,7 @@
 pragma solidity ^0.8.18;
 
 interface IStateRelayer {
+
     struct DEXInfo {
         // the price of the primary token in USDT/ USD
         uint256 primaryTokenPrice;
@@ -50,30 +51,34 @@ interface IStateRelayer {
         uint256 tenYearLockedNoDecimals;
     }
 
+    /**
+     * @notice Getter function to get the information about dexes
+     * @return Last time that information about dexes are updated
+     * @return Total24HVolume of all the dexes
+     * @return TVL of all dexes
+     */
     function getDexInfo() external view returns (uint256, uint256, uint256);
 
+    /**
+     * @notice Getter function to get information about a certain dex
+     * @param _pair The pair to get information about
+     * @return Last time that information about all dexes are updated
+     * @return Information about that pair
+     */
     function getDexPairInfo(string memory _pair) external view returns (uint256, DEXInfo memory);
 
+    /**
+     * @notice Getter function for general vault info
+     * @return Last time that information about vaults is updated
+     * @return Information about vaults
+     */
     function getVaultInfo() external view returns (uint256, VaultGeneralInformation memory);
 
+    /**
+     * @notice Getter function for master node information
+     * @return Last time that information about the master nodes is updated
+     * @return Master nodes information
+     */
     function getMasterNodeInfo() external view returns (uint256, MasterNodeInformation memory);
-}
 
-contract ExampleUsage {
-    address private _stateRelayer;
-
-    uint256 private _latestBTCPrice;
-
-    constructor (uint256 _initialBTCPrice) {
-        _latestBTCPrice = _initialBTCPrice;
-    }  
-
-    function getBTCPrice() public returns (uint256) {
-        (, IStateRelayer.DEXInfo memory dex) = IStateRelayer(_stateRelayer).getDexPairInfo('dBTC-DFI');
-        // check if the value is maximum or not, if it is maximum, 
-        // meaning the value is invalid, revert to the previous price
-        _latestBTCPrice =  dex.primaryTokenPrice == type(uint256).max ? _latestBTCPrice : dex.primaryTokenPrice;
-
-        return _latestBTCPrice;
-    }  
 }
