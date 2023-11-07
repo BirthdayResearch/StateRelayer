@@ -1,13 +1,13 @@
 import { SignerWithAddress } from '@nomicfoundation/hardhat-ethers/signers';
-import { loadFixture, time } from '@nomicfoundation/hardhat-network-helpers';
+import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { expect } from 'chai';
 
-import { StateRelayer, StateRelayer__factory } from '../generated';
+import { StateRelayer, IStateRelayer, StateRelayer__factory } from '../generated';
 import { deployContract } from './utils/deployment';
 
-type MasterNodeInformationStruct = StateRelayer.MasterNodeInformationStruct;
-type VaultGeneralInformation = StateRelayer.VaultGeneralInformationStruct;
-type DexInfo = StateRelayer.DEXInfoStruct;
+type MasterNodeInformationStruct = IStateRelayer.MasterNodeInformationStruct;
+type VaultGeneralInformation = IStateRelayer.VaultGeneralInformationStruct;
+type DexInfo = IStateRelayer.DEXInfoStruct;
 
 describe('State relayer contract data tests', () => {
   let stateRelayerProxy: StateRelayer;
@@ -294,6 +294,18 @@ describe('State relayer contract data tests', () => {
       const botRole = await stateRelayerProxy.BOT_ROLE();
       await expect(stateRelayerProxy.connect(bot).batchCallByBot([encodedGrantRole])).to.revertedWith(
         `AccessControl: account ${(await stateRelayerProxy.getAddress()).toLowerCase()} is missing role ${botRole}`,
+      );
+    });
+
+    it('Return right error when not using the right call data', async () => {
+      ({ stateRelayerProxy, bot } = await loadFixture(deployContract));
+      // check if 0xffffffff is among the signatures of the contract
+      expect(StateRelayer__factory.createInterface().hasFunction('0xffffffff')).to.be.false;
+
+      // use non-existent function signature
+      await expect(stateRelayerProxy.connect(bot).batchCallByBot(['0xffffffff'])).to.revertedWithCustomError(
+        stateRelayerProxy,
+        'ERROR_IN_LOW_LEVEL_CALLS()',
       );
     });
   });
