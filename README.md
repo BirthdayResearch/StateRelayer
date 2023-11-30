@@ -54,3 +54,29 @@ npx hardhat run --network DMCTestnet scripts/deployment.ts
 ```
 npx hardhat run --network DMCTestnet scripts/deployment.ts
 ```
+
+### How to manage permission for smart contracts via Metamask
+
+There are three main functions related to this:
+`grantRole(bytes32,address)`, `revokeRole(bytes32,address)` and `renounceRole(bytes32,address)`
+
+Clone the repo.
+
+git checkout v0.0.1, (the version that the smart contract is deployed from)
+
+Install dependencies and compile smart contract:
+
+```
+npm ci
+npx hardhat compile
+```
+
+Generate encoded data by executing this command line:
+
+npx ts-node scripts/utils/generateEncodedData
+
+After this, enable metamask to be able to show hex data.
+
+Then when creating a transaction to send, enter the smart contract address as the recipient, then paste the generated encoded data into the "Hex data" field.
+
+A similar flow is showcased in video/MetamaskInstruction.mov
