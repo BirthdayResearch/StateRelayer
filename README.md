@@ -71,7 +71,8 @@ npm ci
 npx hardhat compile
 ```
 
-Generate encoded data by executing this command line:
+Copy file scripts/utils/generateEncodedData.ts from main onto this branch and then
+generate encoded data by executing this command line:
 
 npx ts-node scripts/utils/generateEncodedData
 
