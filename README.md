@@ -54,3 +54,15 @@ npx hardhat run --network DMCTestnet scripts/deployment.ts
 ```
 npx hardhat run --network DMCTestnet scripts/deployment.ts
 ```
+
+### Smart contract addresses deployed by BirthdayResearch team
+
+#### MetaChain Mainnet
+
+StateRelayerProxy: [0xa075dC93D00ac14f4a7416C03cAbec4728586760](https://meta.defiscan.live/address/0xa075dC93D00ac14f4a7416C03cAbec4728586760)
+
+StateRelayer: [0x970F740feB2D14926881d51873Eb81E9183E7B18](https://meta.defiscan.live/address/0x970F740feB2D14926881d51873Eb81E9183E7B18)
+
+#### MetaChain Testnet
+
+StateRelayerProxy: [0xA6A853DDbfB6C85d3584E33313628555BA85753B](https://meta.defiscan.live/address/0xA6A853DDbfB6C85d3584E33313628555BA85753B?network=TestNet)
