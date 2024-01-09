@@ -93,3 +93,5 @@ StateRelayer: [0x970F740feB2D14926881d51873Eb81E9183E7B18](https://meta.defiscan
 #### MetaChain Testnet
 
 StateRelayerProxy: [0xA6A853DDbfB6C85d3584E33313628555BA85753B](https://meta.defiscan.live/address/0xA6A853DDbfB6C85d3584E33313628555BA85753B?network=TestNet)
+
+StateRelayer: [ 0x45f94FFE3fE1b1076e145285E11D5E7Cdf7d6f5e](https://meta.defiscan.live/address/0x45f94FFE3fE1b1076e145285E11D5E7Cdf7d6f5e?network=TestNet)
