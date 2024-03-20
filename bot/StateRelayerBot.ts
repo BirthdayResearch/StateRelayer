@@ -1,11 +1,11 @@
+import { ApiPagedResponse } from '@defichain/whale-api-client';
+import { PoolPairData } from '@defichain/whale-api-client/dist/api/poolpairs';
 import { getWhaleClient } from '@waveshq/walletkit-bot';
 import { ethers } from 'ethers';
 
 import { StateRelayer__factory } from '../generated';
 import { tranformPairData, transformDataMasternode, transformDataVault } from './utils/transformData';
 import { DataStore, MasterNodeData, StateRelayerHandlerProps, VaultData } from './utils/types';
-import { ApiPagedResponse } from '@defichain/whale-api-client';
-import { PoolPairData } from '@defichain/whale-api-client/dist/api/poolpairs';
 
 const DENOMINATION = 'USDT';
 const PAGESIZE = 50;
@@ -30,6 +30,26 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
 
     const dexPriceData = await client.poolpairs.listDexPrices(DENOMINATION);
 
+    const ETHDFIRawDataArr = rawPoolPairData.filter((rawData) => rawData.symbol === 'ETH-DFI');
+
+    if (ETHDFIRawDataArr.length > 0) {
+      const ETHDFIRawData = ETHDFIRawDataArr[0];
+      const DFIETHRawData = { ...ETHDFIRawData };
+      const tempTokenA = DFIETHRawData.tokenA;
+      DFIETHRawData.tokenA = DFIETHRawData.tokenB;
+      DFIETHRawData.tokenB = tempTokenA;
+
+      const priceRatioABTemp = DFIETHRawData.priceRatio.ab;
+      DFIETHRawData.priceRatio.ab = DFIETHRawData.priceRatio.ba;
+      DFIETHRawData.priceRatio.ba = priceRatioABTemp;
+
+      DFIETHRawData.symbol = 'DFI-ETH';
+      DFIETHRawData.displaySymbol = 'DFI-dETH';
+      DFIETHRawData.name = 'Default Defi token-Ether';
+
+      rawPoolPairData.push(DFIETHRawData);
+    }
+
     const inputForDexUpdate = tranformPairData(rawPoolPairData, statsData, dexPriceData);
 
     // Data from vaults
@@ -46,7 +66,7 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
       inputForDexUpdate.dexInfo,
       inputForDexUpdate.totalValueLocked,
       inputForDexUpdate.total24HVolume,
-      { nonce: nonce, gasLimit: props.gasUpdateDEX },
+      { nonce, gasLimit: props.gasUpdateDEX },
     );
 
     // Update Master Node information
