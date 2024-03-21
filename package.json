@@ -45,7 +45,7 @@
     "@waveshq/standard-defichain-jellyfishsdk": "^0.52.1",
     "@waveshq/walletkit-bot": "^0.47.0",
     "axios": "^1.4.0",
-    "dotenv": "^16.1.4",
+    "dotenv": "^16.4.5",
     "hardhat": "^2.13.1"
   },
   "devDependencies": {
