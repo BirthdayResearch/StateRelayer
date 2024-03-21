@@ -30,12 +30,28 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
 
     const dexPriceData = await client.poolpairs.listDexPrices(DENOMINATION);
 
-    const ETHDFIRawDataArr = rawPoolPairData.filter((rawData) => rawData.symbol === 'ETH-DFI');
-
-    if (ETHDFIRawDataArr.length > 0) {
-      const ETHDFIRawData = ETHDFIRawDataArr[0];
+    const ETHDFIRawData = rawPoolPairData.find((rawData) => rawData.symbol === 'ETH-DFI');
+    if (ETHDFIRawData) {
+      // Note: added DFI-ETH to calculate DFI price as a primaryTokenPrice.
       const DFIETHRawData = {
         ...ETHDFIRawData,
+        symbol: 'DFI-ETH',
+        displaySymbol: 'DFI-dETH',
+        name: 'Default Defi token-Ether',
+        priceRatio: {
+          ab: ETHDFIRawData.priceRatio.ba,
+          ba: ETHDFIRawData.priceRatio.ab,
+        },
+        tokenA: {
+          ...ETHDFIRawData.tokenB,
+          reserve: '0', // setting value to 0 as pair dose not exists
+        },
+        tokenB: {
+          ...ETHDFIRawData.tokenA,
+          reserve: '0',
+        },
+        commission: '0',
+        rewardPct: '0',
         apr: {
           reward: 0,
           commission: 0,
@@ -50,19 +66,6 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
           usd: '0'
         }
       };
-      const tempTokenA = DFIETHRawData.tokenA;
-      DFIETHRawData.tokenA = DFIETHRawData.tokenB;
-      DFIETHRawData.tokenB = tempTokenA;
-
-      const priceRatioABTemp = DFIETHRawData.priceRatio.ab;
-      DFIETHRawData.priceRatio.ab = DFIETHRawData.priceRatio.ba;
-      DFIETHRawData.priceRatio.ba = priceRatioABTemp;
-
-      DFIETHRawData.symbol = 'DFI-ETH';
-      DFIETHRawData.displaySymbol = 'DFI-dETH';
-      DFIETHRawData.name = 'Default Defi token-Ether';
-
-      // Note: added DFI-ETH to calculate DFI price as a primaryTokenPrice.
       rawPoolPairData.push(DFIETHRawData);
     }
 
