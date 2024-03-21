@@ -34,7 +34,22 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
 
     if (ETHDFIRawDataArr.length > 0) {
       const ETHDFIRawData = ETHDFIRawDataArr[0];
-      const DFIETHRawData = { ...ETHDFIRawData };
+      const DFIETHRawData = {
+        ...ETHDFIRawData,
+        apr: {
+          reward: 0,
+          commission: 0,
+          total: 0
+        },
+        volume: {
+          h24: 0,
+          d30: 0
+        },
+        totalLiquidity: {
+          token: '0',
+          usd: '0'
+        }
+      };
       const tempTokenA = DFIETHRawData.tokenA;
       DFIETHRawData.tokenA = DFIETHRawData.tokenB;
       DFIETHRawData.tokenB = tempTokenA;
@@ -47,6 +62,7 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
       DFIETHRawData.displaySymbol = 'DFI-dETH';
       DFIETHRawData.name = 'Default Defi token-Ether';
 
+      // Note: added DFI-ETH to calculate DFI price as a primaryTokenPrice.
       rawPoolPairData.push(DFIETHRawData);
     }
 
