@@ -49,11 +49,11 @@
     "hardhat": "^2.13.1"
   },
   "devDependencies": {
-    "@birthdayresearch/eslint-config": "^0.5.14",
+    "@birthdayresearch/eslint-config": "^0.8.5",
     "@birthdayresearch/sticky-jest": "^0.8.5",
     "@birthdayresearch/sticky-prettier": "^0.8.5",
     "@birthdayresearch/sticky-testcontainers": "^0.8.5",
-    "@birthdayresearch/sticky-typescript": "^0.5.14",
+    "@birthdayresearch/sticky-typescript": "^0.8.5",
     "@nomicfoundation/hardhat-ledger": "^1.0.1",
     "@nomicfoundation/hardhat-toolbox": "^3.0.0",
     "@types/jest": "^29.5.5",
