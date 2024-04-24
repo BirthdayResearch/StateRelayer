@@ -27,6 +27,7 @@ handler({
     gasUpdateDEX: /* gas limit for dex update transaction */,
     gasUpdateMaster: /* gas limit for master node update transaction */,
     gasUpdateVault: /* gas limit for vault update transaction */
+    gasUpdateOracle: /* gas limit for oracle update transaction */,
 })
 ```
 

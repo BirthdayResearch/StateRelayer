@@ -53,8 +53,6 @@ interface IStateRelayer {
     struct OracleInfo {
         // the price of the primary token in USDT/ USD
         uint256 price;
-        // price ticker type "CRYPTO" | "FOREX" | "COMMODITY" | "STOCKS" | "ETF";
-        string tickerType;
         // number of active oracles
         uint256 oraclesActive;
         // number of total oracles

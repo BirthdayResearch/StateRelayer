@@ -172,13 +172,11 @@ describe('State relayer v2 contract data tests', () => {
     it('Should successfully set oracle data', async () => {
       const oracleDataEth: OracleInfo = {
         price: 111,
-        tickerType: "CRYPTO",
         oraclesActive: 5,
         oraclesTotal: 13,
       };
       const oracleDataBtc: OracleInfo = {
         price: 222,
-        tickerType: "CRYPTO",
         oraclesActive: 5,
         oraclesTotal: 13,
       };
@@ -200,7 +198,6 @@ describe('State relayer v2 contract data tests', () => {
     it('Should successfully revert if the signer is not `bot`', async () => {
       const oracleDataEth: OracleInfo = {
         price: 111,
-        tickerType: "CRYPTO",
         oraclesActive: 5,
         oraclesTotal: 13,
       };
@@ -212,13 +209,11 @@ describe('State relayer v2 contract data tests', () => {
     it('Should successfully revert if there is a mismatch between the length of _oracleInfo and _oracle', async () => {
       const oracleDataEth: OracleInfo = {
         price: 111,
-        tickerType: "CRYPTO",
         oraclesActive: 5,
         oraclesTotal: 13,
       };
       const oracleDataBtc: OracleInfo = {
         price: 222,
-        tickerType: "CRYPTO",
         oraclesActive: 5,
         oraclesTotal: 13,
       };
@@ -289,13 +284,11 @@ describe('State relayer v2 contract data tests', () => {
 
       const oracleDataEth: OracleInfo = {
         price: 12,
-        tickerType: "CRYPTO",
         oraclesActive: 53,
         oraclesTotal: 113,
       };
       const oracleDataBtc: OracleInfo = {
         price: 212,
-        tickerType: "CRYPTO",
         oraclesActive: 52,
         oraclesTotal: 123,
       };

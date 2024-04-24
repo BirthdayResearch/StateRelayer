@@ -3,14 +3,15 @@ import { EnvironmentNetwork } from '@waveshq/walletkit-core';
 import { ethers } from 'ethers';
 
 import { HardhatNetwork, HardhatNetworkContainer, StartedHardhatNetworkContainer } from '../../containers';
-import { StateRelayer, StateRelayer__factory, StateRelayerProxy__factory } from '../../generated';
+import { StateRelayer__factory, StateRelayerProxy__factory, StateRelayerV2, StateRelayerV2__factory } from '../../generated';
 import { handler } from '../StateRelayerBot';
-import { tranformPairData } from '../utils/transformData';
+import { tranformPairData, transformOracleData } from '../utils/transformData';
 import {
   expectedMasterNodeData,
   expectedVaultData,
   mockedDexPricesData,
   mockedPoolPairData,
+  mockedPriceData,
   mockedStatsData,
 } from './mockData/oceanMockedData';
 
@@ -23,6 +24,9 @@ jest.mock('@defichain/whale-api-client', () => ({
       list: () => mockedPoolPairData,
       listDexPrices: () => mockedDexPricesData,
     },
+    prices: {
+      list: () => mockedPriceData
+    }
   })),
 }));
 
@@ -31,7 +35,7 @@ describe('State Relayer Bot Tests', () => {
   let hardhatNetwork: HardhatNetwork;
   let admin: ethers.Signer;
   let bot: ethers.Signer;
-  let proxy: StateRelayer;
+  let proxy: StateRelayerV2;
 
   beforeEach(async () => {
     startedHardhatContainer = await new HardhatNetworkContainer()
@@ -59,7 +63,23 @@ describe('State Relayer Bot Tests', () => {
         ]),
       ],
     });
-    proxy = StateRelayer__factory.connect((await stateRelayerProxy?.getAddress()) || '', bot);
+    // update v2
+    const stateRelayerV2Implementation = await hardhatNetwork?.contracts?.deployContract({
+      deploymentName: 'StateRelayerImplementationV2',
+      contractName: 'StateRelayerV2',
+      abi: StateRelayerV2__factory.abi,
+    });
+    const encodedData = StateRelayerV2__factory.createInterface().encodeFunctionData("initialize", [
+      // Contract version
+      2,
+    ]);
+  
+    // Upgrading the Proxy contract
+    const stateRelayerV2Address = await stateRelayerV2Implementation?.getAddress() ?? "";
+    const v1Contract = StateRelayer__factory.connect((await stateRelayerProxy?.getAddress()) || '', bot);
+    
+    await v1Contract?.connect(admin)?.upgradeToAndCall(stateRelayerV2Address, encodedData)
+    proxy = StateRelayerV2__factory.connect((await stateRelayerProxy?.getAddress()) || '', bot);
   });
 
   afterEach(async () => {
@@ -102,6 +122,16 @@ describe('State Relayer Bot Tests', () => {
     const dex = await proxy.getDexInfo();
     expect(dex[2]).toStrictEqual(expectedDexInfo.totalValueLocked);
     expect(dex[1]).toStrictEqual(expectedDexInfo.total24HVolume);
+
+    // Checking the oracle info
+    const testOceanData = await client.prices.list(200);
+    const dTSLA = await proxy.getOraclePairInfo('TSLA-USD');
+    const expectedOracleInfo = transformOracleData(testOceanData);
+    const lastTSLAUSDInfo = expectedOracleInfo.oracleInfo[expectedOracleInfo.oracle.indexOf('TSLA-USD')];
+    // for sure both two sides have the same type as bigint
+    expect(dTSLA[1].price).toStrictEqual(lastTSLAUSDInfo.price);
+    expect(dTSLA[1].oraclesActive).toStrictEqual(lastTSLAUSDInfo.oraclesActive);
+    expect(dTSLA[1].oraclesTotal).toStrictEqual(lastTSLAUSDInfo.oraclesTotal);
 
     // Checking MasterNode information
     const receivedMasterNodeData = await proxy.getMasterNodeInfo();
