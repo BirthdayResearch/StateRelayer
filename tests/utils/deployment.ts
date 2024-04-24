@@ -23,11 +23,12 @@ export async function deployContract(): Promise<DeployedContractAndSigner> {
   await stateProxy.waitForDeployment();
   const stateRelayerProxy = await ethers.getContractAt('StateRelayer', await stateProxy.getAddress());
 
-  return { stateRelayerProxy, admin, bot, user };
+  return { stateRelayerProxy, admin, bot, user, stateRelayer };
 }
 
-interface DeployedContractAndSigner {
+export interface DeployedContractAndSigner {
   stateRelayerProxy: StateRelayer;
+  stateRelayer: StateRelayer;
   admin: SignerWithAddress;
   bot: SignerWithAddress;
   user: SignerWithAddress;
