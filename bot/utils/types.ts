@@ -22,4 +22,5 @@ export type StateRelayerHandlerProps = {
   gasUpdateDEX?: bigint;
   gasUpdateMaster?: bigint;
   gasUpdateVault?: bigint;
+  gasUpdateOracle?: bigint;
 };

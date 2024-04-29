@@ -40,13 +40,13 @@
     "preset": "@birthdayresearch/sticky-jest"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "4.9.3",
-    "@openzeppelin/contracts-upgradeable": "4.9.3",
+    "@openzeppelin/contracts": "^4.9.6",
+    "@openzeppelin/contracts-upgradeable": "^4.9.6",
     "@waveshq/standard-defichain-jellyfishsdk": "^0.52.1",
     "@waveshq/walletkit-bot": "^0.47.0",
     "axios": "^1.4.0",
     "dotenv": "^16.1.4",
-    "hardhat": "^2.13.1"
+    "hardhat": "^2.19.4"
   },
   "devDependencies": {
     "@birthdayresearch/eslint-config": "^0.5.14",
@@ -54,11 +54,14 @@
     "@birthdayresearch/sticky-prettier": "^0.8.5",
     "@birthdayresearch/sticky-testcontainers": "^0.8.5",
     "@birthdayresearch/sticky-typescript": "^0.5.14",
-    "@nomicfoundation/hardhat-ledger": "^1.0.1",
-    "@nomicfoundation/hardhat-toolbox": "^3.0.0",
+    "@nomicfoundation/hardhat-chai-matchers": "^2.0.6",
+    "@nomicfoundation/hardhat-ledger": "^1.0.3",
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "@nomicfoundation/hardhat-verify": "^2.0.3",
+    "@openzeppelin/hardhat-upgrades": "^3.1.0",
     "@types/jest": "^29.5.5",
     "jest": "^29.7.0",
-    "solhint": "^3.4.1",
+    "solhint": "^3.6.2",
     "ts-jest": "^29.1.1"
   }
 }

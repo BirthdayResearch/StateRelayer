@@ -1,5 +1,7 @@
+import "@nomicfoundation/hardhat-chai-matchers";
 import '@nomicfoundation/hardhat-toolbox';
 import '@nomicfoundation/hardhat-ledger';
+import '@openzeppelin/hardhat-upgrades';
 
 import { HardhatUserConfig, task, types } from 'hardhat/config';
 
