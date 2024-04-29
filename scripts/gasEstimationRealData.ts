@@ -19,6 +19,7 @@ async function estimateGasCost() {
       urlNetwork: 'https://ocean.defichain.com/',
       envNetwork: EnvironmentNetwork.MainNet,
       contractAddress: await stateRelayerProxy.getAddress(), // Proxy contract address
+      enableOracleUpdate: true,
       signer: bot,
     });
     if (data === undefined) break;

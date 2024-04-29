@@ -74,6 +74,7 @@ describe('State Relayer Bot Tests', () => {
   test('Successfully set the dexInfo data', async () => {
     const output = await handler({
       testGasCost: false,
+      enableOracleUpdate: true,
       envNetwork: EnvironmentNetwork.LocalPlayground,
       urlNetwork: '',
       contractAddress: await proxy.getAddress(),

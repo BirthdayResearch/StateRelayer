@@ -12,7 +12,7 @@ const DENOMINATION = 'USDT';
 const PAGESIZE = 50;
 
 export async function handler(props: StateRelayerHandlerProps): Promise<DFCData | undefined> {
-  const { urlNetwork, envNetwork, signer, contractAddress } = props;
+  const { urlNetwork, envNetwork, signer, contractAddress, enableOracleUpdate } = props;
   const stateRelayerContract = StateRelayer__factory.connect(contractAddress, signer);
   const dataStore = {} as DataStore;
   try {
@@ -72,16 +72,6 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
 
     const inputForDexUpdate = tranformPairData(rawPoolPairData, statsData, dexPriceData);
 
-    // Data for Oracles
-    let rawPriceData: Array<PriceTicker> = [];
-    let pagedPriceData: ApiPagedResponse<PriceTicker> = await client.prices.list(PAGESIZE);
-    rawPriceData = rawPriceData.concat(pagedPriceData);
-    while (pagedPriceData.hasNext) {
-      pagedPriceData = await client.paginate(pagedPriceData);
-      rawPriceData = rawPriceData.concat(pagedPriceData);
-    }
-
-    const inputForOracleUpdate = transformOracleData(rawPriceData)
     // Data from vaults
     const dataVault = transformDataVault(statsData);
 
@@ -114,13 +104,27 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
     });
     console.log('Hash of vault update transaction', vaultTx.hash);
 
-    // Update Oracle information
-    const oracleInfoTx = await stateRelayerContract.updateOracleInfo(
-      inputForOracleUpdate.oracle,
-      inputForOracleUpdate.oracleInfo,
-      { nonce: nonce + 3, gasLimit: props.gasUpdateOracle },
-    );
-    console.log('Hash of oracle update transaction', oracleInfoTx.hash);
+    let oracleInfoTx;
+    if (enableOracleUpdate) {
+      // Data for Oracles
+      let rawPriceData: Array<PriceTicker> = [];
+      let pagedPriceData: ApiPagedResponse<PriceTicker> = await client.prices.list(PAGESIZE);
+      rawPriceData = rawPriceData.concat(pagedPriceData);
+      while (pagedPriceData.hasNext) {
+        pagedPriceData = await client.paginate(pagedPriceData);
+        rawPriceData = rawPriceData.concat(pagedPriceData);
+      }
+
+      const inputForOracleUpdate = transformOracleData(rawPriceData)
+      // Update Oracle information
+      oracleInfoTx = await stateRelayerContract.updateOracleInfo(
+        inputForOracleUpdate.oracle,
+        inputForOracleUpdate.oracleInfo,
+        { nonce: nonce + 3, gasLimit: props.gasUpdateOracle },
+      );
+      console.log('Hash of oracle update transaction', oracleInfoTx.hash);
+      
+    }
 
     if (!props.testGasCost) {
       return {
@@ -136,7 +140,7 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
       dexInfoTxReceipt: (await dexInfoTx.wait()) || undefined,
       masterDataTxReceipt: (await masterDataTx.wait()) || undefined,
       vaultTxReceipt: (await vaultTx.wait()) || undefined,
-      oracleInfoTxReceipt: (await oracleInfoTx.wait()) || undefined,
+      oracleInfoTxReceipt: (await oracleInfoTx?.wait()) || undefined,
     };
   } catch (e) {
     console.error((e as Error).message);
