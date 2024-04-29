@@ -5,12 +5,13 @@ import { ethers } from 'ethers';
 import { HardhatNetwork, HardhatNetworkContainer, StartedHardhatNetworkContainer } from '../../containers';
 import { StateRelayer, StateRelayer__factory, StateRelayerProxy__factory } from '../../generated';
 import { handler } from '../StateRelayerBot';
-import { tranformPairData } from '../utils/transformData';
+import { tranformPairData, transformOracleData } from '../utils/transformData';
 import {
   expectedMasterNodeData,
   expectedVaultData,
   mockedDexPricesData,
   mockedPoolPairData,
+  mockedPriceData,
   mockedStatsData,
 } from './mockData/oceanMockedData';
 
@@ -23,10 +24,13 @@ jest.mock('@defichain/whale-api-client', () => ({
       list: () => mockedPoolPairData,
       listDexPrices: () => mockedDexPricesData,
     },
+    prices: {
+      list: () => mockedPriceData
+    }
   })),
 }));
 
-describe('State Relayer Bot Tests', () => {
+describe.only('State Relayer Bot Tests', () => {
   let startedHardhatContainer: StartedHardhatNetworkContainer;
   let hardhatNetwork: HardhatNetwork;
   let admin: ethers.Signer;
@@ -59,6 +63,7 @@ describe('State Relayer Bot Tests', () => {
         ]),
       ],
     });
+    
     proxy = StateRelayer__factory.connect((await stateRelayerProxy?.getAddress()) || '', bot);
   });
 
@@ -102,6 +107,16 @@ describe('State Relayer Bot Tests', () => {
     const dex = await proxy.getDexInfo();
     expect(dex[2]).toStrictEqual(expectedDexInfo.totalValueLocked);
     expect(dex[1]).toStrictEqual(expectedDexInfo.total24HVolume);
+
+    // Checking the oracle info
+    const testOceanData = await client.prices.list(200);
+    const dTSLA = await proxy.getOraclePairInfo('TSLA-USD');
+    const expectedOracleInfo = transformOracleData(testOceanData);
+    const lastTSLAUSDInfo = expectedOracleInfo.oracleInfo[expectedOracleInfo.oracle.indexOf('TSLA-USD')];
+    // for sure both two sides have the same type as bigint
+    expect(dTSLA[1].price).toStrictEqual(lastTSLAUSDInfo.price);
+    expect(dTSLA[1].oraclesActive).toStrictEqual(lastTSLAUSDInfo.oraclesActive);
+    expect(dTSLA[1].oraclesTotal).toStrictEqual(lastTSLAUSDInfo.oraclesTotal);
 
     // Checking MasterNode information
     const receivedMasterNodeData = await proxy.getMasterNodeInfo();

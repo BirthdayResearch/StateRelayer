@@ -5,12 +5,13 @@ import { BigNumber as BigFloatingNumber } from 'bignumber.js';
 import { handler } from '../bot/StateRelayerBot';
 import { deployContract } from '../tests/utils/deployment';
 
-// to run this file, run npx hardhat clean && npm i && npx hardhat run scripts/gasEstimation.ts
-// estimation is 22.46 USD per month
+// to run this file, run npx hardhat clean && npm i && npx hardhat run scripts/gasEstimationRealData.ts
+// Average cost of updating all data in USD at one time is $0.015
 async function estimateGasCost() {
   const dexesData: BigInt[] = [];
   const masterData: BigInt[] = [];
   const vaultData: BigInt[] = [];
+  const oracleData: BigInt[] = [];
   const { bot, stateRelayerProxy } = await deployContract();
   for (let i = 0; i < 10; i += 1) {
     const data = await handler({
@@ -21,22 +22,25 @@ async function estimateGasCost() {
       signer: bot,
     });
     if (data === undefined) break;
-    const { dexInfoTxReceipt, masterDataTxReceipt, vaultTxReceipt } = data;
+    const { dexInfoTxReceipt, masterDataTxReceipt, vaultTxReceipt, oracleInfoTxReceipt } = data;
     dexesData.push(dexInfoTxReceipt!.gasUsed);
     masterData.push(masterDataTxReceipt!.gasUsed);
     vaultData.push(vaultTxReceipt!.gasUsed);
+    oracleData.push(oracleInfoTxReceipt!.gasUsed)
     console.log('Successfully update ', i);
     await new Promise((r) => setTimeout(r, 10 * 1000));
   }
-  console.log('Update DEXes');
+  console.log('Update DEXes', dexesData);
   const averageCostUpdateDEX = await calculateAverageCost(dexesData.map((x) => x.valueOf()));
+  console.log('Update Oracles');
+  const averageCostUpdateOracles = await calculateAverageCost(oracleData.map((x) => x.valueOf()));
   console.log('Update Masterdata');
   const averageCostUpdateMasterData = await calculateAverageCost(masterData.map((x) => x.valueOf()));
   console.log('Update Vault data');
   const averageCostUpdateVaultData = await calculateAverageCost(vaultData.map((x) => x.valueOf()));
   console.log(
     'Average cost of updating all data in USD at one time is ',
-    averageCostUpdateDEX.plus(averageCostUpdateMasterData).plus(averageCostUpdateVaultData).toString(),
+    averageCostUpdateDEX.plus(averageCostUpdateOracles).plus(averageCostUpdateMasterData).plus(averageCostUpdateVaultData).toString(),
   );
 }
 

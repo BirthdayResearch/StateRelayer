@@ -8,8 +8,10 @@ import './IStateRelayer.sol';
 error ERROR_IN_LOW_LEVEL_CALLS();
 error NOT_BOT_ROLE_OR_NOT_IN_BATCH_CALL_IN_BOT();
 error DEX_AND_DEXINFO_NOT_HAVE_THE_SAME_LENGTH();
+error ORACLE_AND_ORACLEINFO_NOT_HAVE_THE_SAME_LENGTH();
 
 // @NOTE: if a uint256 is equal to 2**256 - 1, the value is not reliable and therefore should not be used
+/// @custom:oz-upgrades-unsafe-allow constructor
 contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable, IStateRelayer {
     bytes32 public constant BOT_ROLE = keccak256('BOT_ROLE');
     uint256 public constant DECIMALS = 18;
@@ -21,11 +23,15 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable, IStateRelaye
     // integer value, no decimals
     uint256 private lastUpdatedVaultInfoTimestampNoDecimals;
     // integer value, no decimals
+    uint256 private lastUpdatedOracleInfoTimestampNoDecimals;
+
+    // integer value, no decimals
     uint256 private lastUpdatedMasterNodeInfoTimestampNoDecimals;
     // integer value, no decimals
     uint256 private lastUpdatedDexInfoTimestampNoDecimals;
     bool private inBatchCallByBot;
 
+    mapping(string => OracleInfo) private OracleInfoMapping;
     mapping(string => DEXInfo) private DEXInfoMapping;
 
     VaultGeneralInformation private vaultInfo;
@@ -33,8 +39,9 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable, IStateRelaye
     MasterNodeInformation private masterNodeInformation;
 
     event UpdateDEXInfo();
+    event UpdateOracleInfo();
     event UpdateVaultGeneralInformation();
-    event UpdateMasterNodeInformation(); 
+    event UpdateMasterNodeInformation();
 
     function _authorizeUpgrade(address newImplementation) internal override onlyRole(DEFAULT_ADMIN_ROLE) {}
 
@@ -100,7 +107,7 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable, IStateRelaye
         masterNodeInformation = _masterNodeInformation;
         uint256 _lastUpdatedMasterNodeInfoTimestamp = block.timestamp;
         lastUpdatedMasterNodeInfoTimestampNoDecimals = _lastUpdatedMasterNodeInfoTimestamp;
-        emit UpdateMasterNodeInformation(); 
+        emit UpdateMasterNodeInformation();
     }
 
     /**
@@ -124,6 +131,21 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable, IStateRelaye
             }
         }
         inBatchCallByBot = false;
+    }
+
+    /**
+     @notice Function to update the oracle info
+     @param _oracle The names of the pool pairs
+     @param _oracleInfo Information about the oracles
+     */
+    function updateOracleInfo(string[] calldata _oracle, OracleInfo[] calldata _oracleInfo) external allowUpdate {
+        if (_oracle.length != _oracleInfo.length) revert ORACLE_AND_ORACLEINFO_NOT_HAVE_THE_SAME_LENGTH();
+        for (uint256 i = 0; i < _oracle.length; ++i) {
+            OracleInfoMapping[_oracle[i]] = _oracleInfo[i];
+        }
+        uint256 _lastUpdatedOracleInfo = block.timestamp;
+        lastUpdatedOracleInfoTimestampNoDecimals = _lastUpdatedOracleInfo;
+        emit UpdateOracleInfo();
     }
 
     /**
@@ -152,5 +174,12 @@ contract StateRelayer is UUPSUpgradeable, AccessControlUpgradeable, IStateRelaye
      */
     function getMasterNodeInfo() external view returns (uint256, MasterNodeInformation memory) {
         return (lastUpdatedMasterNodeInfoTimestampNoDecimals, masterNodeInformation);
+    }
+
+    /**
+     * @inheritdoc IStateRelayer
+     */
+    function getOraclePairInfo(string calldata _pair) external view returns (uint256, OracleInfo memory) {
+        return (lastUpdatedOracleInfoTimestampNoDecimals, OracleInfoMapping[_pair]);
     }
 }

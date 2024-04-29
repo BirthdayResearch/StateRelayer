@@ -1,8 +1,10 @@
+import { DexPricesResult, PoolPairData } from '@defichain/whale-api-client/dist/api/poolpairs';
+import { PriceTicker } from '@defichain/whale-api-client/dist/api/prices';
+import { StatsData } from '@defichain/whale-api-client/dist/api/stats';
 import { BigNumber } from 'bignumber.js';
+
 import { IStateRelayer } from '../../generated';
 import { MasterNodeData, PairData, VaultData } from './types';
-import { DexPricesResult, PoolPairData } from '@defichain/whale-api-client/dist/api/poolpairs';
-import { StatsData } from '@defichain/whale-api-client/dist/api/stats';
 
 const DECIMALS = 18;
 const DENOMINATION = 'USDT';
@@ -104,4 +106,21 @@ export function tranformPairData(
     totalValueLocked: totalValueLockedInPoolPair,
     total24HVolume,
   };
+}
+export function transformOracleData(prices: PriceTicker[] ):{
+  oracle: string[];
+  oracleInfo: IStateRelayer.OracleInfoStruct[];
+} {
+  const data = prices.reduce((all, { id, price }) => ({
+    ...all,
+    [id]: {
+      price: transformToBigInt(price.aggregated.amount, DECIMALS),
+      oraclesActive: transformToBigInt(price.aggregated.oracles.active, DECIMALS),
+      oraclesTotal:transformToBigInt(price.aggregated.oracles.total, DECIMALS)
+    }
+  }), {})
+  return {
+    oracle: Object.keys(data),
+    oracleInfo: Object.values(data)
+  }
 }
