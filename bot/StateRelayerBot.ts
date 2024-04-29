@@ -97,7 +97,7 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
       inputForDexUpdate.dexInfo,
       inputForDexUpdate.totalValueLocked,
       inputForDexUpdate.total24HVolume,
-      { nonce, gasLimit: props.gasUpdateOracle },
+      { nonce, gasLimit: props.gasUpdateDEX },
     );
 
     // Update Master Node information
@@ -115,7 +115,7 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
     const oracleInfoTx = await stateRelayerContract.updateOracleInfo(
       inputForOracleUpdate.oracle,
       inputForOracleUpdate.oracleInfo,
-      { nonce: nonce + 3, gasLimit: props.gasUpdateDEX },
+      { nonce: nonce + 3, gasLimit: props.gasUpdateOracle },
     );
 
     console.log('Hash of dex update transaction', dexInfoTx.hash);
