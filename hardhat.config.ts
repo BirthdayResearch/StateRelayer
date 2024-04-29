@@ -83,10 +83,10 @@ const config: HardhatUserConfig = {
       allowUnlimitedContractSize: true,
     },
     DMCTestnet: {
-      url: 'https://testnet-dmc.mydefichain.com:20551/',
+      url: 'https://eth.testnet.ocean.jellyfishsdk.com',
       accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
       // ledgerAccounts: ['first EVM address of your ledger'],
-      chainId: 1133,
+      chainId: 1131,
     },
     sepolia: {
       url: process.env.SEPOLIA_URL || '',
@@ -102,10 +102,10 @@ const config: HardhatUserConfig = {
     customChains: [
       {
         network: 'DMCTestnet',
-        chainId: 1133,
+        chainId: 1131,
         urls: {
-          apiURL: 'https://testnet-dmc.mydefichain.com:8444/api',
-          browserURL: 'https://testnet-dmc.mydefichain.com:8444',
+          apiURL: 'https://blockscout.testnet.ocean.jellyfishsdk.com/api',
+          browserURL: 'https://blockscout.testnet.ocean.jellyfishsdk.com',
         },
       },
     ],
