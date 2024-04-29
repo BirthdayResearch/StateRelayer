@@ -2,12 +2,14 @@ import { SignerWithAddress } from '@nomicfoundation/hardhat-ethers/signers';
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { expect } from 'chai';
 
-import { StateRelayer, IStateRelayer, StateRelayer__factory } from '../generated';
+import { StateRelayer, StateRelayer__factory } from '../generated';
+import { IStateRelayer } from '../generated/contracts/StateRelayer'
 import { deployContract } from './utils/deployment';
 
 type MasterNodeInformationStruct = IStateRelayer.MasterNodeInformationStruct;
 type VaultGeneralInformation = IStateRelayer.VaultGeneralInformationStruct;
 type DexInfo = IStateRelayer.DEXInfoStruct;
+type OracleInfo = IStateRelayer.OracleInfoStruct;
 
 describe('State relayer contract data tests', () => {
   let stateRelayerProxy: StateRelayer;
@@ -15,9 +17,12 @@ describe('State relayer contract data tests', () => {
   let user: SignerWithAddress;
   let admin: SignerWithAddress;
 
+  before(async ()=> {
+    ({ stateRelayerProxy, admin, bot, user } = await loadFixture(deployContract));
+  })
+
   describe('Test update master node data', () => {
     it('Should successfully set master node data', async () => {
-      ({ stateRelayerProxy, bot } = await loadFixture(deployContract));
       const masterNodeData: MasterNodeInformationStruct = {
         totalValueLockedInMasterNodes: 108,
         zeroYearLockedNoDecimals: 101,
@@ -33,7 +38,6 @@ describe('State relayer contract data tests', () => {
     });
 
     it('Should successfully revert if the signer is not `bot`', async () => {
-      ({ stateRelayerProxy, user } = await loadFixture(deployContract));
       const masterNodeData: MasterNodeInformationStruct = {
         totalValueLockedInMasterNodes: 108,
         zeroYearLockedNoDecimals: 101,
@@ -48,7 +52,6 @@ describe('State relayer contract data tests', () => {
 
   describe('Test update vault data', () => {
     it('Should successfully set vault node data', async () => {
-      ({ stateRelayerProxy, bot } = await loadFixture(deployContract));
       const vaultInformationData: VaultGeneralInformation = {
         noOfVaultsNoDecimals: 2,
         totalLoanValue: 1000,
@@ -65,7 +68,6 @@ describe('State relayer contract data tests', () => {
     });
 
     it('Should successfully revert if the signer is not `bot`', async () => {
-      ({ stateRelayerProxy, user } = await loadFixture(deployContract));
       const vaultInformationData: VaultGeneralInformation = {
         noOfVaultsNoDecimals: 2,
         totalLoanValue: 1000,
@@ -81,7 +83,6 @@ describe('State relayer contract data tests', () => {
 
   describe('Test update dexs data ', () => {
     it('Should successfully set dexs data', async () => {
-      ({ stateRelayerProxy, bot } = await loadFixture(deployContract));
       const totalValueLockInPoolPair = 76354685;
       const total24HVolume = 65738274;
       const dexDataEth: DexInfo = {
@@ -120,7 +121,6 @@ describe('State relayer contract data tests', () => {
     });
 
     it('Should successfully revert if the signer is not `bot`', async () => {
-      ({ stateRelayerProxy, user } = await loadFixture(deployContract));
 
       const dexDataEth: DexInfo = {
         primaryTokenPrice: 113,
@@ -138,7 +138,6 @@ describe('State relayer contract data tests', () => {
     });
 
     it('Should successfully revert if there is a mismatch between the length of _dexInfo and _dex', async () => {
-      ({ stateRelayerProxy, bot } = await loadFixture(deployContract));
       const totalValueLockInPoolPair = 76354685;
       const total24HVolume = 65738274;
       const dexDataEth: DexInfo = {
@@ -169,9 +168,65 @@ describe('State relayer contract data tests', () => {
     });
   });
 
+  describe('Test update oracle data ', () => {
+    it('Should successfully set oracle data', async () => {
+      const oracleDataEth: OracleInfo = {
+        price: 111,
+        oraclesActive: 5,
+        oraclesTotal: 13,
+      };
+      const oracleDataBtc: OracleInfo = {
+        price: 222,
+        oraclesActive: 5,
+        oraclesTotal: 13,
+      };
+      const oracleData: OracleInfo[] = [oracleDataEth, oracleDataBtc];
+      const symbols: string[] = ['eth-usd', 'btc-usd'];
+      await expect(
+        stateRelayerProxy.connect(bot).updateOracleInfo(symbols, oracleData),
+      ).to.emit(stateRelayerProxy, 'UpdateOracleInfo');
+      // Getting ETH Oracle Data
+      const receivedEThOracleData = await stateRelayerProxy.getOraclePairInfo(symbols[0]);
+      // Testing that the received is as expected as oracleDataEth
+      expect(receivedEThOracleData[1].toString()).to.equal(Object.values(oracleDataEth).toString());
+      // Getting BTC Oracle Data
+      const receivedBtcOracleData = await stateRelayerProxy.getOraclePairInfo(symbols[1]);
+      // Testing that the received is as expected as oracleDataBtc
+      expect(receivedBtcOracleData[1].toString()).to.equal(Object.values(oracleDataBtc).toString());
+    });
+
+    it('Should successfully revert if the signer is not `bot`', async () => {
+      const oracleDataEth: OracleInfo = {
+        price: 111,
+        oraclesActive: 5,
+        oraclesTotal: 13,
+      };
+      await expect(
+        stateRelayerProxy.connect(user).updateOracleInfo(['eth-usd'], [oracleDataEth]),
+      ).to.be.revertedWithCustomError(stateRelayerProxy, 'NOT_BOT_ROLE_OR_NOT_IN_BATCH_CALL_IN_BOT');
+    });
+
+    it('Should successfully revert if there is a mismatch between the length of _oracleInfo and _oracle', async () => {
+      const oracleDataEth: OracleInfo = {
+        price: 111,
+        oraclesActive: 5,
+        oraclesTotal: 13,
+      };
+      const oracleDataBtc: OracleInfo = {
+        price: 222,
+        oraclesActive: 5,
+        oraclesTotal: 13,
+      };
+      const oracleData: OracleInfo[] = [oracleDataEth, oracleDataBtc];
+      const symbols: string[] = ['eth-usd', 'btc-usd', 'dfi-usd'];
+      await expect(
+        stateRelayerProxy.connect(bot).updateOracleInfo(symbols, oracleData),
+      ).to.revertedWithCustomError(stateRelayerProxy, 'ORACLE_AND_ORACLEINFO_NOT_HAVE_THE_SAME_LENGTH');
+    });
+  });
+
   describe('Test batch call', () => {
     it('Should be able to update in batch ', async () => {
-      ({ stateRelayerProxy, bot } = await loadFixture(deployContract));
       // Master node data
       const masterNodeData: MasterNodeInformationStruct = {
         totalValueLockedInMasterNodes: 108,
@@ -227,12 +282,31 @@ describe('State relayer contract data tests', () => {
         2,
       ]);
 
+      const oracleDataEth: OracleInfo = {
+        price: 12,
+        oraclesActive: 53,
+        oraclesTotal: 113,
+      };
+      const oracleDataBtc: OracleInfo = {
+        price: 212,
+        oraclesActive: 52,
+        oraclesTotal: 123,
+      };
+
+      const oracleData: OracleInfo[] = [oracleDataEth, oracleDataBtc];
+      const oracleSymbols: string[] = ['eth-usd', 'btc-usd'];
+      const callDataForUpdatingOracleInfos = stateRelayerInterface.encodeFunctionData('updateOracleInfo', [
+        oracleSymbols,
+        oracleData
+      ]);
+
       await stateRelayerProxy
         .connect(bot)
         .batchCallByBot([
           callDataForUpdatingMasterNodeData,
           callDataForUpdatingVaultInformation,
           callDataForUpdatingDexInfos,
+          callDataForUpdatingOracleInfos
         ]);
       const receivedMasterNodeData = await stateRelayerProxy.getMasterNodeInfo();
       expect(receivedMasterNodeData[1].toString()).to.equal(Object.values(masterNodeData).toString());
@@ -246,10 +320,18 @@ describe('State relayer contract data tests', () => {
       const receivedBtcDexData = await stateRelayerProxy.getDexPairInfo(symbols[1]);
       // Testing that the received is as expected as dexDataBtc
       expect(receivedBtcDexData[1].toString()).to.equal(Object.values(dexDataBtc).toString());
+
+      // Getting ETH Oracle Data
+      const receivedEThDexOracleData = await stateRelayerProxy.getOraclePairInfo(oracleSymbols[0]);
+      // Testing that the received is as expected as oracleDataEth
+      expect(receivedEThDexOracleData[1].toString()).to.equal(Object.values(oracleDataEth).toString());
+      // Getting BTC Oracle Data
+      const receivedBtcOracleData = await stateRelayerProxy.getOraclePairInfo(oracleSymbols[1]);
+      // Testing that the received is as expected as oracleDataBtc
+      expect(receivedBtcOracleData[1].toString()).to.equal(Object.values(oracleDataBtc).toString());
     });
 
     it('Should fail when the caller is not authorized ', async () => {
-      ({ stateRelayerProxy, admin } = await loadFixture(deployContract));
 
       const masterNodeData: MasterNodeInformationStruct = {
         totalValueLockedInMasterNodes: 108,
@@ -270,7 +352,6 @@ describe('State relayer contract data tests', () => {
     });
 
     it('Should fail when the batch call tries to use authorized function', async () => {
-      ({ stateRelayerProxy, bot } = await loadFixture(deployContract));
 
       const stateRelayerInterface = StateRelayer__factory.createInterface();
       const encodedGrantRole = stateRelayerInterface.encodeFunctionData('grantRole', [
@@ -285,7 +366,6 @@ describe('State relayer contract data tests', () => {
     });
 
     it('Should fail when not granting state relayer the bot_role and then perform recursive batch call', async () => {
-      ({ stateRelayerProxy, bot } = await loadFixture(deployContract));
 
       const stateRelayerInterface = StateRelayer__factory.createInterface();
       const encodedGrantRole = stateRelayerInterface.encodeFunctionData('batchCallByBot', [
@@ -298,7 +378,6 @@ describe('State relayer contract data tests', () => {
     });
 
     it('Return right error when not using the right call data', async () => {
-      ({ stateRelayerProxy, bot } = await loadFixture(deployContract));
       // check if 0xffffffff is among the signatures of the contract
       expect(StateRelayer__factory.createInterface().hasFunction('0xffffffff')).to.be.false;
 

@@ -2,7 +2,6 @@
 pragma solidity ^0.8.18;
 
 interface IStateRelayer {
-
     struct DEXInfo {
         // the price of the primary token in USDT/ USD
         uint256 primaryTokenPrice;
@@ -51,6 +50,15 @@ interface IStateRelayer {
         uint256 tenYearLockedNoDecimals;
     }
 
+    struct OracleInfo {
+        // the price of the primary token in USDT/ USD
+        uint256 price;
+        // number of active oracles
+        uint256 oraclesActive;
+        // number of total oracles
+        uint256 oraclesTotal;
+    }
+
     /**
      * @notice Getter function to get the information about dexes
      * @return Last time that information about dexes are updated
@@ -81,4 +89,11 @@ interface IStateRelayer {
      */
     function getMasterNodeInfo() external view returns (uint256, MasterNodeInformation memory);
 
+    /**
+     * @notice Getter function to get information about a certain oracle
+     * @param _pair The pair to get information about
+     * @return Last time that information about all dexes are updated
+     * @return Information about that pair
+     */
+    function getOraclePairInfo(string calldata _pair) external view returns (uint256, OracleInfo memory);
 }

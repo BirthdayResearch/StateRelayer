@@ -1,17 +1,18 @@
 import { ApiPagedResponse } from '@defichain/whale-api-client';
 import { PoolPairData } from '@defichain/whale-api-client/dist/api/poolpairs';
+import { PriceTicker } from '@defichain/whale-api-client/dist/api/prices';
 import { getWhaleClient } from '@waveshq/walletkit-bot';
 import { ethers } from 'ethers';
 
 import { StateRelayer__factory } from '../generated';
-import { tranformPairData, transformDataMasternode, transformDataVault } from './utils/transformData';
+import { tranformPairData, transformDataMasternode, transformDataVault, transformOracleData } from './utils/transformData';
 import { DataStore, MasterNodeData, StateRelayerHandlerProps, VaultData } from './utils/types';
 
 const DENOMINATION = 'USDT';
 const PAGESIZE = 50;
 
 export async function handler(props: StateRelayerHandlerProps): Promise<DFCData | undefined> {
-  const { urlNetwork, envNetwork, signer, contractAddress } = props;
+  const { urlNetwork, envNetwork, signer, contractAddress, enableOracleUpdate } = props;
   const stateRelayerContract = StateRelayer__factory.connect(contractAddress, signer);
   const dataStore = {} as DataStore;
   try {
@@ -87,21 +88,43 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
       inputForDexUpdate.total24HVolume,
       { nonce, gasLimit: props.gasUpdateDEX },
     );
+    console.log('Hash of dex update transaction', dexInfoTx.hash);
 
     // Update Master Node information
     const masterDataTx = await stateRelayerContract.updateMasterNodeInformation(dataMasterNode, {
       nonce: nonce + 1,
       gasLimit: props.gasUpdateMaster,
     });
+    console.log('Hash of master update transaction', masterDataTx.hash);
+
     // Update Vault general information
     const vaultTx = await stateRelayerContract.updateVaultGeneralInformation(dataVault, {
       nonce: nonce + 2,
       gasLimit: props.gasUpdateVault,
     });
-
-    console.log('Hash of dex update transaction', dexInfoTx.hash);
-    console.log('Hash of master update transaction', masterDataTx.hash);
     console.log('Hash of vault update transaction', vaultTx.hash);
+
+    let oracleInfoTx;
+    if (enableOracleUpdate) {
+      // Data for Oracles
+      let rawPriceData: Array<PriceTicker> = [];
+      let pagedPriceData: ApiPagedResponse<PriceTicker> = await client.prices.list(PAGESIZE);
+      rawPriceData = rawPriceData.concat(pagedPriceData);
+      while (pagedPriceData.hasNext) {
+        pagedPriceData = await client.paginate(pagedPriceData);
+        rawPriceData = rawPriceData.concat(pagedPriceData);
+      }
+
+      const inputForOracleUpdate = transformOracleData(rawPriceData)
+      // Update Oracle information
+      oracleInfoTx = await stateRelayerContract.updateOracleInfo(
+        inputForOracleUpdate.oracle,
+        inputForOracleUpdate.oracleInfo,
+        { nonce: nonce + 3, gasLimit: props.gasUpdateOracle },
+      );
+      console.log('Hash of oracle update transaction', oracleInfoTx.hash);
+      
+    }
 
     if (!props.testGasCost) {
       return {
@@ -117,6 +140,7 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
       dexInfoTxReceipt: (await dexInfoTx.wait()) || undefined,
       masterDataTxReceipt: (await masterDataTx.wait()) || undefined,
       vaultTxReceipt: (await vaultTx.wait()) || undefined,
+      oracleInfoTxReceipt: (await oracleInfoTx?.wait()) || undefined,
     };
   } catch (e) {
     console.error((e as Error).message);
@@ -131,4 +155,5 @@ interface DFCData {
   dexInfoTxReceipt?: ethers.ContractTransactionReceipt;
   masterDataTxReceipt?: ethers.ContractTransactionReceipt;
   vaultTxReceipt?: ethers.ContractTransactionReceipt;
+  oracleInfoTxReceipt?: ethers.ContractTransactionReceipt;
 }

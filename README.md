@@ -22,11 +22,13 @@ handler({
     testGasCost: false,
     urlNetwork: "https://ocean.defichain.com/",
     envNetwork: EnvironmentNetwork.MainNet,
-    contractAddress: /* YOUR STATE RELAYER PROXY ADDRESS */,
-    signer: /* signer object */,
-    gasUpdateDEX: /* gas limit for dex update transaction */,
-    gasUpdateMaster: /* gas limit for master node update transaction */,
-    gasUpdateVault: /* gas limit for vault update transaction */
+    contractAddress: "" /* YOUR STATE RELAYER PROXY ADDRESS */,
+    signer: "" /* signer object */,
+    enableOracleUpdate: false /* enable or disable oracle info update */
+    gasUpdateDEX: "" /* gas limit for dex update transaction */,
+    gasUpdateMaster: "" /* gas limit for master node update transaction */,
+    gasUpdateVault: "" /* gas limit for vault update transaction */,
+    gasUpdateOracle: "" /* gas limit for oracle update transaction */,
 })
 ```
 

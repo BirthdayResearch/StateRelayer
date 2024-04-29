@@ -1180,3 +1180,431 @@ export const mockedDexPricesData = {
 export const expectedVaultData = transformDataVault(mockedStatsData);
 
 export const expectedMasterNodeData = transformDataMasternode(mockedStatsData);
+
+export const mockedPriceData = [
+  {
+      "id": "MARA-USD",
+      "sort": "0000000f003bd7d9MARA-USD",
+      "price": {
+          "block": {
+              "hash": "4531df332a790a0e1de05e7b5fde103972e7c06a8efc87837bdfa0af173dbad8",
+              "height": 3921881,
+              "medianTime": 1713935549,
+              "time": 1713935780
+          },
+          "aggregated": {
+              "amount": "19.44008797",
+              "weightage": 100,
+              "oracles": {
+                  "active": 10,
+                  "total": 15
+              }
+          },
+          "currency": "USD",
+          "token": "MARA",
+          "id": "MARA-USD-3921881",
+          "key": "MARA-USD",
+          "sort": "662894bd003bd7d9"
+      }
+  },
+  {
+      "id": "TSLA-USD",
+      "sort": "0000000d003bd7ddTSLA-USD",
+      "price": {
+          "block": {
+              "hash": "72af059d13c6539c00f3ab0dc8b4a1251120a8fbb121e30615ae1c350f43d132",
+              "height": 3921885,
+              "medianTime": 1713935772,
+              "time": 1713935853
+          },
+          "aggregated": {
+              "amount": "144.67764212",
+              "weightage": 50,
+              "oracles": {
+                  "active": 5,
+                  "total": 13
+              }
+          },
+          "currency": "USD",
+          "token": "TSLA",
+          "id": "TSLA-USD-3921885",
+          "key": "TSLA-USD",
+          "sort": "6628959c003bd7dd"
+      }
+  },
+  {
+      "id": "GOOGL-USD",
+      "sort": "0000000d003bd7ddGOOGL-USD",
+      "price": {
+          "block": {
+              "hash": "72af059d13c6539c00f3ab0dc8b4a1251120a8fbb121e30615ae1c350f43d132",
+              "height": 3921885,
+              "medianTime": 1713935772,
+              "time": 1713935853
+          },
+          "aggregated": {
+              "amount": "158.25786341",
+              "weightage": 50,
+              "oracles": {
+                  "active": 5,
+                  "total": 13
+              }
+          },
+          "currency": "USD",
+          "token": "GOOGL",
+          "id": "GOOGL-USD-3921885",
+          "key": "GOOGL-USD",
+          "sort": "6628959c003bd7dd"
+      }
+  },
+  {
+      "id": "GME-USD",
+      "sort": "0000000d003bd7ddGME-USD",
+      "price": {
+          "block": {
+              "hash": "72af059d13c6539c00f3ab0dc8b4a1251120a8fbb121e30615ae1c350f43d132",
+              "height": 3921885,
+              "medianTime": 1713935772,
+              "time": 1713935853
+          },
+          "aggregated": {
+              "amount": "10.16005593",
+              "weightage": 50,
+              "oracles": {
+                  "active": 5,
+                  "total": 13
+              }
+          },
+          "currency": "USD",
+          "token": "GME",
+          "id": "GME-USD-3921885",
+          "key": "GME-USD",
+          "sort": "6628959c003bd7dd"
+      }
+  },
+  {
+      "id": "FB-USD",
+      "sort": "0000000d003bd7ddFB-USD",
+      "price": {
+          "block": {
+              "hash": "72af059d13c6539c00f3ab0dc8b4a1251120a8fbb121e30615ae1c350f43d132",
+              "height": 3921885,
+              "medianTime": 1713935772,
+              "time": 1713935853
+          },
+          "aggregated": {
+              "amount": "496.11049209",
+              "weightage": 50,
+              "oracles": {
+                  "active": 5,
+                  "total": 13
+              }
+          },
+          "currency": "USD",
+          "token": "FB",
+          "id": "FB-USD-3921885",
+          "key": "FB-USD",
+          "sort": "6628959c003bd7dd"
+      }
+  },
+  {
+      "id": "COIN-USD",
+      "sort": "0000000d003bd7ddCOIN-USD",
+      "price": {
+          "block": {
+              "hash": "72af059d13c6539c00f3ab0dc8b4a1251120a8fbb121e30615ae1c350f43d132",
+              "height": 3921885,
+              "medianTime": 1713935772,
+              "time": 1713935853
+          },
+          "aggregated": {
+              "amount": "236.43035335",
+              "weightage": 50,
+              "oracles": {
+                  "active": 5,
+                  "total": 13
+              }
+          },
+          "currency": "USD",
+          "token": "COIN",
+          "id": "COIN-USD-3921885",
+          "key": "COIN-USD",
+          "sort": "6628959c003bd7dd"
+      }
+  },
+  {
+      "id": "AMZN-USD",
+      "sort": "0000000d003bd7ddAMZN-USD",
+      "price": {
+          "block": {
+              "hash": "72af059d13c6539c00f3ab0dc8b4a1251120a8fbb121e30615ae1c350f43d132",
+              "height": 3921885,
+              "medianTime": 1713935772,
+              "time": 1713935853
+          },
+          "aggregated": {
+              "amount": "179.53823352",
+              "weightage": 50,
+              "oracles": {
+                  "active": 5,
+                  "total": 13
+              }
+          },
+          "currency": "USD",
+          "token": "AMZN",
+          "id": "AMZN-USD-3921885",
+          "key": "AMZN-USD",
+          "sort": "6628959c003bd7dd"
+      }
+  },
+  {
+      "id": "AMD-USD",
+      "sort": "0000000d003bd7ddAMD-USD",
+      "price": {
+          "block": {
+              "hash": "72af059d13c6539c00f3ab0dc8b4a1251120a8fbb121e30615ae1c350f43d132",
+              "height": 3921885,
+              "medianTime": 1713935772,
+              "time": 1713935853
+          },
+          "aggregated": {
+              "amount": "152.27074225",
+              "weightage": 50,
+              "oracles": {
+                  "active": 5,
+                  "total": 13
+              }
+          },
+          "currency": "USD",
+          "token": "AMD",
+          "id": "AMD-USD-3921885",
+          "key": "AMD-USD",
+          "sort": "6628959c003bd7dd"
+      }
+  },
+  {
+      "id": "AAPL-USD",
+      "sort": "0000000d003bd7ddAAPL-USD",
+      "price": {
+          "block": {
+              "hash": "72af059d13c6539c00f3ab0dc8b4a1251120a8fbb121e30615ae1c350f43d132",
+              "height": 3921885,
+              "medianTime": 1713935772,
+              "time": 1713935853
+          },
+          "aggregated": {
+              "amount": "166.90040006",
+              "weightage": 50,
+              "oracles": {
+                  "active": 5,
+                  "total": 13
+              }
+          },
+          "currency": "USD",
+          "token": "AAPL",
+          "id": "AAPL-USD-3921885",
+          "key": "AAPL-USD",
+          "sort": "6628959c003bd7dd"
+      }
+  },
+  {
+      "id": "TWTR-USD",
+      "sort": "0000000d0024efe3TWTR-USD",
+      "price": {
+          "block": {
+              "hash": "1ad0ecbea0ab5a9e51b52f5f4218ff590e28dbc4f329bcddff8ebfda9e3b5e42",
+              "height": 2420707,
+              "medianTime": 1668729011,
+              "time": 1668729103
+          },
+          "aggregated": {
+              "amount": "53.85964879",
+              "weightage": 20,
+              "oracles": {
+                  "active": 2,
+                  "total": 13
+              }
+          },
+          "currency": "USD",
+          "token": "TWTR",
+          "id": "TWTR-USD-2420707",
+          "key": "TWTR-USD",
+          "sort": "6376c8b30024efe3"
+      }
+  },
+  {
+      "id": "UBER-USD",
+      "sort": "0000000c003bd7ddUBER-USD",
+      "price": {
+          "block": {
+              "hash": "72af059d13c6539c00f3ab0dc8b4a1251120a8fbb121e30615ae1c350f43d132",
+              "height": 3921885,
+              "medianTime": 1713935772,
+              "time": 1713935853
+          },
+          "aggregated": {
+              "amount": "70.79989869",
+              "weightage": 50,
+              "oracles": {
+                  "active": 5,
+                  "total": 12
+              }
+          },
+          "currency": "USD",
+          "token": "UBER",
+          "id": "UBER-USD-3921885",
+          "key": "UBER-USD",
+          "sort": "6628959c003bd7dd"
+      }
+  },
+  {
+      "id": "OTGLY-USD",
+      "sort": "0000000c003bd7ddOTGLY-USD",
+      "price": {
+          "block": {
+              "hash": "72af059d13c6539c00f3ab0dc8b4a1251120a8fbb121e30615ae1c350f43d132",
+              "height": 3921885,
+              "medianTime": 1713935772,
+              "time": 1713935853
+          },
+          "aggregated": {
+              "amount": "7.20996073",
+              "weightage": 50,
+              "oracles": {
+                  "active": 5,
+                  "total": 12
+              }
+          },
+          "currency": "USD",
+          "token": "OTGLY",
+          "id": "OTGLY-USD-3921885",
+          "key": "OTGLY-USD",
+          "sort": "6628959c003bd7dd"
+      }
+  },
+  {
+      "id": "NVDA-USD",
+      "sort": "0000000c003bd7ddNVDA-USD",
+      "price": {
+          "block": {
+              "hash": "72af059d13c6539c00f3ab0dc8b4a1251120a8fbb121e30615ae1c350f43d132",
+              "height": 3921885,
+              "medianTime": 1713935772,
+              "time": 1713935853
+          },
+          "aggregated": {
+              "amount": "824.24601933",
+              "weightage": 50,
+              "oracles": {
+                  "active": 5,
+                  "total": 12
+              }
+          },
+          "currency": "USD",
+          "token": "NVDA",
+          "id": "NVDA-USD-3921885",
+          "key": "NVDA-USD",
+          "sort": "6628959c003bd7dd"
+      }
+  },
+  {
+      "id": "MSTR-USD",
+      "sort": "0000000c003bd7ddMSTR-USD",
+      "price": {
+          "block": {
+              "hash": "72af059d13c6539c00f3ab0dc8b4a1251120a8fbb121e30615ae1c350f43d132",
+              "height": 3921885,
+              "medianTime": 1713935772,
+              "time": 1713935853
+          },
+          "aggregated": {
+              "amount": "1338.62935899",
+              "weightage": 50,
+              "oracles": {
+                  "active": 5,
+                  "total": 12
+              }
+          },
+          "currency": "USD",
+          "token": "MSTR",
+          "id": "MSTR-USD-3921885",
+          "key": "MSTR-USD",
+          "sort": "6628959c003bd7dd"
+      }
+  },
+  {
+      "id": "SQNXF-USD",
+      "sort": "0000000c0022f28eSQNXF-USD",
+      "price": {
+          "block": {
+              "hash": "5e12fcca9942743bcac1e6a52feda67b8e58dc8d9263738da757a8b324b6bfe9",
+              "height": 2290318,
+              "medianTime": 1664810328,
+              "time": 1664810451
+          },
+          "aggregated": {
+              "amount": "43.90986690",
+              "weightage": 50,
+              "oracles": {
+                  "active": 5,
+                  "total": 12
+              }
+          },
+          "currency": "USD",
+          "token": "SQNXF",
+          "id": "SQNXF-USD-2290318",
+          "key": "SQNXF-USD",
+          "sort": "633afd580022f28e"
+      }
+  },
+  {
+      "id": "UUUU-USD",
+      "sort": "0000000a003bd7dfUUUU-USD",
+      "price": {
+          "block": {
+              "hash": "a30a194360b7c9b52e12ac6080f80d111db22e460a641e3e48537406ff0937f3",
+              "height": 3921887,
+              "medianTime": 1713935846,
+              "time": 1713935864
+          },
+          "aggregated": {
+              "amount": "5.24008517",
+              "weightage": 50,
+              "oracles": {
+                  "active": 5,
+                  "total": 10
+              }
+          },
+          "currency": "USD",
+          "token": "UUUU",
+          "id": "UUUU-USD-3921887",
+          "key": "UUUU-USD",
+          "sort": "662895e6003bd7df"
+      }
+  },
+  {
+      "id": "UL-USD",
+      "sort": "0000000a003bd7dfUL-USD",
+      "price": {
+          "block": {
+              "hash": "a30a194360b7c9b52e12ac6080f80d111db22e460a641e3e48537406ff0937f3",
+              "height": 3921887,
+              "medianTime": 1713935846,
+              "time": 1713935864
+          },
+          "aggregated": {
+              "amount": "47.97904154",
+              "weightage": 50,
+              "oracles": {
+                  "active": 5,
+                  "total": 10
+              }
+          },
+          "currency": "USD",
+          "token": "UL",
+          "id": "UL-USD-3921887",
+          "key": "UL-USD",
+          "sort": "662895e6003bd7df"
+      }
+  }
+]
