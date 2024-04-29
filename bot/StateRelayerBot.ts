@@ -98,17 +98,21 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
       inputForDexUpdate.total24HVolume,
       { nonce, gasLimit: props.gasUpdateDEX },
     );
+    console.log('Hash of dex update transaction', dexInfoTx.hash);
 
     // Update Master Node information
     const masterDataTx = await stateRelayerContract.updateMasterNodeInformation(dataMasterNode, {
       nonce: nonce + 1,
       gasLimit: props.gasUpdateMaster,
     });
+    console.log('Hash of master update transaction', masterDataTx.hash);
+
     // Update Vault general information
     const vaultTx = await stateRelayerContract.updateVaultGeneralInformation(dataVault, {
       nonce: nonce + 2,
       gasLimit: props.gasUpdateVault,
     });
+    console.log('Hash of vault update transaction', vaultTx.hash);
 
     // Update Oracle information
     const oracleInfoTx = await stateRelayerContract.updateOracleInfo(
@@ -116,11 +120,6 @@ export async function handler(props: StateRelayerHandlerProps): Promise<DFCData 
       inputForOracleUpdate.oracleInfo,
       { nonce: nonce + 3, gasLimit: props.gasUpdateOracle },
     );
-    
-
-    console.log('Hash of dex update transaction', dexInfoTx.hash);
-    console.log('Hash of master update transaction', masterDataTx.hash);
-    console.log('Hash of vault update transaction', vaultTx.hash);
     console.log('Hash of oracle update transaction', oracleInfoTx.hash);
 
     if (!props.testGasCost) {

@@ -30,7 +30,7 @@ jest.mock('@defichain/whale-api-client', () => ({
   })),
 }));
 
-describe.only('State Relayer Bot Tests', () => {
+describe('State Relayer Bot Tests', () => {
   let startedHardhatContainer: StartedHardhatNetworkContainer;
   let hardhatNetwork: HardhatNetwork;
   let admin: ethers.Signer;

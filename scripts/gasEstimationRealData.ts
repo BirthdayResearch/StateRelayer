@@ -30,7 +30,6 @@ async function estimateGasCost() {
     console.log('Successfully update ', i);
     await new Promise((r) => setTimeout(r, 10 * 1000));
   }
-  console.log('Update DEXes', dexesData);
   const averageCostUpdateDEX = await calculateAverageCost(dexesData.map((x) => x.valueOf()));
   console.log('Update Oracles');
   const averageCostUpdateOracles = await calculateAverageCost(oracleData.map((x) => x.valueOf()));
