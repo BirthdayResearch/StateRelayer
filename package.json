@@ -42,7 +42,7 @@
   "dependencies": {
     "@openzeppelin/contracts": "4.9.3",
     "@openzeppelin/contracts-upgradeable": "4.9.3",
-    "@waveshq/standard-defichain-jellyfishsdk": "^0.52.1",
+    "@waveshq/standard-defichain-jellyfishsdk": "^0.54.0",
     "@waveshq/walletkit-bot": "^0.47.0",
     "axios": "^1.4.0",
     "dotenv": "^16.1.4",
